@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#e9efe5">
+  <title>HiARCH — Atlas staveb / pracovní varianta B</title>
+  <link rel="stylesheet" href="assets/fonts.css"><link rel="stylesheet" href="assets/fonts-v3.css"><link rel="stylesheet" href="map-v4.css?v=6.2">
+  <script src="assets/vendor/delaunator.min.js"></script><script type="module" src="map-v4.js?v=6.2"></script>
+</head>
+<body>
+  <header class="site-header"><a class="back" href="index.html" aria-label="Zpět do studia">← <span>Zpět do studia</span></a><a class="wordmark" href="variant-b.html" aria-label="HiARCH, atlas staveb">Hi<span>ARCH</span><i aria-hidden="true"></i></a><nav class="variant-nav" aria-label="Varianty webu"><a href="variant-a.html">A</a><a href="variant-b.html" aria-current="page">B · Atlas</a><a href="variant-c.html">C</a></nav><span class="work-stamp">Interní pracovní verze</span></header>
+  <main>
+    <div class="atlas-shell">
+      <section class="map-column" aria-label="Interaktivní mapa projektů">
+        <div class="map-toolbar"><div class="map-title"><span class="eyebrow">HiARCH / ATLAS STAVEB</span><span id="viewName">Morava / místa a stavby</span></div><div class="toolbar-actions"><div class="preset-controls" role="group" aria-label="Pohled na mapu"><button type="button" data-view="morava" class="is-active">Morava</button><button type="button" data-view="country">Česko</button><button type="button" data-view="brno">Brno</button><button type="button" data-view="hodonin">Hodonín</button></div><button type="button" class="mode-toggle" id="modeToggle" aria-pressed="false" title="Přepnout mezi prostorovým a horním pohledem">Pohled shora ↗</button></div></div>
+        <div class="map-stage" id="mapStage" tabindex="0" role="application" aria-label="Mapa Česka. Táhněte pro posun, plus a minus pro přiblížení, šipky pro posun. Kolečko funguje po zaměření mapy nebo s Ctrl." data-map-renderer="loading" data-terrain="loading">
+          <div class="map-scene" id="mapScene" aria-hidden="true"></div>
+          <svg class="map-svg" id="mapSvg" aria-hidden="true" preserveAspectRatio="none"><defs><filter id="groundShadow" x="-35%" y="-50%" width="170%" height="200%"><feGaussianBlur stdDeviation="11"/></filter></defs><g id="mapLand"></g><g id="mapLeaders"></g></svg>
+          <div class="map-labels" id="mapLabels" aria-hidden="true"></div><div class="map-markers" id="mapMarkers"></div>
+          <div class="compass" aria-hidden="true"><span>SEVER</span><b>↑</b></div><div class="map-controls" role="group" aria-label="Přiblížení mapy"><button type="button" id="zoomIn" aria-label="Přiblížit mapu">+</button><button type="button" id="zoomOut" aria-label="Oddálit mapu">−</button><button type="button" id="resetMap" aria-label="Vrátit pohled na Moravu">⌂</button></div>
+          <span class="map-hint">TÁHNĚTE MAPU · VYBERTE MÍSTO</span><span class="terrain-credit" id="terrainCredit" hidden>Terén Mapzen · SRTM/USGS</span>
+        </div>
+      </section>
+      <aside class="side-panel" aria-label="Projekty a filtry"><div class="side-intro"><span class="eyebrow">MÍSTA / 01—08</span><h1>Architektura<br><em>má své místo.</em></h1><p>Skutečné projekty v mapě Česka. Vyberte místo nebo stavbu.</p></div><div class="filter-head"><span>Typologie</span><span id="projectCount">8 projektů</span></div><div class="filters" role="group" aria-label="Filtr typologie"><button type="button" class="is-active" data-filter="all" aria-pressed="true">Vše</button><button type="button" data-filter="bydleni" aria-pressed="false">Bydlení</button><button type="button" data-filter="verejne" aria-pressed="false">Veřejné</button><button type="button" data-filter="komercni" aria-pressed="false">Komerční</button></div><div class="list-head"><span>Projekty</span><button id="toggleList" type="button" aria-expanded="true" aria-controls="projectList">Skrýt seznam ↑</button></div><div class="project-list" id="projectList" aria-live="polite"></div><p class="side-note">Body ukazují obec, ne přesnou parcelu. Značky tvoří fotografické výřezy.</p></aside>
+      <aside class="detail-panel" id="detailPanel" aria-label="Detail vybraného projektu" hidden></aside>
+      <div class="page-scrim" id="pageScrim" hidden></div><section class="project-page" id="projectPage" role="dialog" aria-modal="true" aria-label="Celý projekt" aria-hidden="true" inert></section>
+    </div>
+    <section class="gallery" aria-labelledby="galleryTitle"><div class="gallery-heading"><span class="eyebrow">VÝBĚR Z ATLASU</span><h2 id="galleryTitle">Stavby v obraze.</h2><p>Fotografie a vizualizace z dostupných podkladů.</p></div><div class="gallery-grid" id="galleryGrid"></div></section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,127 @@
+import * as THREE from './assets/vendor/three.module.min.js';
+import {makeProjectModel} from './museum-models-v5.js?v=5.2';
+import {buildGalleryRoom} from './museum-room-v5.js?v=5.2';
+import {OrbitControls} from './assets/vendor/OrbitControls.js';
+
+const $=id=>document.getElementById(id);
+const shell=$('museum'),host=$('museumCanvas'),status=$('museumStatus');
+const reduced=matchMedia('(prefers-reduced-motion:reduce)'),mobile=matchMedia('(max-width:650px)');
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const companies={hiarch:{name:'HiARCH',role:'Architektura a povolení',copy:'Navrhujeme architekturu a připravujeme povolení. Od prvního záměru po potřebnou dokumentaci.'},hiplan:{name:'HiPLAN',role:'Vlastní developerské projekty',copy:'Realizujeme vlastní developerské projekty.'},hireal:{name:'HiREAL',role:'Realitní činnost',copy:'Věnujeme se realitní činnosti a nabývání nemovitostí.'}};
+let projects=[],renderer=null,scene=null,camera=null,selected=-1,entered=false,walking=false,visible=true;
+let cameraTarget=new THREE.Vector3(),cameraFrame=0,movementFrame=0,renderFrame=0,frameCount=0;
+let yaw=0,pitch=-.05,gesture=null,lastMove=0,selectedLight=null;
+let controls=null,doors=[],doorProgress=0,activeNote=null;
+const noteContent={facade:{title:'Průčelí a členění',copy:'Světlou hlavní hmotu člení tmavé svislé pásy a pravidelný rytmus oken. Podobu modelu porovnáte se skutečnými fotografiemi v detailu.'},conversion:{title:'Nové využití objektu',copy:'Rekonstrukce bývalé administrativní budovy na polyfunkční dům. Projekt propojuje bydlení s kancelářskými prostory a službami v přízemí.'},hiarch:{title:'HiARCH',copy:'Projekt je součástí portfolia ateliéru HiARCH.'}};
+const keys=new Set(),tables=[],pickables=[];
+const say=text=>status.textContent=text;
+const clockEase=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const photo=p=>p.image||'';
+const thumb=p=>p.thumbnail||`assets/v4/thumbs/${p.id}.webp`;
+function render(){if(!renderer||!visible||document.hidden)return;renderer.render(scene,camera);shell.dataset.frames=String(++frameCount);shell.dataset.cameraZ=camera.position.z.toFixed(2);shell.dataset.cameraX=camera.position.x.toFixed(2);shell.dataset.cameraAngle=String(Math.atan2(camera.position.x-cameraTarget.x,camera.position.z-cameraTarget.z).toFixed(3));updateHotspots()}
+function scheduleRender(){if(!renderer||renderFrame)return;renderFrame=requestAnimationFrame(()=>{renderFrame=0;render()})}
+function stopFrames(){cancelAnimationFrame(cameraFrame);cancelAnimationFrame(movementFrame);cameraFrame=0;movementFrame=0;keys.clear();lastMove=0}
+function doorPose(){doors.forEach((d,i)=>d.rotation.y=(i?-1:1)*doorProgress*1.2)}
+function syncControls(){if(!controls)return;controls.target.copy(cameraTarget);controls.enabled=!walking&&selected>=0;controls.minPolarAngle=selected>=0&&!walking?.22:0;controls.maxPolarAngle=selected>=0&&!walking?1.43:Math.PI;controls.minDistance=selected===0?3.6:2.5;controls.maxDistance=selected===0?8.5:6;controls.update()}
+function flyTo(position,target,duration=850){
+ if(!camera)return;stopFrames();if(controls)controls.enabled=false;const startP=camera.position.clone(),startT=cameraTarget.clone(),endP=new THREE.Vector3(...position),endT=new THREE.Vector3(...target),doorStart=doorProgress;let began=null;
+ const apply=t=>{camera.position.lerpVectors(startP,endP,t);cameraTarget.lerpVectors(startT,endT,t);camera.lookAt(cameraTarget);if(entered){doorProgress=doorStart+(1-doorStart)*t;doorPose()}render();if(t===1)syncControls()};
+ if(reduced.matches||duration===0){apply(1);return}
+ const step=now=>{if(began===null)began=now;const t=Math.min(1,(now-began)/duration);apply(clockEase(t));if(t<1)cameraFrame=requestAnimationFrame(step);else cameraFrame=0};cameraFrame=requestAnimationFrame(step);
+}
+function overview(){setWalking(false);selected=-1;activeNote=null;$('selectedExhibit').hidden=true;updateSelection();entered=true;shell.classList.add('entered');$('entryCard').inert=true;$('entryCard').setAttribute('aria-hidden','true');flyTo(mobile.matches?[0,5.2,23]:[0,4.3,15],[0,1.5,-3]);say('Celý sál. Klikněte na vitrínu, nebo na volnou podlahu pro přechod.')}
+function focusProject(id,scroll=false){
+ const i=projects.findIndex(p=>p.id===id);if(i<0)return;activeNote=null;selected=i;shell.dataset.selectedProject=id;entered=true;shell.classList.add('entered');$('entryCard').inert=true;$('entryCard').setAttribute('aria-hidden','true');setWalking(false);const p=projects[i],t=tables[i];
+ $('selectedExhibit').hidden=false;$('selectedImage').src=thumb(p);$('selectedImage').alt=p.name;$('selectedLocation').textContent=[p.city,p.year].filter(Boolean).join(' · ');$('selectedName').textContent=p.name;
+ updateSelection();if(t){const featured=t.featured;flyTo([t.x+(featured?(mobile.matches?4.1:4.4):3.1),featured?3.35:2.75,t.z+(featured?(mobile.matches?8.1:5.4):4.4)],[t.x,featured?1.95:1.55,t.z],900)}
+ if(scroll)shell.scrollIntoView({block:'start',behavior:reduced.matches?'auto':'smooth'});
+ document.querySelector('.project-picker').open=false;say(`Vitrína ${i+1} z ${projects.length}: ${p.name}. Tažením myší obcházejte vitrínu, kolečkem přibližujte.`);
+}
+function updateSelection(){
+ if($('navigationMode'))$('navigationMode').textContent=walking?'Chůze galerií':selected>=0?'Obcházení vitríny':'Přehled sálu';
+ $('tourPosition').textContent=selected<0?'PŘEHLED SÁLU':`STŮL ${selected+1} / ${projects.length}`;
+ document.querySelectorAll('[data-focus]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.focus===projects[selected]?.id)));
+ tables.forEach((t,i)=>{t.rim.material.color.set(i===selected?0xe7b56f:0x93b38a);t.rim.material.opacity=i===selected?.95:.18});
+ if(selectedLight&&selected>=0){const t=tables[selected];selectedLight.position.set(t.x,5,t.z+.1);selectedLight.target.position.set(t.x,1.3,t.z);renderer.shadowMap.needsUpdate=true}
+ scheduleRender();
+}
+function clearFloor(x,z){return tables.every(t=>Math.abs(x-t.x)>(t.featured?2.25:1.7)||Math.abs(z-t.z)>(t.featured?1.8:1.25))}
+function walkPosition(x,z){x=THREE.MathUtils.clamp(x,-8.5,8.5);z=THREE.MathUtils.clamp(z,-15.5,15.4);return clearFloor(x,z)?[x,z]:null}
+function setWalking(value,keepPosition=false){
+ walking=value;activeNote=null;shell.classList.toggle('walking',value);$('walkPad').hidden=!value;$('walkToggle').setAttribute('aria-pressed',String(value));$('walkToggle').innerHTML=value?'Obcházet vitrínu <span>↗</span>':'Projít galerii <span>↗</span>';if(controls)controls.enabled=!value&&selected>=0;
+ keys.clear();cancelAnimationFrame(movementFrame);movementFrame=0;lastMove=0;
+ if(value){entered=true;shell.classList.add('entered');$('entryCard').inert=true;$('entryCard').setAttribute('aria-hidden','true');$('selectedExhibit').hidden=true;let pos=keepPosition?walkPosition(camera.position.x,camera.position.z):null;const direction=cameraTarget.clone().sub(camera.position);yaw=keepPosition?Math.atan2(-direction.x,-direction.z):0;pitch=-.05;const x=pos?pos[0]:0,z=pos?pos[1]:12.4;flyTo([x,2.35,z],[x-Math.sin(yaw)*8,1.95,z-Math.cos(yaw)*8],600);say('Táhněte myší pro rozhlížení. Klikněte na podlahu nebo použijte kolečko pro chůzi. Klávesy WASD a šipky fungují také.');host.focus({preventScroll:true})}
+ if($('walkHelp'))$('walkHelp').textContent=value?'Tažení: rozhlížení · klik na podlahu / kolečko: chůze · WASD':'Tažení: obcházení vitríny · kolečko: přiblížení · klik na bod: popisek';
+ updateSelection();
+}
+function moveLoop(now){
+ if(!walking||!keys.size||!visible||document.hidden){movementFrame=0;lastMove=0;return}
+ cancelAnimationFrame(cameraFrame);cameraFrame=0;const dt=lastMove?Math.min(.035,(now-lastMove)/1000):.016;lastMove=now;let f=0,s=0;
+ if(keys.has('forward'))f+=1;if(keys.has('back'))f-=1;if(keys.has('left'))s-=1;if(keys.has('right'))s+=1;
+ const speed=2.7*dt;const nx=THREE.MathUtils.clamp(camera.position.x+(-Math.sin(yaw)*f+Math.cos(yaw)*s)*speed,-8.5,8.5),nz=THREE.MathUtils.clamp(camera.position.z+(-Math.cos(yaw)*f-Math.sin(yaw)*s)*speed,-15.5,15.4);if(clearFloor(nx,camera.position.z))camera.position.x=nx;if(clearFloor(camera.position.x,nz))camera.position.z=nz;camera.position.y=2.35;
+ lookFromWalk();render();movementFrame=requestAnimationFrame(moveLoop);
+}
+function lookFromWalk(){cameraTarget.set(camera.position.x-Math.sin(yaw)*Math.cos(pitch)*8,camera.position.y+Math.sin(pitch)*8,camera.position.z-Math.cos(yaw)*Math.cos(pitch)*8);camera.lookAt(cameraTarget)}
+function startStep(key){if(!walking)setWalking(true);keys.add(key);if(!movementFrame)moveLoop(performance.now())}
+function openCompany(id){const c=companies[id];if(!c)return;$('companyDialogBody').innerHTML=`<article class="company-profile"><span class="eyebrow">${esc(c.role)}</span><h2>${esc(c.name)}</h2><p>${esc(c.copy)}</p><a href="mailto:info@hiarch.cz">Kontaktovat skupinu ↗</a></article>`;if(!$('companyDialog').open)$('companyDialog').showModal()}
+function openProject(id){
+ const p=projects.find(p=>p.id===id);if(!p)return;const labels={housing:'Bydlení',public:'Veřejné stavby',commercial:'Komerční stavby'},photos=[photo(p),...(p.gallery||[])].filter((x,i,a)=>x&&a.indexOf(x)===i),copy=p.longDescription||p.summary;
+ $('projectDialogBody').innerHTML=`<div class="project-detail-grid"><div class="detail-photograph"><img id="detailMainPhoto" src="${esc(photos[0])}" alt="${esc(p.name)}"><span class="photo-position" id="photoPosition">1 / ${photos.length}</span></div><div class="project-detail-copy"><span class="eyebrow">${esc(p.city)} / PROJEKT</span><h2>${esc(p.name)}</h2><p>${esc(copy||'')}</p><dl class="detail-facts"><div><dt>Lokalita</dt><dd>${esc(p.city)}</dd></div><div><dt>Rok</dt><dd>${esc(p.year||'Neuveden')}</dd></div><div><dt>Typ</dt><dd>${esc(labels[p.type]||p.type)}</dd></div><div><dt>Stav</dt><dd>${esc(p.status||'Neuveden')}</dd></div></dl><button class="participation company-sign" type="button" data-company="hiarch"><b>HiARCH</b><span>V portfoliu ateliéru ↗</span></button><p class="model-disclosure">Architektonická studie modelu vychází z fotografií. Fotografie zachycují skutečný projekt.</p></div></div>${photos.length>1?`<div class="detail-photo-strip" aria-label="Fotografie projektu">${photos.map((src,i)=>`<button type="button" data-gallery-url="${esc(src)}" data-photo-index="${i+1}" aria-label="Zobrazit fotografii ${i+1}" aria-pressed="${i===0}"><img src="${esc(src.replace('/v5/photos/','/v5/preview-photos/'))}" alt="${esc(p.name)} — pohled ${i+1}"><span>Pohled ${i+1}</span></button>`).join('')}</div>`:''}`;
+ if(!$('projectDialog').open)$('projectDialog').showModal();
+}
+function buildInterface(){
+ $('pickerCount').textContent=String(projects.length);
+ $('exhibitPicker').innerHTML=projects.map((p,i)=>`<button type="button" data-focus="${esc(p.id)}"><img src="${esc(thumb(p))}" alt="" loading="lazy"><span><b>${esc(p.name)}</b><small>${esc(p.city)}</small></span><span class="picker-index">${String(i+1).padStart(2,'0')}</span></button>`).join('');
+ $('projectIndex').innerHTML=projects.map((p,i)=>`<article class="project-card${i===0?' is-featured':''}"><button type="button" data-open="${esc(p.id)}"><div class="card-photograph"><img src="${esc(p.preview||photo(p))}" alt="${esc(p.name)}" loading="lazy"><span>${i===0?'UKÁZKOVÁ VITRÍNA':'V PORTFOLIU HIARCH'}</span></div><div class="card-description"><span>${esc(p.city)} · ${esc(p.year||'')}</span><h3>${esc(p.name)}</h3><p>${esc(p.summary||'')}</p><span class="card-open">Fotografie a informace <b>↗</b></span></div></button><div class="card-actions"><button type="button" data-focus="${esc(p.id)}" data-scroll>${i===0?'Obejít model v galerii':'Najít ve výstavě'} ↗</button></div></article>`).join('');
+}
+function textureText(lines,{width=1024,height=256,color='#e1efd9',glow=false}={}){
+ const c=document.createElement('canvas');c.width=width;c.height=height;const x=c.getContext('2d');x.clearRect(0,0,width,height);x.textAlign='center';x.textBaseline='middle';
+ lines.forEach((line,i)=>{let size=height/(lines.length===1?1.7:3.5);x.font=`500 ${size}px "Space Grotesk", sans-serif`;while(size>8&&x.measureText(line).width>width*.92){size-=2;x.font=`500 ${size}px "Space Grotesk", sans-serif`}x.fillStyle=color;if(glow){x.shadowColor=color;x.shadowBlur=height*.065}x.fillText(line,width/2,height*(i+.5)/lines.length);if(glow){x.shadowBlur=0;x.fillText(line,width/2,height*(i+.5)/lines.length)}});
+ const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=renderer.capabilities.getMaxAnisotropy()>2?2:1;return t;
+}
+function mat(color,extra={}){return new THREE.MeshStandardMaterial({color,roughness:.85,metalness:.03,...extra})}
+function box(w,h,d,x,y,z,material,parent=scene){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
+function glowPlane(w,h,x,y,z,text,color='#dceccc'){
+ const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:textureText([text],{glow:true,color}),transparent:true,depthWrite:false,toneMapped:false}));m.position.set(x,y,z);scene.add(m);return m;
+}
+function buildRoom(){
+ const room=buildGalleryRoom({THREE,renderer,projects,makeProjectModel,labelTexture:textureText});scene=room.scene;tables.push(...room.tables);pickables.push(...room.pickables);doors=room.doors;selectedLight=room.selectedLight;
+ camera=new THREE.PerspectiveCamera(mobile.matches?60:48,1,.1,120);camera.position.set(0,mobile.matches?4.1:3.2,mobile.matches?32:27.2);cameraTarget.set(0,mobile.matches?-2.5:2.5,mobile.matches?3:-2);camera.lookAt(cameraTarget);doorPose();
+ controls=new OrbitControls(camera,renderer.domElement);controls.enabled=false;controls.enableDamping=false;controls.enablePan=false;controls.minPolarAngle=0;controls.maxPolarAngle=Math.PI;controls.rotateSpeed=.65;controls.zoomSpeed=.8;controls.target.copy(cameraTarget);controls.update();controls.addEventListener('change',()=>{cameraTarget.copy(controls.target);scheduleRender()});controls.addEventListener('start',()=>{cancelAnimationFrame(cameraFrame);cameraFrame=0});
+}
+function updateHotspots(){
+ const layer=$('hotspotLayer');if(!layer||!camera)return;const t=tables[selected],show=entered&&!walking&&t?.featured;layer.hidden=!show;if(!show){$('annotationCard').hidden=true;return}
+ if(!layer.children.length){layer.innerHTML=(t.hotspots||[]).map(h=>`<button class="hotspot-button" data-note="${h.key}" aria-label="${noteContent[h.key]?.title||'Popis modelu'}"><i>+</i><span>${noteContent[h.key]?.title||'Detail'}</span></button>`).join('')}
+ const w=host.clientWidth,h=host.clientHeight;for(const hotspot of t.hotspots||[]){const p=new THREE.Vector3();hotspot.object.getWorldPosition(p);p.project(camera);const b=layer.querySelector(`[data-note="${hotspot.key}"]`);if(!b)continue;b.hidden=p.z>1||Math.abs(p.x)>1||Math.abs(p.y)>1;b.style.left=`${(p.x+1)*w/2}px`;b.style.top=`${(1-p.y)*h/2}px`}
+ const card=$('annotationCard');card.hidden=!activeNote;if(activeNote){const b=layer.querySelector(`[data-note="${activeNote}"]`);if(b&&!b.hidden){const x=parseFloat(b.style.left),y=parseFloat(b.style.top);card.style.left=`${Math.max(15,Math.min(w-295,x>(w/2)?x-285:x+22))}px`;card.style.top=`${Math.max(86,Math.min(h-250,y-10))}px`}}
+}
+function showNote(key){const n=noteContent[key];if(!n)return;activeNote=activeNote===key?null:key;$('annotationCard').innerHTML=`<button class="note-close" data-note-close aria-label="Zavřít popisek">×</button><span class="eyebrow">KOUPELNÍ 2 / DETAIL</span><h3>${esc(n.title)}</h3><p>${esc(n.copy)}</p>${key==='hiarch'?'<button data-company="hiarch" class="note-more">O ateliéru HiARCH ↗</button>':'<button class="note-more" data-open="koupelni">Fotografie projektu ↗</button>'}`;updateHotspots();shell.dataset.annotation=activeNote||''}
+
+function pick(event){
+ if(!renderer)return;const r=host.getBoundingClientRect(),v=new THREE.Vector2((event.clientX-r.left)/r.width*2-1,-(event.clientY-r.top)/r.height*2+1),ray=new THREE.Raycaster();ray.setFromCamera(v,camera);const hits=ray.intersectObjects(pickables,true);
+ if(hits.length){let o=hits[0].object;while(o&&!o.userData.annotationId&&!o.userData.companyId&&!o.userData.projectId)o=o.parent;if(o?.userData.annotationId){showNote(o.userData.annotationId);return}if(o?.userData.companyId){openCompany(o.userData.companyId);return}if(o?.userData.projectId){focusProject(o.userData.projectId);return}}
+ if(!entered){focusProject('koupelni');return}
+ const p=new THREE.Vector3();if(!ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),0),p))return;const pos=walkPosition(p.x,p.z);if(!pos)return;if(!walking)setWalking(true,true);flyTo([pos[0],2.35,pos[1]],[pos[0]-Math.sin(yaw)*8,1.95,pos[1]-Math.cos(yaw)*8],650);say('Přechod na vybrané místo v galerii.');
+}
+function setFallback(){shell.dataset.renderer='html';$('museumFallback').hidden=false;say('Projekty jsou dostupné v přehledu pod galerií.');$('museumEnter').disabled=true}
+async function init(){
+ try{const response=await fetch('assets/v5/projects.json');if(!response.ok)throw Error();const data=await response.json();projects=data.projects||[];if(!projects.length)throw Error();buildInterface()}catch{setFallback();say('Projektové podklady se nepodařilo načíst. Obnovte stránku.');return}
+ await document.fonts.ready;
+ try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'low-power'});renderer.setPixelRatio(Math.min(devicePixelRatio||1,mobile.matches?1.25:1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.domElement.setAttribute('aria-hidden','true');host.append(renderer.domElement);buildRoom();renderer.shadowMap.needsUpdate=true;shell.dataset.renderer='webgl';shell.dataset.exhibits=String(tables.length);shell.dataset.roomReady='true';shell.dataset.revision='5';say('Výstavní sál je připravený.');const resize=()=>{const w=host.clientWidth,h=host.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();scheduleRender()};new ResizeObserver(resize).observe(host);resize();renderer.domElement.addEventListener('webglcontextlost',event=>{event.preventDefault();stopFrames();setFallback()});}
+ catch(error){console.warn('Museum 3D unavailable; project index retained.',error);setFallback()}
+}
+host.addEventListener('wheel',event=>{if(!walking)return;event.preventDefault();const step=event.deltaY>0?-1:1;const pos=walkPosition(camera.position.x-Math.sin(yaw)*step,camera.position.z-Math.cos(yaw)*step);if(pos)flyTo([pos[0],2.35,pos[1]],[pos[0]-Math.sin(yaw)*8,1.95,pos[1]-Math.cos(yaw)*8],240)},{passive:false});
+// Interface works independently of the 3D canvas.
+document.addEventListener('click',event=>{const b=event.target.closest('button');if(!b)return;if(b.hasAttribute('data-note-close')){activeNote=null;updateHotspots();return}if(b.dataset.note){showNote(b.dataset.note);return}if(b.dataset.galleryUrl){$('detailMainPhoto').src=b.dataset.galleryUrl;$('photoPosition').textContent=`${b.dataset.photoIndex} / ${document.querySelectorAll('[data-gallery-url]').length}`;document.querySelectorAll('[data-gallery-url]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));return}if(b.dataset.company){openCompany(b.dataset.company);return}if(b.dataset.focus){focusProject(b.dataset.focus,b.hasAttribute('data-scroll'));return}if(b.dataset.open){openProject(b.dataset.open);return}if(b.hasAttribute('data-close'))b.closest('dialog')?.close()});
+$('museumEnter').addEventListener('click',()=>focusProject(projects[0]?.id));$('overviewButton').addEventListener('click',overview);$('walkToggle').addEventListener('click',()=>{if(walking)focusProject(projects[selected>=0?selected:0]?.id);else setWalking(true,true)});$('nextExhibit').addEventListener('click',()=>focusProject(projects[(selected+1+projects.length)%projects.length]?.id));$('previousExhibit').addEventListener('click',()=>focusProject(projects[selected<0?projects.length-1:(selected-1+projects.length)%projects.length]?.id));$('openProject').addEventListener('click',()=>{if(selected>=0)openProject(projects[selected].id)});
+for(const dialog of document.querySelectorAll('dialog')){dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});dialog.addEventListener('close',scheduleRender)}
+const keyMap={w:'forward',arrowup:'forward',s:'back',arrowdown:'back',a:'left',arrowleft:'left',d:'right',arrowright:'right'};
+document.addEventListener('keydown',event=>{if(event.metaKey||event.ctrlKey||event.altKey)return;if(document.querySelector('dialog[open]')||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;const key=keyMap[event.key.toLowerCase()];if(!key)return;if(walking){event.preventDefault();startStep(key)}else if(document.activeElement===host&&(event.key==='ArrowLeft'||event.key==='ArrowRight')){event.preventDefault();const i=event.key==='ArrowRight'?selected+1:selected-1;focusProject(projects[(i+projects.length)%projects.length].id)}});
+document.addEventListener('keyup',event=>{const key=keyMap[event.key.toLowerCase()];if(key)keys.delete(key)});
+for(const button of document.querySelectorAll('[data-step]')){button.addEventListener('pointerdown',event=>{event.preventDefault();button.setPointerCapture(event.pointerId);startStep(button.dataset.step)});const end=()=>keys.delete(button.dataset.step);button.addEventListener('pointerup',end);button.addEventListener('pointercancel',end)}
+host.addEventListener('pointerdown',event=>{if(event.button>0)return;gesture={id:event.pointerId,x:event.clientX,y:event.clientY,dragged:false};host.focus({preventScroll:true});if(walking)host.setPointerCapture(event.pointerId)});
+host.addEventListener('pointermove',event=>{if(!gesture||gesture.id!==event.pointerId)return;const dx=event.clientX-gesture.x,dy=event.clientY-gesture.y;if(Math.abs(dx)+Math.abs(dy)>8)gesture.dragged=true;if(walking){cancelAnimationFrame(cameraFrame);cameraFrame=0;yaw-=dx*.004;pitch=THREE.MathUtils.clamp(pitch-dy*.003,-.37,.3);lookFromWalk();scheduleRender();host.classList.add('is-dragging');gesture.x=event.clientX;gesture.y=event.clientY}});
+host.addEventListener('pointerup',event=>{const g=gesture;gesture=null;host.classList.remove('is-dragging');if(g&&!g.dragged)pick(event)});host.addEventListener('pointercancel',()=>{gesture=null;host.classList.remove('is-dragging')});
+new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(!visible)stopFrames();else scheduleRender()},{threshold:.03}).observe(shell);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopFrames();else scheduleRender()});window.addEventListener('blur',()=>{keys.clear()});
+init();

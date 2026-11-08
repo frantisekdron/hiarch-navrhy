@@ -1,0 +1,201 @@
+{
+  "projects": [
+    {
+      "id": "koupelni",
+      "name": "Koupelní 2",
+      "city": "Hodonín",
+      "year": null,
+      "type": "housing",
+      "status": "Dokončená 1. etapa",
+      "summary": "Proměna bývalé administrativní budovy v polyfunkční dům.",
+      "coordinates": [
+        17.132,
+        48.848
+      ],
+      "image": "assets/v5/photos/koupelni-aerial.webp",
+      "original": "assets/v2/originals/koupelni-aerial.webp",
+      "icon": "assets/v5/icons/koupelni.webp",
+      "source": "https://www.hiarch.cz/polyfunkcni-dum-hodonin-koupelni-2/",
+      "locationPrecision": "obec",
+      "mediaLabel": "Fotografický podklad · upravené světlo, barvy a perspektiva",
+      "gallery": [
+        "assets/v5/photos/koupelni-aerial.webp",
+        "assets/v5/photos/koupelni-front.webp",
+        "assets/v2/photos/koupelni-interior.webp"
+      ],
+      "thumbnail": "assets/v5/thumbs/koupelni.webp",
+      "preview": "assets/v5/preview-photos/koupelni-aerial.webp",
+      "longDescription": "Bývalá administrativní budova na Koupelní 2 v Hodoníně prochází proměnou v polyfunkční dům. Projekt spojuje bydlení s kancelářskými prostory a službami v přízemí. Architektonické řešení pracuje se stávající hlavní hmotou, světlým průčelím a tmavými svislými pásy. Galerie zachycuje dům z nadhledu, pohled z ulice a interiér."
+    },
+    {
+      "id": "hustopece",
+      "name": "Dětská skupina Hustopeče",
+      "city": "Hustopeče",
+      "year": 2026,
+      "type": "public",
+      "status": "Realizace",
+      "summary": "Novostavba dětské skupiny s pobytovou zahradou.",
+      "coordinates": [
+        16.737,
+        48.94
+      ],
+      "image": "assets/v5/photos/hustopece.webp",
+      "original": "assets/v2/originals/hustopece.webp",
+      "icon": "assets/v5/icons/hustopece.webp",
+      "source": "https://www.hiarch.cz/",
+      "locationPrecision": "obec",
+      "mediaLabel": "Fotografický podklad · upravené světlo, barvy a perspektiva",
+      "gallery": [
+        "assets/v5/photos/hustopece.webp"
+      ],
+      "thumbnail": "assets/v5/thumbs/hustopece.webp",
+      "preview": "assets/v5/preview-photos/hustopece.webp"
+    },
+    {
+      "id": "transped",
+      "name": "HP Transped",
+      "city": "Brno",
+      "year": 2024,
+      "type": "commercial",
+      "status": "Realizace",
+      "summary": "Administrativní budova s halou pro diagnostiku aut.",
+      "coordinates": [
+        16.608,
+        49.195
+      ],
+      "image": "assets/v5/photos/transped.webp",
+      "original": "assets/v2/originals/transped.webp",
+      "icon": "assets/v5/icons/transped.webp",
+      "source": "https://www.hiarch.cz/",
+      "locationPrecision": "obec",
+      "mediaLabel": "Fotografický podklad · upravené světlo, barvy a perspektiva",
+      "gallery": [
+        "assets/v5/photos/transped.webp"
+      ],
+      "thumbnail": "assets/v5/thumbs/transped.webp",
+      "preview": "assets/v5/preview-photos/transped.webp"
+    },
+    {
+      "id": "wurmova",
+      "name": "RD Wurmova",
+      "city": "Brno",
+      "year": 2017,
+      "type": "housing",
+      "status": "Realizace",
+      "summary": "Rekonstrukce a dostavba rodinného domu.",
+      "coordinates": [
+        16.608,
+        49.195
+      ],
+      "image": "assets/v5/photos/wurmova.webp",
+      "original": "assets/v2/originals/wurmova.webp",
+      "icon": "assets/v5/icons/wurmova.webp",
+      "source": "https://www.hiarch.cz/",
+      "locationPrecision": "obec",
+      "mediaLabel": "Fotografický podklad · upravené světlo, barvy a perspektiva",
+      "gallery": [
+        "assets/v5/photos/wurmova.webp"
+      ],
+      "thumbnail": "assets/v5/thumbs/wurmova.webp",
+      "preview": "assets/v5/preview-photos/wurmova.webp"
+    },
+    {
+      "id": "bystrc",
+      "name": "Přístaviště Bystrc",
+      "city": "Brno",
+      "year": 2011,
+      "type": "public",
+      "status": "Realizace",
+      "summary": "Výpravna lodí na Brněnské přehradě.",
+      "coordinates": [
+        16.608,
+        49.195
+      ],
+      "image": "assets/v5/photos/bystrc.webp",
+      "original": "assets/v2/originals/bystrc.webp",
+      "icon": "assets/v5/icons/bystrc.webp",
+      "source": "https://www.hiarch.cz/",
+      "locationPrecision": "obec",
+      "mediaLabel": "Fotografický podklad · upravené světlo, barvy a perspektiva",
+      "gallery": [
+        "assets/v5/photos/bystrc.webp"
+      ],
+      "thumbnail": "assets/v5/thumbs/bystrc.webp",
+      "preview": "assets/v5/preview-photos/bystrc.webp"
+    },
+    {
+      "id": "selska84",
+      "name": "BD Selská 84",
+      "city": "Brno",
+      "year": 2024,
+      "type": "housing",
+      "status": "Realizace",
+      "summary": "Novostavba bytového domu.",
+      "coordinates": [
+        16.608,
+        49.195
+      ],
+      "image": "assets/v5/photos/selska84.webp",
+      "original": "assets/v2/originals/selska84.webp",
+      "icon": "assets/v5/icons/selska84.webp",
+      "source": "https://www.hiarch.cz/",
+      "locationPrecision": "obec",
+      "mediaLabel": "Fotografický podklad · upravené světlo, barvy a perspektiva",
+      "gallery": [
+        "assets/v5/photos/selska84.webp"
+      ],
+      "thumbnail": "assets/v5/thumbs/selska84.webp",
+      "preview": "assets/v5/preview-photos/selska84.webp"
+    },
+    {
+      "id": "ivancice",
+      "name": "KoDuS Ivančice",
+      "city": "Ivančice",
+      "year": 2016,
+      "type": "housing",
+      "status": "Realizace",
+      "summary": "Komunitní a bytový dům.",
+      "coordinates": [
+        16.377,
+        49.101
+      ],
+      "image": "assets/v5/photos/ivancice.webp",
+      "original": "assets/v2/originals/ivancice.webp",
+      "icon": "assets/v5/icons/ivancice.webp",
+      "source": "https://www.hiarch.cz/",
+      "locationPrecision": "obec",
+      "mediaLabel": "Fotografický podklad · upravené světlo, barvy a perspektiva",
+      "gallery": [
+        "assets/v5/photos/ivancice.webp"
+      ],
+      "thumbnail": "assets/v5/thumbs/ivancice.webp",
+      "preview": "assets/v5/preview-photos/ivancice.webp"
+    },
+    {
+      "id": "nebovidy",
+      "name": "Vývojové centrum Veselý DS",
+      "city": "Nebovidy",
+      "year": 2020,
+      "type": "commercial",
+      "status": "Realizace",
+      "summary": "Vývojové centrum v podnikatelském areálu.",
+      "coordinates": [
+        16.5514,
+        49.1413
+      ],
+      "image": "assets/v5/photos/nebovidy.webp",
+      "original": "assets/v2/originals/nebovidy.webp",
+      "icon": "assets/v5/icons/nebovidy.webp",
+      "source": "https://www.hiarch.cz/",
+      "locationPrecision": "obec",
+      "mediaLabel": "Fotografický podklad · upravené světlo, barvy a perspektiva",
+      "gallery": [
+        "assets/v5/photos/nebovidy.webp"
+      ],
+      "thumbnail": "assets/v5/thumbs/nebovidy.webp",
+      "preview": "assets/v5/preview-photos/nebovidy.webp"
+    }
+  ],
+  "updated": "2026-11-08",
+  "revision": 5
+}

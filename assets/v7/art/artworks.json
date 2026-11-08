@@ -1,0 +1,52 @@
+{
+  "artworks": [
+    {
+      "id": "interior-living",
+      "image": "assets/v7/art/interiors-2.webp",
+      "title": "Koupelní 2 · obytný prostor",
+      "subtitle": "Interiérová vizualizace",
+      "source": "https://koupelni.hireal.cz/galerie/",
+      "preview": "assets/v7/art/textures/interior-living.webp"
+    },
+    {
+      "id": "axonometry",
+      "image": "assets/v7/art/koupelni-axonometry.webp",
+      "title": "Koupelní 2 · axonometrie",
+      "subtitle": "Původní projektový výkres",
+      "source": "https://koupelni.hireal.cz/pudorysy/",
+      "preview": "assets/v7/art/textures/axonometry.webp"
+    },
+    {
+      "id": "floor-5np",
+      "image": "assets/v7/art/koupelni-plan-5np.webp",
+      "title": "Koupelní 2 · 5. nadzemní podlaží",
+      "subtitle": "Půdorys z projektových podkladů",
+      "source": "https://koupelni.hireal.cz/pudorysy/",
+      "preview": "assets/v7/art/textures/floor-5np.webp"
+    },
+    {
+      "id": "interior-bedroom",
+      "image": "assets/v7/art/interiors-1.webp",
+      "title": "Koupelní 2 · ložnice",
+      "subtitle": "Interiérová vizualizace",
+      "source": "https://koupelni.hireal.cz/galerie/",
+      "preview": "assets/v7/art/textures/interior-bedroom.webp"
+    },
+    {
+      "id": "interior-room",
+      "image": "assets/v7/art/interiors-3.webp",
+      "title": "Koupelní 2 · pokoj",
+      "subtitle": "Interiérová vizualizace",
+      "source": "https://koupelni.hireal.cz/galerie/",
+      "preview": "assets/v7/art/textures/interior-room.webp"
+    },
+    {
+      "id": "real-building",
+      "image": "assets/v6/photos/koupelni-aerial.webp",
+      "title": "Koupelní 2 · současná podoba domu",
+      "subtitle": "Skutečná fotografie",
+      "source": "https://www.hiarch.cz/polyfunkcni-dum-hodonin-koupelni-2/",
+      "preview": "assets/v7/art/textures/real-building.webp"
+    }
+  ]
+}
