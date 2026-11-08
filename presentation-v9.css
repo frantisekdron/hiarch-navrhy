@@ -1,0 +1,122 @@
+/* Shared presentation finishes. Text colors have contrast headroom on every surface. */
+:root{--ui-paper:#f2efe7;--ui-surface:#f9f7f0;--ui-ink:#24392c;--ui-muted:#4e5e50;--ui-green:#365b43;--ui-brass:#72572c;--ui-clay:#814b3c;--ui-edge:#758474;--ui-night:#101b15;--ui-light:#f3f2e5}
+button,input,select,textarea{color:inherit;-webkit-text-fill-color:currentColor}
+button,a,summary,input{-webkit-tap-highlight-color:#a1b89255}
+body :is(a,button,summary,input,select,textarea,[tabindex]):focus-visible{outline:3px solid #253d2d!important;outline-offset:3px!important;box-shadow:0 0 0 6px #f7f4e8!important}
+body :is(button,summary){touch-action:manipulation}
+body :is(button,a){text-underline-offset:4px}
+body button:disabled{cursor:default}
+
+/* The overview uses the same neutral paper, dark evergreen and restrained warm metal. */
+body.studio-page{--hub-ink:var(--ui-ink);--hub-sage:var(--ui-green);--hub-muted:var(--ui-muted)}
+body.studio-page :is(.direction-copy small,.direction-copy .direction-control-note,.studio-state,.media-status){color:var(--ui-muted)}
+body.studio-page .direction-copy small{font-weight:750;font-size:10px}
+body.studio-page .direction-copy .direction-control-note{font-size:12px;line-height:1.6}
+body.studio-page .direction-image span{padding:7px 10px;background:#14291fee;color:#fff9ee;font-size:10px;letter-spacing:.06em;border:1px solid #b9c5ad;border-radius:3px}
+body.studio-page .open-direction{border-color:var(--ui-edge);color:var(--ui-green);min-height:46px}
+body.studio-page .open-direction:hover{background:var(--ui-green);color:var(--ui-light)}
+body.studio-page .studio-footer{color:#f1eee4}
+
+/* A retains the paper/card character; small labels and all three subbrands gain depth. */
+body.variant-a{--a-ink:var(--ui-ink);--a-sage:var(--ui-green);--a-brass:var(--ui-brass);--firm-arch:var(--ui-green);--firm-plan:var(--ui-brass);--firm-real:var(--ui-clay)}
+body.variant-a :is(.maquette-measure,.hero-paths p span,.drawing-caption,.data-note,.stack-position,.process-controls,.company-tabs button small){color:var(--ui-muted)}
+body.variant-a :is(.hero-paths p b,.brand-word.plan,.firm-plan){color:var(--ui-brass)}
+body.variant-a :is(.brand-word.real,.firm-real){color:var(--ui-clay)}
+body.variant-a :is(.approach-heading>p:last-child,.process-list article p,.company-grid p,.contact-inner small,.dialog-copy p){color:var(--ui-muted)}
+body.variant-a .process-indexes button{color:var(--ui-ink);border-color:var(--ui-edge);min-width:44px;min-height:44px}
+body.variant-a .process-indexes button[aria-pressed=true]{color:#fff9ed;background:var(--ui-green)}
+body.variant-a .maquette-plane:not([data-active=true]),body.variant-a .process-list article[data-deck-position]{opacity:1}
+body.variant-a .company-tabs button[data-company-tab=hiplan][aria-selected=true]{color:var(--ui-brass)}
+body.variant-a .company-tabs button[data-company-tab=hireal][aria-selected=true]{color:var(--ui-clay)}
+body.variant-a :is(.project-card .card-meta,.project-card .card-city,.newspaper-sectionline,.newspaper-columns small,.newspaper-page footer){color:var(--ui-muted)}
+body.variant-a .dialog-facts :is(span,small){color:var(--ui-muted)}
+body.variant-a .drawing-caption{font-size:11px;line-height:1.6}
+body.variant-a .site-footer,body.variant-a .site-footer a,body.variant-a .site-footer small{color:#eeeede}
+
+/* B: explicit author colors prevent the blue iOS button defaults as well as legacy accents. */
+body[data-presentation=b]{--ink:var(--ui-ink);--muted:var(--ui-muted);--rust:var(--ui-green);color:var(--ui-ink);background:#e9ece2}
+body[data-presentation=b] :is(button,.project-row,.gallery-card,.preset-controls button,.filters button,.mode-toggle,.map-controls button){color:var(--ui-ink);-webkit-text-fill-color:currentColor}
+body[data-presentation=b] .site-header{background:#23382c;color:#f3f0e5}
+body[data-presentation=b] .site-header :is(a,.variant-nav a,.work-stamp){color:#f0efdf}
+body[data-presentation=b] .variant-nav a[aria-current]{border-color:#d2dec4;background:#36563f;color:#fff9ed}
+body[data-presentation=b] .side-panel{background:#f3f3e9}
+body[data-presentation=b] :is(.map-toolbar,.map-caption){background:#e9ede1}
+body[data-presentation=b] .map-stage{background:radial-gradient(ellipse at 53% 47%,#e9eee0,#d8dfcd 70%,#c7d1bd)}
+body[data-presentation=b] :is(.side-intro p,.side-note,.project-row small,.filter-head span:last-child,.empty-list,.gallery-heading p,.gallery-card small,.detail-inner p,.detail-meta dt,.page-facts dt,.page-hero-caption,.page-heading p){color:var(--ui-muted)}
+body[data-presentation=b] :is(.eyebrow,.list-head button,.project-row .arrow){color:var(--ui-green)}
+body[data-presentation=b] :is(.filters button,.preset-controls button,.mode-toggle,.page-back){min-height:44px;border-color:var(--ui-edge)}
+body[data-presentation=b] :is(.filters button.is-active,.preset-controls button.is-active,.map-marker.is-selected .marker-text,.marker-count,.detail-full){background:var(--ui-green);color:#fff9ed;border-color:var(--ui-green)}
+body[data-presentation=b] :is(.filters button.is-active,.preset-controls button.is-active,.marker-count,.map-marker.is-selected .marker-text) *{color:inherit}
+body[data-presentation=b] .map-marker.is-selected .marker-text small{color:#f3f3e6}
+body[data-presentation=b] :is(.marker-text,.marker-cluster-label){background:#f6f5e9;color:var(--ui-ink)}
+body[data-presentation=b] .marker-text small{color:var(--ui-muted)}
+body[data-presentation=b] :is(.country-label,.city-label,.city-label.major){color:#354e3b;text-shadow:0 1px 2px #f5f6e8,0 -1px 2px #f5f6e8}
+body[data-presentation=b] :is(.compass,.map-hint,.terrain-credit,.map-scale){color:#405740}
+body[data-presentation=b] :is(.map-hint,.terrain-credit){background:#f1f3e6f7;padding:5px 8px;border:1px solid #84937c;border-radius:5px}
+body[data-presentation=b] .compass{background:#f1f3e6f7;padding:5px 8px;border-radius:5px}
+body[data-presentation=b] :is(.detail-panel,.project-page,.page-top){background:#f8f7ee;color:var(--ui-ink)}
+body[data-presentation=b] .gallery{background:#f3f2e9}
+body[data-presentation=b] .gallery-card b{color:var(--ui-ink)}
+body[data-presentation=b] .page-gallery-item.is-active{border:3px solid var(--ui-green)}
+body[data-presentation=b] :is(.project-row:hover,.project-row.is-selected,.gallery-card:hover,.page-back:hover){background:#e2e9da}
+body[data-presentation=b] .gallery-card{padding-bottom:10px;border-bottom:1px solid #bdc9b4}
+
+/* C: the exhibition can be nearly black while its controls stay readable and stable. */
+body[data-presentation=c] .museum-header :is(a,.private-stamp){color:#f0efdf}
+body[data-presentation=c] .museum-header nav a[aria-current]{color:#24392c}
+body[data-presentation=c] .museum-shell{background:#030604}
+body[data-presentation=c] :is(.tool-button,.lighting-control>summary,.room-controls button,.info-dock-button,.project-pager){background:#102018;color:#f5f3e7;border-color:#bdcbae;box-shadow:0 8px 22px #0005}
+body[data-presentation=c] :is(.tool-button,.lighting-control>summary,.room-controls button,.info-dock-button):hover{background:#284a34;color:#fff9ed}
+body[data-presentation=c] .project-pager small{color:#c8d5bb}
+body[data-presentation=c] .project-pager button:hover{background:#304e36}
+body[data-presentation=c] .walk-pad:not([hidden]){background:#0d1b14e8;border-color:#e6efd9}
+body[data-presentation=c] .walk-pad .move-label{background:#102018;color:#f3f3e5;border-radius:5px;width:65px;margin:auto;padding:2px 0}
+body[data-presentation=c] .walk-help{padding:3px 9px;border-radius:5px;background:#102018;color:#dfe9d4;text-shadow:none;font-size:10px}
+body[data-presentation=c] .mobile-projects-link{padding:0 8px;border-radius:6px;background:#102018;color:#f4f2e3}
+body[data-presentation=c] .museum-shell[data-lighting] .room-title{background:#102018;color:#f2f3e5;border-color:#bdcbae}
+body[data-presentation=c] .museum-shell[data-lighting] .room-title b{color:#f2f3e5}
+body[data-presentation=c] .museum-shell[data-lighting] .room-title>.navigation-mode{color:#e4eddb;background:#294330;border-color:#95aa85;font-size:10px;letter-spacing:0}
+body[data-presentation=c] .museum-shell[data-lighting] .entry-card{background:#f2efe7;color:var(--ui-ink);border-color:#b3bfa7}
+body[data-presentation=c] .museum-shell[data-lighting] .entry-card h1{color:var(--ui-ink)}
+body[data-presentation=c] .museum-shell[data-lighting] .entry-card :is(p,small,.eyebrow){color:var(--ui-muted)}
+body[data-presentation=c] .museum-shell:is([data-lighting=evening],[data-lighting=neon]) .entry-card{background:#111e17f2;color:var(--ui-light);border-color:#93a584}
+body[data-presentation=c] .museum-shell:is([data-lighting=evening],[data-lighting=neon]) .entry-card h1{color:var(--ui-light)}
+body[data-presentation=c] .museum-shell:is([data-lighting=evening],[data-lighting=neon]) .entry-card :is(p,small,.eyebrow){color:#c8d4bd}
+body[data-presentation=c] .entry-card .enter-button{background:#d7e4c8;border-color:#d7e4c8;color:#1c3625;font-weight:750}
+body[data-presentation=c] .entry-card .enter-button:hover{background:#f3efde;color:#1c3625}
+body[data-presentation=c] .lighting-panel{background:#f2f0e5;color:var(--ui-ink);border-color:#74856c}
+body[data-presentation=c] .lighting-panel :is(.led-label,.lighting-level,p){color:var(--ui-muted);font-size:11px}
+body[data-presentation=c] .light-presets button{background:#e1e6d5;color:#263d2c;border-color:#708367;min-height:44px;font-size:12px}
+body[data-presentation=c] .light-presets button[aria-pressed=true]{background:#365b43;color:#fff9ed;border-color:#365b43}
+body[data-presentation=c] .led-colors button{border-color:#73856b}
+body[data-presentation=c] .led-colors button[aria-pressed=true]{outline-color:#345c3b}
+body[data-presentation=c] .museum-shell:is([data-lighting=evening],[data-lighting=neon]) .lighting-panel{background:#14221a;color:#f2f2e5;border-color:#a8ba98}
+body[data-presentation=c] .museum-shell:is([data-lighting=evening],[data-lighting=neon]) .lighting-panel :is(h3,.led-label,.lighting-level,p){color:#d1dec4}
+body[data-presentation=c] .museum-shell:is([data-lighting=evening],[data-lighting=neon]) .light-presets button{background:#243d2c;color:#f2f2e4;border-color:#a0b28f}
+body[data-presentation=c] .museum-shell:is([data-lighting=evening],[data-lighting=neon]) .light-presets button[aria-pressed=true]{background:#d7e5c6;color:#183021;border-color:#e1ebd5}
+body[data-presentation=c] .museum-shell:is([data-lighting=evening],[data-lighting=neon]) .led-colors button{border-color:#b1c19f}
+body[data-presentation=c] .museum-shell:is([data-lighting=evening],[data-lighting=neon]) .led-colors button[aria-pressed=true]{outline-color:#f1f2db}
+body[data-presentation=c] :is(.exhibition-index,.project-dialog,.company-dialog){color:var(--ui-ink);background:#eeece2}
+body[data-presentation=c] :is(.index-heading .eyebrow,.index-heading>p,.card-description>span:first-child,.card-description>p,.card-actions button,.project-detail-copy>p,.project-detail-copy .model-disclosure,.detail-facts dt,.company-sign span,.artwork-detail p,.company-profile .eyebrow,.company-profile>p){color:var(--ui-muted)}
+body[data-presentation=c] :is(.card-description h3,.card-description .card-open,.project-detail-copy h2,.artwork-detail h2,.company-profile h2){color:var(--ui-ink)}
+body[data-presentation=c] :is(.card-actions button,.company-profile>a,.artwork-detail a){color:var(--ui-green);border-color:#6e8165}
+body[data-presentation=c] :is(.card-description>span:first-child,.card-actions button,.model-disclosure,.detail-facts dt){font-size:11px}
+body[data-presentation=c] .card-photograph>span{color:#2b432e;background:#f2f1e5;font-size:10px}
+body[data-presentation=c] .museum-companies>.eyebrow{color:#d0ddc3}
+body[data-presentation=c] .museum-companies :is(span,i){color:#cad9bc}
+body[data-presentation=c] footer :is(a,small,span){color:#d5dfc8}
+body[data-presentation=c] .annotation-card{background:#f2f0e5;color:var(--ui-ink)}
+body[data-presentation=c] .annotation-card :is(.eyebrow,p,.note-close,.note-more){color:var(--ui-muted)}
+body[data-presentation=c] .wall-map-layer :is(b,small,i){color:#2d4832}
+@media(max-width:650px){body[data-presentation=c] .mobile-projects-link{font-size:9px;padding-inline:6px}body[data-presentation=c] .gallery-tools{gap:4px}body[data-presentation=c] .room-title{display:none}body[data-presentation=c] .project-pager #pagerName{font-size:14px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important}}
+/* Cartographic text keeps a quiet paper halo even above the darkest relief edges. */
+body[data-presentation=b] .city-label{background:#f1f3e7f5;border-radius:3px;padding:2px 4px}
+body[data-presentation=b] #mapLeaders path{stroke:#43694d;opacity:1}
+body[data-presentation=b] :is(.project-row small,.gallery-card small,.marker-text small,.side-note){font-size:11px}
+body[data-presentation=c] .walk-help{opacity:1}
+body[data-presentation=c] .museum-shell[data-lighting] .walk-help{color:#dfe9d4;background:#102018;opacity:1;text-shadow:none}
+body[data-presentation=c] .museum-shell[data-lighting] .museum-status{color:#dfe9d4}
+body.variant-a .company-tabs button[aria-selected=true]{box-shadow:inset 0 -3px 0 currentColor}
+body.variant-a .company-tabs button[aria-selected=true] b{font-weight:800}
+@media(max-width:340px){body[data-presentation=c] .mobile-projects-link{font-size:0;min-width:44px;justify-content:center;padding:0}body[data-presentation=c] .gallery-tools{gap:3px}}
