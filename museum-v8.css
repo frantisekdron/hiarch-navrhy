@@ -1,0 +1,37 @@
+/* Navigation from FD Prohlidka; keep the exhibition visible around the controls. */
+.museum-shell{min-height:0;height:calc(100svh - 72px)}
+.gallery-tools .icon-tool{width:44px;min-width:44px;justify-content:center;padding:0;font-size:21px}
+.gallery-tools .icon-tool:first-child{font-size:16px}
+.selected-exhibit{display:none!important}
+.walk-pad:not([hidden]){display:block!important;position:absolute;left:28px;bottom:30px;width:140px;height:140px;border:1px solid #e9eddfb0;border-radius:50%;background:#15251db3;box-shadow:0 0 0 2px #11211980;z-index:12;touch-action:none;pointer-events:auto}
+.walk-pad .move-label{position:absolute;top:-27px;left:0;right:0;text-align:center;color:#eff3df;font:500 11px Manrope,sans-serif;letter-spacing:.04em;text-shadow:0 1px 5px #000}
+.walk-pad button{position:absolute!important;display:grid;place-items:center;width:44px;height:44px;min-height:44px;border:0;border-radius:16px;background:transparent;color:#f3f6e9;font:400 24px/1 Manrope,sans-serif;touch-action:none;grid-row:auto;grid-column:auto}
+.walk-pad button[data-step=forward]{left:48px;top:0}.walk-pad button[data-step=back]{left:48px;bottom:0}.walk-pad button[data-step=left]{left:0;top:48px}.walk-pad button[data-step=right]{right:0;top:48px}
+.walk-pad button[data-held],.walk-pad button:active{background:#d5e7bd;color:#22352b}
+.move-knob{position:absolute;left:47px;top:47px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#d9e6c8;border:2px solid #243d2b;box-shadow:0 3px 14px #0006;touch-action:none;cursor:grab;z-index:2}
+.move-knob svg{width:24px;height:24px;fill:none;stroke:#2a4835;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.walk-pad[data-press]{border-color:#d8e7b0}.walk-pad[data-press] .move-knob{cursor:grabbing}
+.project-pager{position:absolute;z-index:11;left:50%;bottom:30px;transform:translateX(-50%);display:grid;grid-template-columns:44px minmax(130px,240px) 44px;min-height:57px;border:1px solid #d5e2c74d;border-radius:11px;background:#16291fe8;color:#eff4e3;box-shadow:0 8px 25px #0004;backdrop-filter:blur(12px);overflow:hidden}
+.project-pager button{min-height:54px;min-width:44px;border:0;background:transparent;color:inherit;padding:7px 11px;line-height:1.2}.project-pager>button:first-child,.project-pager>button:last-child{font-size:28px}.project-pager button:hover{background:#adc39326}.project-pager #pagerDetail{text-align:left;border-inline:1px solid #d5e2c72b}.project-pager #pagerName{display:block;font:500 14px/1.25 'Space Grotesk',sans-serif}.project-pager small{display:block;font-size:9px;color:#becbb0;margin-top:4px}
+.museum-floor-controls{bottom:30px}.room-controls button{min-height:54px;min-width:140px}
+.hotspot-layer{left:28px;bottom:205px}.walk-help{left:50%;bottom:7px;transform:translateX(-50%);text-align:center;max-width:55%;pointer-events:none}.museum-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.museum-shell[data-entry-complete=false] .walk-pad,.museum-shell[data-entry-complete=false] .project-pager{visibility:hidden}
+.gallery-is-expanded{overflow:hidden}.museum-shell.expanded-gallery{position:fixed;inset:0;z-index:100;height:100dvh;max-height:none;min-height:0;width:100vw}
+.navigation-help h2{font-size:44px}.navigation-help p{font-size:14px;line-height:1.65;margin-block:17px}
+@media(max-width:650px){
+ .museum-header{height:56px;padding-block:4px}.museum-header nav a{min-width:38px;min-height:44px;padding:6px}.museum-header .museum-brand{font-size:7px}
+ .museum-shell{height:calc(100svh - 56px);min-height:0;max-height:none}
+ .museum-top{top:12px;left:12px;right:12px}.room-title{display:none}.gallery-tools{margin-left:auto;gap:5px}.tool-button,.lighting-control>summary{min-height:44px;font-size:10px;padding:9px 11px;gap:5px}.gallery-tools .icon-tool{width:44px;padding:0}
+ .entry-card{left:12px;right:12px;bottom:22px;width:auto;padding:15px 17px;border-radius:9px}.entry-card .eyebrow{font-size:7px}.entry-card h1{font-size:29px;line-height:1.05;margin:7px 0 9px}.entry-card p{font-size:11px;line-height:1.5;max-width:none;margin:0 0 12px}.entry-card p br{display:none}.entry-card small{display:none}.entry-card .enter-button{width:100%;min-height:46px;padding:9px 14px}
+ .walk-pad:not([hidden]){left:12px;bottom:85px}.walk-pad .move-label{font-size:9px;top:-21px}
+ .project-pager{left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));width:auto;transform:none;grid-template-columns:44px minmax(0,1fr) 44px}.project-pager #pagerName{font-size:13px}.project-pager small{font-size:9px}
+ .museum-floor-controls{bottom:85px;left:12px;right:12px}.room-controls button{min-width:135px;min-height:46px;padding:9px 13px;font-size:10px}.room-controls button span{display:inline}
+ .hotspot-layer{left:auto;right:12px;bottom:145px;display:flex;flex-direction:column;height:auto;gap:6px}.info-dock-button{min-width:135px;min-height:44px;justify-content:space-between;font-size:10px;padding:9px 12px}
+ .mobile-projects-link{left:12px;top:12px;bottom:auto;min-height:44px;font-size:9px;gap:6px}.museum-shell:not(.entered) .mobile-projects-link{display:none}
+ .wall-map-layer{inset:72px 12px 85px;padding:14px}.lighting-panel{top:53px;right:0;width:min(300px,calc(100vw - 24px))}
+ .walk-help{display:none}.annotation-card{max-width:calc(100% - 24px)}
+}
+@media(max-height:520px){.walk-pad:not([hidden]){transform:none}.hotspot-layer{display:none!important}.entry-card{bottom:16px;padding:14px 17px}.entry-card h1{font-size:30px}.entry-card p,.entry-card small{display:none}.room-title{display:none}.project-pager{bottom:12px}.museum-floor-controls{bottom:12px}}
+@media(prefers-reduced-motion:reduce){.move-knob,.project-pager{transition:none}}
+
+.light-presets button{min-height:44px}
