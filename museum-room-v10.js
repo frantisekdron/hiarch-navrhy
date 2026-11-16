@@ -1,4 +1,4 @@
-import {placeExhibitModel} from './museum-placement-v19.js?v=22.0';
+import {placeExhibitModel} from './museum-placement-v19.js?v=23.0';
 import {createPlinthContact} from './museum-plinth-contact-v22.js';
 import {loadGallerySurfaces} from './museum-surfaces-v20.js';
 import {hangGalleryPictures} from './museum-pictures-v20.js';

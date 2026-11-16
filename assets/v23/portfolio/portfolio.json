@@ -1,0 +1,1013 @@
+{
+  "projects": {
+    "wurmova": {
+      "description": "Při rekonstrukci a dostavbě nárožního domu v brněnské Wurmově ulici dostalo jeho hlavní průčelí prosklený arkýř. Tmavý rám propojuje obě podlaží. Z boční ulice vynikne odstup mezi hlavní hmotou domu a nízkou garáží.",
+      "images": [
+        {
+          "src": "assets/v23/portfolio/wurmova/01.webp",
+          "thumb": "assets/v23/portfolio/wurmova/01-sm.webp",
+          "caption": "Uliční průčelí s proskleným arkýřem",
+          "kind": "photo",
+          "width": 1600,
+          "height": 1200,
+          "medium": "assets/v23/portfolio/wurmova/01-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/wurmova/02.webp",
+          "thumb": "assets/v23/portfolio/wurmova/02-sm.webp",
+          "caption": "Detail arkýře a střešní krytiny",
+          "kind": "photo",
+          "width": 1380,
+          "height": 951,
+          "medium": "assets/v23/portfolio/wurmova/02-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 689,
+          "thumbWidth": 480,
+          "thumbHeight": 331
+        },
+        {
+          "src": "assets/v23/portfolio/wurmova/03.webp",
+          "thumb": "assets/v23/portfolio/wurmova/03-sm.webp",
+          "caption": "Boční průčelí s garáží",
+          "kind": "photo",
+          "width": 1380,
+          "height": 1035,
+          "medium": "assets/v23/portfolio/wurmova/03-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/wurmova/04.webp",
+          "thumb": "assets/v23/portfolio/wurmova/04-sm.webp",
+          "caption": "Vstup a oplocení domu",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/wurmova/04-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/wurmova/05.webp",
+          "thumb": "assets/v23/portfolio/wurmova/05-sm.webp",
+          "caption": "Dům v nárožní uliční zástavbě",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1250,
+          "medium": "assets/v23/portfolio/wurmova/05-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 625,
+          "thumbWidth": 480,
+          "thumbHeight": 300
+        }
+      ],
+      "facts": [
+        [
+          "Lokalita",
+          "Brno"
+        ]
+      ],
+      "feature": {
+        "title": "Nároží a detail arkýře",
+        "images": [
+          "assets/v23/portfolio/wurmova/05.webp",
+          "assets/v23/portfolio/wurmova/02.webp"
+        ]
+      }
+    },
+    "bystrc": {
+      "description": "Na nábřeží Brněnské přehrady tvoří výpravnu několik nízkých objektů. Mezi nimi vede cesta k nástupním lávkám. Bílé membránové zastřešení je z vody vidět dřív než budovy pod ním.",
+      "images": [
+        {
+          "src": "assets/v23/portfolio/bystrc/01.webp",
+          "thumb": "assets/v23/portfolio/bystrc/01-sm.webp",
+          "caption": "Výpravna a nástupní lávka nad vodou",
+          "kind": "photo",
+          "width": 1024,
+          "height": 680,
+          "thumbWidth": 480,
+          "thumbHeight": 319
+        },
+        {
+          "src": "assets/v23/portfolio/bystrc/02.webp",
+          "thumb": "assets/v23/portfolio/bystrc/02-sm.webp",
+          "caption": "Přístaviště z boční lávky",
+          "kind": "photo",
+          "width": 1024,
+          "height": 768,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/bystrc/03.webp",
+          "thumb": "assets/v23/portfolio/bystrc/03-sm.webp",
+          "caption": "Průchod mezi objekty pod membránovou střechou",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/bystrc/03-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/bystrc/04.webp",
+          "thumb": "assets/v23/portfolio/bystrc/04-sm.webp",
+          "caption": "Detail zavěšení a tvaru zastřešení",
+          "kind": "photo",
+          "width": 1500,
+          "height": 2000,
+          "medium": "assets/v23/portfolio/bystrc/04-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 1333,
+          "thumbWidth": 360,
+          "thumbHeight": 480
+        },
+        {
+          "src": "assets/v23/portfolio/bystrc/05.webp",
+          "thumb": "assets/v23/portfolio/bystrc/05-sm.webp",
+          "caption": "Areál přístaviště od příchozí cesty",
+          "kind": "photo",
+          "width": 1422,
+          "height": 800,
+          "medium": "assets/v23/portfolio/bystrc/05-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 563,
+          "thumbWidth": 480,
+          "thumbHeight": 270
+        }
+      ],
+      "facts": [
+        [
+          "Lokalita",
+          "Brno"
+        ]
+      ],
+      "feature": {
+        "title": "Pod membránovou střechou",
+        "images": [
+          "assets/v23/portfolio/bystrc/03.webp",
+          "assets/v23/portfolio/bystrc/04.webp"
+        ]
+      }
+    },
+    "hustopece": {
+      "description": "Do dětské skupiny v Hustopečích se vchází z ulice kolem kruhového posezení. Barevné rámy oken člení světlou zaoblenou fasádu. Na opačné straně domu navazuje na terasu oplocená zahrada s herními prvky.",
+      "images": [
+        {
+          "src": "assets/v23/portfolio/hustopece/01.webp",
+          "thumb": "assets/v23/portfolio/hustopece/01-sm.webp",
+          "caption": "Průčelí s hlavním vstupem",
+          "kind": "photo",
+          "width": 1600,
+          "height": 739,
+          "medium": "assets/v23/portfolio/hustopece/01-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 462,
+          "thumbWidth": 480,
+          "thumbHeight": 222
+        },
+        {
+          "src": "assets/v23/portfolio/hustopece/02.webp",
+          "thumb": "assets/v23/portfolio/hustopece/02-sm.webp",
+          "caption": "Barevné okenní rámy do ulice",
+          "kind": "photo",
+          "width": 2000,
+          "height": 924,
+          "medium": "assets/v23/portfolio/hustopece/02-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 462,
+          "thumbWidth": 480,
+          "thumbHeight": 222
+        },
+        {
+          "src": "assets/v23/portfolio/hustopece/03.webp",
+          "thumb": "assets/v23/portfolio/hustopece/03-sm.webp",
+          "caption": "Boční fasáda v uličním svahu",
+          "kind": "photo",
+          "width": 2000,
+          "height": 924,
+          "medium": "assets/v23/portfolio/hustopece/03-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 462,
+          "thumbWidth": 480,
+          "thumbHeight": 222
+        },
+        {
+          "src": "assets/v23/portfolio/hustopece/04.webp",
+          "thumb": "assets/v23/portfolio/hustopece/04-sm.webp",
+          "caption": "Zahrada s herními prvky",
+          "kind": "photo",
+          "width": 2000,
+          "height": 924,
+          "medium": "assets/v23/portfolio/hustopece/04-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 462,
+          "thumbWidth": 480,
+          "thumbHeight": 222
+        },
+        {
+          "src": "assets/v23/portfolio/hustopece/05.webp",
+          "thumb": "assets/v23/portfolio/hustopece/05-sm.webp",
+          "caption": "Zaoblené nároží do zahrady",
+          "kind": "photo",
+          "width": 2000,
+          "height": 924,
+          "medium": "assets/v23/portfolio/hustopece/05-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 462,
+          "thumbWidth": 480,
+          "thumbHeight": 222
+        },
+        {
+          "src": "assets/v23/portfolio/hustopece/06.webp",
+          "thumb": "assets/v23/portfolio/hustopece/06-sm.webp",
+          "caption": "Vstupní předprostor s kruhovou dlažbou",
+          "kind": "photo",
+          "width": 2000,
+          "height": 924,
+          "medium": "assets/v23/portfolio/hustopece/06-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 462,
+          "thumbWidth": 480,
+          "thumbHeight": 222
+        },
+        {
+          "src": "assets/v23/portfolio/hustopece/07.webp",
+          "thumb": "assets/v23/portfolio/hustopece/07-sm.webp",
+          "caption": "Pohled přes zahradní terasu",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/hustopece/07-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/hustopece/08.webp",
+          "thumb": "assets/v23/portfolio/hustopece/08-sm.webp",
+          "caption": "Kruhové posezení před vstupem",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/hustopece/08-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/hustopece/09.webp",
+          "thumb": "assets/v23/portfolio/hustopece/09-sm.webp",
+          "caption": "Zaoblená čelní fasáda z ulice",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/hustopece/09-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        }
+      ],
+      "facts": [
+        [
+          "Lokalita",
+          "Hustopeče"
+        ]
+      ],
+      "feature": {
+        "title": "Mezi vstupem a zahradou",
+        "images": [
+          "assets/v23/portfolio/hustopece/04.webp",
+          "assets/v23/portfolio/hustopece/08.webp"
+        ]
+      }
+    },
+    "selska84": {
+      "description": "Bytový dům na Selské ulici v Brně má dvě odlišné tváře. Směrem do ulice vystupují ze světlého průčelí hluboké balkony. Ve dvoře se otevírají terasy a podél fasády vede venkovní schodiště.",
+      "images": [
+        {
+          "src": "assets/v23/portfolio/selska84/01.webp",
+          "thumb": "assets/v23/portfolio/selska84/01-sm.webp",
+          "caption": "Uliční průčelí bytového domu",
+          "kind": "photo",
+          "width": 1600,
+          "height": 1209,
+          "medium": "assets/v23/portfolio/selska84/01-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 756,
+          "thumbWidth": 480,
+          "thumbHeight": 363
+        },
+        {
+          "src": "assets/v23/portfolio/selska84/02.webp",
+          "thumb": "assets/v23/portfolio/selska84/02-sm.webp",
+          "caption": "Balkony ve slunečním světle",
+          "kind": "photo",
+          "width": 1500,
+          "height": 2000,
+          "medium": "assets/v23/portfolio/selska84/02-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 1333,
+          "thumbWidth": 360,
+          "thumbHeight": 480
+        },
+        {
+          "src": "assets/v23/portfolio/selska84/03.webp",
+          "thumb": "assets/v23/portfolio/selska84/03-sm.webp",
+          "caption": "Zapuštěný vstup z ulice",
+          "kind": "photo",
+          "width": 1500,
+          "height": 2000,
+          "medium": "assets/v23/portfolio/selska84/03-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 1333,
+          "thumbWidth": 360,
+          "thumbHeight": 480
+        },
+        {
+          "src": "assets/v23/portfolio/selska84/04.webp",
+          "thumb": "assets/v23/portfolio/selska84/04-sm.webp",
+          "caption": "Detail oken a povrchu uliční fasády",
+          "kind": "photo",
+          "width": 1500,
+          "height": 2000,
+          "medium": "assets/v23/portfolio/selska84/04-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 1333,
+          "thumbWidth": 360,
+          "thumbHeight": 480
+        },
+        {
+          "src": "assets/v23/portfolio/selska84/05.webp",
+          "thumb": "assets/v23/portfolio/selska84/05-sm.webp",
+          "caption": "Vjezd do garáže",
+          "kind": "photo",
+          "width": 1500,
+          "height": 2000,
+          "medium": "assets/v23/portfolio/selska84/05-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 1333,
+          "thumbWidth": 360,
+          "thumbHeight": 480
+        },
+        {
+          "src": "assets/v23/portfolio/selska84/06.webp",
+          "thumb": "assets/v23/portfolio/selska84/06-sm.webp",
+          "caption": "Výhled z balkonu do okolní zástavby",
+          "kind": "photo",
+          "width": 1500,
+          "height": 2000,
+          "medium": "assets/v23/portfolio/selska84/06-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 1333,
+          "thumbWidth": 360,
+          "thumbHeight": 480
+        },
+        {
+          "src": "assets/v23/portfolio/selska84/07.webp",
+          "thumb": "assets/v23/portfolio/selska84/07-sm.webp",
+          "caption": "Venkovní schodiště do dvora",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/selska84/07-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/selska84/08.webp",
+          "thumb": "assets/v23/portfolio/selska84/08-sm.webp",
+          "caption": "Dvorní fasáda s balkony",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/selska84/08-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/selska84/09.webp",
+          "thumb": "assets/v23/portfolio/selska84/09-sm.webp",
+          "caption": "Pobytová terasa horního podlaží",
+          "kind": "photo",
+          "width": 1500,
+          "height": 2000,
+          "medium": "assets/v23/portfolio/selska84/09-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 1333,
+          "thumbWidth": 360,
+          "thumbHeight": 480
+        },
+        {
+          "src": "assets/v23/portfolio/selska84/10.webp",
+          "thumb": "assets/v23/portfolio/selska84/10-sm.webp",
+          "caption": "Nároží domu a navazující terasa",
+          "kind": "photo",
+          "width": 1500,
+          "height": 2000,
+          "medium": "assets/v23/portfolio/selska84/10-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 1333,
+          "thumbWidth": 360,
+          "thumbHeight": 480
+        }
+      ],
+      "facts": [
+        [
+          "Lokalita",
+          "Brno"
+        ]
+      ],
+      "feature": {
+        "title": "Balkony a dvůr",
+        "images": [
+          "assets/v23/portfolio/selska84/08.webp",
+          "assets/v23/portfolio/selska84/07.webp"
+        ]
+      }
+    },
+    "transped": {
+      "description": "Budova HP Transped spojuje kanceláře s halou pro diagnostiku aut. Velká vrata v přízemí určují měřítko světlé spodní části. Nad ní vystupuje tmavě opláštěné patro s pásovými okny a terasou.",
+      "images": [
+        {
+          "src": "assets/v23/portfolio/transped/01.webp",
+          "thumb": "assets/v23/portfolio/transped/01-sm.webp",
+          "caption": "Administrativní část nad provozní halou",
+          "kind": "photo",
+          "width": 1600,
+          "height": 1200,
+          "medium": "assets/v23/portfolio/transped/01-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/transped/02.webp",
+          "thumb": "assets/v23/portfolio/transped/02-sm.webp",
+          "caption": "Tmavý fasádní plášť nad vjezdem",
+          "kind": "photo",
+          "width": 1500,
+          "height": 2000,
+          "medium": "assets/v23/portfolio/transped/02-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 1333,
+          "thumbWidth": 360,
+          "thumbHeight": 480
+        },
+        {
+          "src": "assets/v23/portfolio/transped/03.webp",
+          "thumb": "assets/v23/portfolio/transped/03-sm.webp",
+          "caption": "Podélná fasáda s pásovým prosklením",
+          "kind": "photo",
+          "width": 1500,
+          "height": 2000,
+          "medium": "assets/v23/portfolio/transped/03-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 1333,
+          "thumbWidth": 360,
+          "thumbHeight": 480
+        },
+        {
+          "src": "assets/v23/portfolio/transped/04.webp",
+          "thumb": "assets/v23/portfolio/transped/04-sm.webp",
+          "caption": "Uzavřená boční stěna haly",
+          "kind": "photo",
+          "width": 1500,
+          "height": 2000,
+          "medium": "assets/v23/portfolio/transped/04-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 1333,
+          "thumbWidth": 360,
+          "thumbHeight": 480
+        },
+        {
+          "src": "assets/v23/portfolio/transped/05.webp",
+          "thumb": "assets/v23/portfolio/transped/05-sm.webp",
+          "caption": "Vjezd do provozní haly",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/transped/05-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/transped/06.webp",
+          "thumb": "assets/v23/portfolio/transped/06-sm.webp",
+          "caption": "Fotovoltaické panely na ploché střeše",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/transped/06-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/transped/07.webp",
+          "thumb": "assets/v23/portfolio/transped/07-sm.webp",
+          "caption": "Detail střešní instalace",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/transped/07-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/transped/08.webp",
+          "thumb": "assets/v23/portfolio/transped/08-sm.webp",
+          "caption": "Prosklený prostor schodiště",
+          "kind": "photo",
+          "width": 1500,
+          "height": 2000,
+          "medium": "assets/v23/portfolio/transped/08-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 1333,
+          "thumbWidth": 360,
+          "thumbHeight": 480
+        },
+        {
+          "src": "assets/v23/portfolio/transped/09.webp",
+          "thumb": "assets/v23/portfolio/transped/09-sm.webp",
+          "caption": "Obslužná cesta podél budovy",
+          "kind": "photo",
+          "width": 1500,
+          "height": 2000,
+          "medium": "assets/v23/portfolio/transped/09-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 1333,
+          "thumbWidth": 360,
+          "thumbHeight": 480
+        }
+      ],
+      "facts": [
+        [
+          "Lokalita",
+          "Brno"
+        ]
+      ],
+      "feature": {
+        "title": "Schodiště a střecha haly",
+        "images": [
+          "assets/v23/portfolio/transped/08.webp",
+          "assets/v23/portfolio/transped/06.webp"
+        ]
+      }
+    },
+    "ivancice": {
+      "description": "Komunitní a bytový dům v Ivančicích tvoří několik navazujících částí různé výšky. Z ulice jsou dobře vidět vstupy s tmavými svislými prvky. Ze zahrady vynikne délka domu a souvislé řady balkonů.",
+      "images": [
+        {
+          "src": "assets/v23/portfolio/ivancice/01.webp",
+          "thumb": "assets/v23/portfolio/ivancice/01-sm.webp",
+          "caption": "Dlouhá zahradní fasáda s balkony",
+          "kind": "photo",
+          "width": 1600,
+          "height": 1212,
+          "medium": "assets/v23/portfolio/ivancice/01-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 758,
+          "thumbWidth": 480,
+          "thumbHeight": 364
+        },
+        {
+          "src": "assets/v23/portfolio/ivancice/02.webp",
+          "thumb": "assets/v23/portfolio/ivancice/02-sm.webp",
+          "caption": "Hlavní vstup s tmavou svislou hmotou",
+          "kind": "photo",
+          "width": 1500,
+          "height": 2000,
+          "medium": "assets/v23/portfolio/ivancice/02-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 1333,
+          "thumbWidth": 360,
+          "thumbHeight": 480
+        },
+        {
+          "src": "assets/v23/portfolio/ivancice/03.webp",
+          "thumb": "assets/v23/portfolio/ivancice/03-sm.webp",
+          "caption": "Nároží a boční průčelí",
+          "kind": "photo",
+          "width": 1500,
+          "height": 2000,
+          "medium": "assets/v23/portfolio/ivancice/03-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 1333,
+          "thumbWidth": 360,
+          "thumbHeight": 480
+        },
+        {
+          "src": "assets/v23/portfolio/ivancice/04.webp",
+          "thumb": "assets/v23/portfolio/ivancice/04-sm.webp",
+          "caption": "Bytová část od nezastavěné plochy",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/ivancice/04-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/ivancice/05.webp",
+          "thumb": "assets/v23/portfolio/ivancice/05-sm.webp",
+          "caption": "Členění uliční fronty",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/ivancice/05-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/ivancice/06.webp",
+          "thumb": "assets/v23/portfolio/ivancice/06-sm.webp",
+          "caption": "Příjezd a nižší část souboru",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/ivancice/06-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/ivancice/07.webp",
+          "thumb": "assets/v23/portfolio/ivancice/07-sm.webp",
+          "caption": "Střešní světlíky nižšího křídla",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/ivancice/07-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/ivancice/08.webp",
+          "thumb": "assets/v23/portfolio/ivancice/08-sm.webp",
+          "caption": "Celkový pohled přes předprostor",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/ivancice/08-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        }
+      ],
+      "facts": [
+        [
+          "Lokalita",
+          "Ivančice"
+        ]
+      ],
+      "feature": {
+        "title": "Členění dlouhého domu",
+        "images": [
+          "assets/v23/portfolio/ivancice/05.webp",
+          "assets/v23/portfolio/ivancice/02.webp"
+        ]
+      }
+    },
+    "nebovidy": {
+      "description": "Vývojové centrum v areálu společnosti Veselý v Nebovidech lemuje oblouková příjezdová rampa. Podél ní se postupně odkrývá dlouhá stěna s tmavými okenními rámy. Na čelní straně je průčelí otevřené hlubokými lodžiemi.",
+      "images": [
+        {
+          "src": "assets/v23/portfolio/nebovidy/01.webp",
+          "thumb": "assets/v23/portfolio/nebovidy/01-sm.webp",
+          "caption": "Vývojové centrum s obloukovou příjezdovou rampou",
+          "kind": "photo",
+          "width": 1600,
+          "height": 1242,
+          "medium": "assets/v23/portfolio/nebovidy/01-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 776,
+          "thumbWidth": 480,
+          "thumbHeight": 373
+        },
+        {
+          "src": "assets/v23/portfolio/nebovidy/02.webp",
+          "thumb": "assets/v23/portfolio/nebovidy/02-sm.webp",
+          "caption": "Podélná fasáda a sousední zelená střecha",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/nebovidy/02-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/nebovidy/03.webp",
+          "thumb": "assets/v23/portfolio/nebovidy/03-sm.webp",
+          "caption": "Čelní průčelí s ustoupenými lodžiemi",
+          "kind": "photo",
+          "width": 1500,
+          "height": 2000,
+          "medium": "assets/v23/portfolio/nebovidy/03-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 1333,
+          "thumbWidth": 360,
+          "thumbHeight": 480
+        },
+        {
+          "src": "assets/v23/portfolio/nebovidy/04.webp",
+          "thumb": "assets/v23/portfolio/nebovidy/04-sm.webp",
+          "caption": "Příjezdová komunikace kolem budovy",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/nebovidy/04-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/nebovidy/05.webp",
+          "thumb": "assets/v23/portfolio/nebovidy/05-sm.webp",
+          "caption": "Podélné boční průčelí",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/nebovidy/05-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/nebovidy/06.webp",
+          "thumb": "assets/v23/portfolio/nebovidy/06-sm.webp",
+          "caption": "Fasáda směrem k sousední terase",
+          "kind": "photo",
+          "width": 1500,
+          "height": 2000,
+          "medium": "assets/v23/portfolio/nebovidy/06-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 1333,
+          "thumbWidth": 360,
+          "thumbHeight": 480
+        },
+        {
+          "src": "assets/v23/portfolio/nebovidy/07.webp",
+          "thumb": "assets/v23/portfolio/nebovidy/07-sm.webp",
+          "caption": "Okna a stínění v přízemí",
+          "kind": "photo",
+          "width": 1500,
+          "height": 2000,
+          "medium": "assets/v23/portfolio/nebovidy/07-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 1333,
+          "thumbWidth": 360,
+          "thumbHeight": 480
+        },
+        {
+          "src": "assets/v23/portfolio/nebovidy/08.webp",
+          "thumb": "assets/v23/portfolio/nebovidy/08-sm.webp",
+          "caption": "Průčelí od parkoviště",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/nebovidy/08-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/nebovidy/09.webp",
+          "thumb": "assets/v23/portfolio/nebovidy/09-sm.webp",
+          "caption": "Samostatný vstup v boční fasádě",
+          "kind": "photo",
+          "width": 1500,
+          "height": 2000,
+          "medium": "assets/v23/portfolio/nebovidy/09-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 1333,
+          "thumbWidth": 360,
+          "thumbHeight": 480
+        }
+      ],
+      "facts": [
+        [
+          "Lokalita",
+          "Nebovidy"
+        ]
+      ],
+      "feature": {
+        "title": "Rampa a lodžie",
+        "images": [
+          "assets/v23/portfolio/nebovidy/04.webp",
+          "assets/v23/portfolio/nebovidy/03.webp"
+        ]
+      }
+    },
+    "koupelni": {
+      "description": "Na Koupelní 2 v Hodoníně vzniká přestavbou bývalé administrativní budovy polyfunkční dům. Z ulice je dobře čitelné členění vysokého průčelí. Letecké záběry ukazují, jak dům sedí v okolní zástavbě, interiérové fotografie zachycují byty i společné schodiště.",
+      "images": [
+        {
+          "src": "assets/v23/portfolio/koupelni/01.webp",
+          "thumb": "assets/v23/portfolio/koupelni/01-sm.webp",
+          "caption": "Dům od zelené plochy",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1334,
+          "medium": "assets/v23/portfolio/koupelni/01-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 667,
+          "thumbWidth": 480,
+          "thumbHeight": 320
+        },
+        {
+          "src": "assets/v23/portfolio/koupelni/02.webp",
+          "thumb": "assets/v23/portfolio/koupelni/02-sm.webp",
+          "caption": "Celkový pohled na dům z dronu",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/koupelni/02-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/koupelni/03.webp",
+          "thumb": "assets/v23/portfolio/koupelni/03-sm.webp",
+          "caption": "Nadhled od uličního nároží",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/koupelni/03-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/koupelni/04.webp",
+          "thumb": "assets/v23/portfolio/koupelni/04-sm.webp",
+          "caption": "Boční fasáda a nízký parter",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1334,
+          "medium": "assets/v23/portfolio/koupelni/04-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 667,
+          "thumbWidth": 480,
+          "thumbHeight": 320
+        },
+        {
+          "src": "assets/v23/portfolio/koupelni/05.webp",
+          "thumb": "assets/v23/portfolio/koupelni/05-sm.webp",
+          "caption": "Detail oken s barevným prvkem",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1500,
+          "medium": "assets/v23/portfolio/koupelni/05-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 750,
+          "thumbWidth": 480,
+          "thumbHeight": 360
+        },
+        {
+          "src": "assets/v23/portfolio/koupelni/06.webp",
+          "thumb": "assets/v23/portfolio/koupelni/06-sm.webp",
+          "caption": "Světlý obytný prostor s rohovými okny",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1332,
+          "medium": "assets/v23/portfolio/koupelni/06-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 666,
+          "thumbWidth": 480,
+          "thumbHeight": 320
+        },
+        {
+          "src": "assets/v23/portfolio/koupelni/07.webp",
+          "thumb": "assets/v23/portfolio/koupelni/07-sm.webp",
+          "caption": "Dokončená kuchyňská linka",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1333,
+          "medium": "assets/v23/portfolio/koupelni/07-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 666,
+          "thumbWidth": 480,
+          "thumbHeight": 320
+        },
+        {
+          "src": "assets/v23/portfolio/koupelni/08.webp",
+          "thumb": "assets/v23/portfolio/koupelni/08-sm.webp",
+          "caption": "Koupelna se sprchovým koutem",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1333,
+          "medium": "assets/v23/portfolio/koupelni/08-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 666,
+          "thumbWidth": 480,
+          "thumbHeight": 320
+        },
+        {
+          "src": "assets/v23/portfolio/koupelni/09.webp",
+          "thumb": "assets/v23/portfolio/koupelni/09-sm.webp",
+          "caption": "Společné schodiště domu",
+          "kind": "photo",
+          "width": 2000,
+          "height": 1333,
+          "medium": "assets/v23/portfolio/koupelni/09-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 666,
+          "thumbWidth": 480,
+          "thumbHeight": 320
+        },
+        {
+          "src": "assets/v23/portfolio/koupelni/10.webp",
+          "thumb": "assets/v23/portfolio/koupelni/10-sm.webp",
+          "caption": "Návrh obytného prostoru s kuchyní · vizualizace",
+          "kind": "render",
+          "width": 1672,
+          "height": 941,
+          "medium": "assets/v23/portfolio/koupelni/10-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 563,
+          "thumbWidth": 480,
+          "thumbHeight": 270
+        },
+        {
+          "src": "assets/v23/portfolio/koupelni/11.webp",
+          "thumb": "assets/v23/portfolio/koupelni/11-sm.webp",
+          "caption": "Dispoziční schéma 5. nadzemního podlaží",
+          "kind": "plan",
+          "width": 2000,
+          "height": 1414,
+          "medium": "assets/v23/portfolio/koupelni/11-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 707,
+          "thumbWidth": 480,
+          "thumbHeight": 339
+        },
+        {
+          "src": "assets/v23/portfolio/koupelni/12.webp",
+          "thumb": "assets/v23/portfolio/koupelni/12-sm.webp",
+          "caption": "Axonometrický pohled na dům",
+          "kind": "plan",
+          "width": 2000,
+          "height": 1486,
+          "medium": "assets/v23/portfolio/koupelni/12-md.webp",
+          "mediumWidth": 1000,
+          "mediumHeight": 743,
+          "thumbWidth": 480,
+          "thumbHeight": 357
+        }
+      ],
+      "facts": [
+        [
+          "Lokalita",
+          "Hodonín"
+        ]
+      ],
+      "feature": {
+        "title": "Dispozice a interiér",
+        "images": [
+          "assets/v23/portfolio/koupelni/06.webp",
+          "assets/v23/portfolio/koupelni/11.webp"
+        ]
+      }
+    }
+  }
+}

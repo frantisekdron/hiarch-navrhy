@@ -24,14 +24,34 @@ export function placeExhibitModel(model,id,THREE,surfaceY=.962){
  model.userData.displayPlacement={mode:'fit-to-plinth',fit,displaySize:scaledSize.toArray(),sourceSize:size.toArray()};
  return {fit,size,scaledSize,modelHeight:scaledSize.y,targetY:surfaceY+scaledSize.y*.48,focusRadius:scaledSize.length()*.5};
 }
+// Azimuth is measured from +Z. Each bearing shows a documented facade or entrance.
+const streetBearing = Object.freeze({
+ koupelni: -30, hustopece: 149, transped: 30, wurmova: -30.72,
+ bystrc: 28, selska84: 55, ivancice: 38, nebovidy: 34
+});
+
 export function exhibitView(table,camera,THREE,isMobile=false){
- const targetY=table.targetY||1.95,side=table.x< -1?1:table.x>1?-1:1;
- if(table.group?.userData.projectId==='wurmova'){
-  // The street photograph looks up the left flank toward the bay on the +Z facade.
-  const position=new THREE.Vector3(table.x-2.05,1.30,table.z+(isMobile?3.60:3.45));
-  return {position,target:new THREE.Vector3(table.x,targetY,table.z)};
+ const id=table.group.userData.projectId;
+ const angle=THREE.MathUtils.degToRad(id==='wurmova'&&isMobile?-29.66:(streetBearing[id]??30));
+ const dx=Math.sin(angle),dz=Math.cos(angle);
+ const size=table.scaledSize;
+ const target=new THREE.Vector3(table.x,table.targetY,table.z);
+ const base=table.targetY-size.y*.48;
+ const eyeHeight=base+Math.min(.34,Math.max(.095,size.y*.27));
+ const tanV=Math.tan(THREE.MathUtils.degToRad(camera.fov)*.5);
+ const tanH=tanV*camera.aspect;
+ // Frame every front corner, including the long Ivančice facade on narrow screens.
+ let distance=id==='wurmova'?Math.hypot(2.05,isMobile?3.60:3.45):2.85;
+ for(const x of [-size.x/2,size.x/2]){
+  for(const z of [-size.z/2,size.z/2]){
+   const depth=x*dx+z*dz;
+   const horizontal=Math.abs(x*dz-z*dx)/(tanH*(isMobile?.82:.69));
+   const vertical=size.y*.54/(tanV*.77);
+   distance=Math.max(distance,depth+Math.max(horizontal,vertical));
+  }
  }
- const offset=table.featured?(isMobile?2.55:4.4):Math.abs(table.x)>1?side*(isMobile?2.65:3.1):(isMobile?1.7:1.8);
- const forward=table.featured?(isMobile?4.6:5.4):(isMobile?4.3:4.6);
- return {position:new THREE.Vector3(table.x+offset,targetY+(isMobile?1.2:1.4),table.z+forward),target:new THREE.Vector3(table.x,targetY,table.z)};
+ const wallX=(dx>0?8.9:-8.9)-table.x,wallZ=(dz>0?17.05:-17.05)-table.z;
+ if(Math.abs(dx)>.001)distance=Math.min(distance,wallX/dx);
+ if(Math.abs(dz)>.001)distance=Math.min(distance,wallZ/dz);
+ return {target,position:new THREE.Vector3(table.x+dx*distance,eyeHeight,table.z+dz*distance)};
 }
