@@ -1,0 +1,49 @@
+#museum .museum-top{z-index:20}
+.leisure-menu{position:relative;pointer-events:auto}
+.leisure-menu>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 15px;border:1px solid #bdcbae;border-radius:999px;background:#102018;color:#f2f0df;font:500 12px/1.2 Manrope,sans-serif}
+.leisure-menu>summary::-webkit-details-marker{display:none}
+.leisure-menu>summary svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.leisure-menu[open]>summary{background:#d7e4c8;color:#20372a}
+.leisure-popover{position:absolute;z-index:25;top:55px;right:0;width:225px;padding:7px;border:1px solid #acbc9d;border-radius:12px;background:#14261df7;box-shadow:0 15px 50px #0007;backdrop-filter:blur(15px)}
+#museum .leisure-popover button{display:flex;align-items:center;justify-content:space-between;width:100%!important;min-height:46px;min-width:0!important;padding:12px 14px!important;font:500 13px/1.3 Manrope,sans-serif!important;color:#f0efdd;background:transparent;border:0;border-radius:7px;text-align:left;cursor:pointer}
+#museum .leisure-popover button:hover{background:#d7e4c8;color:#21372b}
+.chess-panel:not([hidden]){position:absolute;right:28px;bottom:28px;z-index:14;width:330px;padding:20px;border:1px solid #b8a078b0;border-radius:13px;background:#14251ef7;color:#f0ecd9;box-shadow:0 15px 60px #0008;backdrop-filter:blur(16px)}
+.chess-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:15px}
+.chess-heading h2{font:500 30px/1.1 'Space Grotesk',sans-serif;margin:3px 0 0;color:#f5eed9}
+.chess-heading>div>span{font-size:8px;letter-spacing:.18em;color:#d7c398}
+.chess-player{padding:7px 9px;border:1px solid #a7bc9c66;border-radius:6px;font-size:10px;white-space:nowrap;color:#e4ebd7}
+.chess-levels{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:0;margin:0 0 13px;border:0}
+.chess-levels legend{padding:0;margin-bottom:7px;color:#d8dec9;font:500 10px/1.4 Manrope,sans-serif}
+.chess-levels button,.chess-actions button,.chess-promotion button{min-height:44px;border:1px solid #a7bb9a8a;border-radius:6px;background:#294132;color:#f3efdc;font:500 10px/1.25 Manrope,sans-serif;padding:8px 7px;cursor:pointer}
+.chess-levels button[aria-pressed=true]{background:#ddc79f;color:#21352a;border-color:#eedbb5}
+.chess-status{font:500 14px/1.45 'Space Grotesk',sans-serif;color:#f0ecd7;min-height:38px;margin:0 0 6px}
+.chess-selection{font-size:11px;line-height:1.5;color:#cdd9be;margin:0 0 10px;min-height:30px}
+.chess-history{color:#d2bf96;font:500 11px/1.5 Manrope,sans-serif;padding:9px 0;border-block:1px solid #a8bb941f;margin:0 0 12px;min-height:18px}
+.chess-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.chess-actions #chessExit{grid-column:1/-1;background:transparent}
+.chess-actions button:disabled{opacity:.5;cursor:default}
+.chess-promotion:not([hidden]){display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.chess-promotion>span{grid-column:1/-1;font-size:11px;color:#e7d8b8}
+.chess-promotion button{font-size:27px;color:#e9ddc0}
+.chess-a11y-grid{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap}
+.chess-a11y-grid button{width:1px;height:1px;padding:0;border:0}
+.aquarium-panel:not([hidden]){position:absolute;z-index:14;left:50%;bottom:28px;transform:translateX(-50%);display:flex;align-items:center;gap:18px;padding:11px 13px 11px 21px;border:1px solid #adbb9d99;border-radius:12px;background:#13251df2;color:#f1ebd9;box-shadow:0 10px 40px #0006;backdrop-filter:blur(14px)}
+.aquarium-panel>span{font:500 17px/1.3 'Space Grotesk',sans-serif;white-space:nowrap}
+.aquarium-panel button{min-height:44px;border:1px solid #b3c3a080;border-radius:7px;padding:9px 12px;background:#2a4333;color:#f0efdb;font:500 11px/1.25 Manrope,sans-serif;cursor:pointer}
+.museum-shell:is(.playing-chess,.viewing-aquarium) :is(.museum-floor-controls,.orbit-toolbar,.walk-pad,.project-pager,.hotspot-layer,.walk-help){display:none!important}
+.museum-shell.playing-chess .museum-canvas{cursor:pointer}
+body.gallery-at-entry :is(.chess-panel,.aquarium-panel){display:none!important}
+.chess-panel button:focus-visible,.leisure-menu button:focus-visible,.leisure-menu>summary:focus-visible,.aquarium-panel button:focus-visible{outline:2px solid #ead2a7;outline-offset:3px}
+@media(max-width:650px){
+ .leisure-menu>summary{width:44px;min-height:44px;padding:0}.leisure-menu>summary>span{display:none}.leisure-menu>summary svg{width:21px;height:21px}
+ .chess-panel:not([hidden]){left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));width:auto;padding:12px 14px}
+ .chess-heading{margin-bottom:8px}.chess-heading h2{font-size:23px}.chess-heading>div>span{display:none}.chess-player{font-size:9px;padding:5px 7px}
+ .chess-levels{margin-bottom:7px}.chess-levels legend{margin-bottom:4px;font-size:9px}.chess-levels button{font-size:10px;min-height:44px}
+ .chess-status{font-size:12px;min-height:0;margin-bottom:3px}.chess-selection{font-size:10px;min-height:0;margin-bottom:8px}.chess-history{display:none}
+ .chess-actions{grid-template-columns:repeat(3,1fr);gap:5px}.chess-actions #chessExit{grid-column:auto}.chess-actions button{font-size:9px;min-height:44px;padding:7px 5px}
+ .aquarium-panel:not([hidden]){left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));transform:none;flex-wrap:wrap;gap:8px;padding:11px 13px}
+ .aquarium-panel>span{width:100%;font-size:16px}.aquarium-panel button{flex:1;font-size:10px}
+ .museum-shell:is(.playing-chess,.viewing-aquarium) .mobile-projects-link{display:none}
+}
+
+.lighting-panel .life-motion-toggle{width:100%;min-height:44px;margin-top:12px;border:1px solid #9caf90;border-radius:7px;background:#2b4133;color:#f2efdf;font:500 11px/1.3 Manrope,sans-serif;padding:10px;cursor:pointer}.lighting-panel .life-motion-toggle:focus-visible{outline:2px solid #ead2a7;outline-offset:3px}

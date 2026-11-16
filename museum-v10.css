@@ -1,0 +1,67 @@
+.orbit-toolbar:not([hidden]){
+  position:absolute;z-index:12;left:28px;bottom:30px;
+  display:flex;align-items:center;gap:6px;padding:7px;
+  border:1px solid #bdcbae;border-radius:14px;
+  background:#102018ed;box-shadow:0 8px 22px #0005;
+  backdrop-filter:blur(12px);pointer-events:auto;
+}
+.orbit-toolbar button{
+  display:grid;place-items:center;min-width:44px;min-height:44px;
+  border:1px solid #cbd9bb44;border-radius:9px;
+  background:#263b2d;color:#f5f3e7;font:500 24px/1 'Space Grotesk',sans-serif;
+  touch-action:manipulation;
+}
+.orbit-toolbar button:last-child{font-size:27px}
+.orbit-toolbar button:hover,.orbit-toolbar button:active{background:#dce6ce;color:#243321}
+.orbit-toolbar button:focus-visible{outline:2px solid #e7b56f;outline-offset:2px}
+.museum-shell[data-entry-complete=false] .orbit-toolbar{visibility:hidden;pointer-events:none}
+@media(min-width:651px) and (max-width:900px){.orbit-toolbar:not([hidden]){bottom:108px}}
+@media(max-width:650px){
+  .orbit-toolbar:not([hidden]){left:50%;bottom:145px;transform:translateX(-50%);gap:5px;padding:5px;max-width:calc(100vw - 24px)}
+  .orbit-toolbar button{min-width:44px;min-height:44px}
+  .museum-shell[data-mode=orbit] .hotspot-layer{bottom:207px}
+  .walk-help{display:block;top:96px;bottom:auto;left:12px;right:12px;transform:none;max-width:none;text-align:center;font-size:9px;line-height:1.35;pointer-events:none}
+}
+@media(max-height:520px){.orbit-toolbar:not([hidden]){bottom:80px}.walk-help{display:none}}
+
+/* Mouse controls are independent of touch-action. Keep touch scrolling native
+   in portrait, landscape and on mixed-input devices. */
+.museum-canvas,.museum-canvas canvas,.museum-shell.walking .museum-canvas{touch-action:pan-y!important}
+@media(max-width:650px){
+ #orbitToolbar{display:none!important}
+ .museum-shell[data-mode=orbit] .hotspot-layer{bottom:145px}
+ .walk-help{font-size:11px;line-height:1.4}
+}
+@media(max-width:650px),(pointer:coarse){
+ body.gallery-is-expanded{overflow:auto!important}
+ .museum-shell.expanded-gallery{position:relative;inset:auto;z-index:1;height:100svh;width:100%;max-height:none}
+}
+
+/* Opening shot: only the real gallery architecture. Controls return after the
+   doors finish opening. The page keeps native vertical scrolling throughout. */
+body.gallery-at-entry .museum-header{display:none}
+body.gallery-at-entry .museum-shell{height:100svh;min-height:0;max-height:none}
+body.gallery-at-entry .museum-shell :is(.museum-top,.museum-floor-controls,.walk-help,.mobile-projects-link,.project-pager,.orbit-toolbar,.walk-pad,.hotspot-layer){display:none!important}
+body.gallery-at-entry .museum-canvas{cursor:pointer}
+body.gallery-at-entry .museum-shell[data-renderer=loading] .museum-canvas{cursor:progress}
+body.gallery-at-entry .museum-canvas:focus-visible{outline:2px solid #e4d0a6;outline-offset:-5px}
+.museum-shell[data-renderer=loading]::after{
+ content:'';position:absolute;left:calc(50% - 24px);bottom:32px;
+ width:48px;height:2px;background:#dccba4;border-radius:2px;
+ box-shadow:0 0 14px #dbc79d55;pointer-events:none;
+ animation:entrance-loading 1.3s ease-in-out infinite alternate;
+}
+@keyframes entrance-loading{from{opacity:.2;transform:scaleX(.45)}to{opacity:.8;transform:scaleX(1)}}
+@media(prefers-reduced-motion:reduce){.museum-shell[data-renderer=loading]::after{animation:none}}
+
+/* Photo navigation stays usable on devices without a graphics context. */
+.gallery-fallback .card-actions,
+.gallery-fallback .museum-shell > :is(.museum-top,.museum-floor-controls,.orbit-toolbar,.walk-pad,.project-pager,.selected-exhibit,.hotspot-layer,.wall-map-layer,.chess-panel,.salon-panel,.annotation-card,.walk-help,.mobile-projects-link){display:none!important}
+.gallery-fallback .museum-canvas{visibility:hidden}
+.gallery-fallback .museum-shell{min-height:260px;height:42svh}
+
+/* A frame of the actual room is available during the first WebGL compilation. */
+.entrance-poster{position:absolute;inset:0;z-index:2;display:block;overflow:hidden;background:#141815;touch-action:pan-y}
+.entrance-poster picture,.entrance-poster img{display:block;width:100%;height:100%}
+.entrance-poster img{object-fit:cover}
+.entrance-poster:focus-visible{outline:2px solid #e4d0a6;outline-offset:-5px}

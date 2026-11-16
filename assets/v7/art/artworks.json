@@ -6,7 +6,10 @@
       "title": "Koupelní 2 · obytný prostor",
       "subtitle": "Interiérová vizualizace",
       "source": "https://koupelni.hireal.cz/galerie/",
-      "preview": "assets/v7/art/textures/interior-living.webp"
+      "preview": "assets/v7/art/textures/interior-living.webp",
+      "width": 1024,
+      "height": 576,
+      "miniature": "data:image/webp;base64,UklGRhoDAABXRUJQVlA4IA4DAABQDwCdASpIACkAPq1Ook2mJCMiJnVaAMAViUAXMgXY6tcPkFD3HK3Oy2tM80iiQBzijUY9Y5gq5dQ74Fsrk1b8e6yzuexswlaE40PdQwuFnvWH8jx67tU2uPc5N71l9o2JnvpYp3krEkiLXGndLTNJqDwg0VhJFhJLK7s2OvuCCuI1nAD+q1VtVUCnYfb0/3kfBxToJ9JNPiecN21y4oDli1ghjnKdvIfC5OMMDr7BnX81yKKCRPdAD5NDqYGQ3UrRvy7kmXKaxFKu/2vw5QyfX7dfEDiXgu0XQ4FOveQR/BXWZwzh54fFKmVQTBwhaISjxPEZ0SwDe7ZaVoMxH772dPj0vewxlU5a7ZAIiCpha/gdDn5i7ck/CAis8fR5zsRQuk2t8vH/SMyW0eaBmjvLvILvY1vObf9LYoeFSm9UVE6/fJP5taQ/HSGGM/Dhmyke9Fd5Xgk/G8Arl08tQiKpuF5vmHknwmHsQVESj8YZV19E7wAkpE6Si91TJtnL8RKdczK+nqec3pTR3hj87PkHHqvl+2/8zUKl2yvhCp2xOzPxViH72kmOId4r66zaJ1vEpOAVd7cOFbvFSPcgKQRg+fHKXtuKd6A2NsO/u4ijkDad6y+OiM5KR3HDXrItAhtTR7fiTJRN98Gcs6+Cb0ISseZ3b0MZyx2qyqXu432JAuyg6B0mVp1x3nIQUfj/zyEkLBApY17GefEURsTGTPR7PD0svIcq6FiTJShfJL7CQMZkzEwPGSFLB7uFZS+EdIKvjfVVMAe1N+2cWteS2SzpVjatAO4FsBap3tbkzFjl4RQZNNQwdnecm/0suhh7o+Vp1SpQVtIPoV4+mQ6h4hqyrnF5YnnI/bljbv5zryES6Q9Ue4CTKN8RsLdX5wWgA8KtBlIfzg+r3KR6njtuvy5LloB8rcuAyRXP76SnvtxmDAP9SR1Mn3J/xUrjOEiJEg0zUaA5hBIU2KsFvw6jahDVb/58Olc3zibbN+1io1Clgop6FRzanceB4//gq3ySTk2/KRvLDYRdx7MkT6S4AA=="
     },
     {
       "id": "axonometry",
@@ -14,7 +17,10 @@
       "title": "Koupelní 2 · axonometrie",
       "subtitle": "Původní projektový výkres",
       "source": "https://koupelni.hireal.cz/pudorysy/",
-      "preview": "assets/v7/art/textures/axonometry.webp"
+      "preview": "assets/v7/art/textures/axonometry.webp",
+      "width": 1024,
+      "height": 761,
+      "miniature": "data:image/webp;base64,UklGRsYBAABXRUJQVlA4ILoBAABQCgCdASpIADYAPq1MoUwmJCMiKbVa2MAViWknPtt1hCHKVUsZTV0/X6kwkvnZJbrLxTyn2akGzW5UJGNS1dfSZaE/Ln87X1tOZb+Hwzynqjk7ZSlr4UcGV8AAAP7w3dhZ7SxL4aAQh2gW0+ssR2/XFzZDo9U8OlQ5fKnVO4Vh1dg8bdKWJ06dy9YeOLrDgfAeTTQfuj08tCrufnjUC1/Ol2SV2wgzOH0eWJQPwLvot7P0d21YkBU7MgJfFZvPYwVEv6v4NBVPfJUVi8CzgalG5D6xb9IuqCCsC4/LE6nnUv+vy7WsF3wD7TCVrFlhvTtwvkI1t6CdhJoNYqfYxo45PqNz06zhmI/OiOj+0wbYCt3j2POGUnR3Rb7Ka9stFIFpydruqxP+kUAw2gQrn+2wxiUsl0rAm18O+938NtWUKRhQWzvDs9pG18q7B6s/QT5jiWhoMl01aQWZt8bJB49ntF/N2qgYEzljZmx3fTywOnRUCiWXGvT3L3nJ44ufRs7wd6KDAXooB2YyHlkwndsmNtSZay5/sFNiS6Ijhx4Rmg9wvscIYIIKUODZtVaqg7RSs26JzYovAAAA"
     },
     {
       "id": "floor-5np",
@@ -22,7 +28,10 @@
       "title": "Koupelní 2 · 5. nadzemní podlaží",
       "subtitle": "Půdorys z projektových podkladů",
       "source": "https://koupelni.hireal.cz/pudorysy/",
-      "preview": "assets/v7/art/textures/floor-5np.webp"
+      "preview": "assets/v7/art/textures/floor-5np.webp",
+      "width": 1024,
+      "height": 724,
+      "miniature": "data:image/webp;base64,UklGRiICAABXRUJQVlA4IBYCAABwDACdASpIADMAPq1Gn0omI6KhqbgNIMAViUAZqA9K69TP1AEOwtbY61t65EF0NfW8yKMMinza/BZ4cTn2KgZJUkZEroGRtmHNCHrvQ/84hdhXFG9C4uCcqqsMdeG56VYKdgw8z8sJqw5fjDQA/vx3L+I+0zCh0QTKBTMo4H0IQshqpRqLphLUs5eilwnTzSu4WrntBiCSzOveYGb0mpur/jnaPKB8lxp+RTcpCtAD50yNzDkhPd5q+Inrhi3ZJUNr7BSMlOCKPMA9AFLYPvmO+Jb57+jgX+NV+btZsu8Mg3EjPrqwOJeX4K1/yUspq/CAO4QBu2I/PVnlZ9Paof6b3tbmrbER5N5DOZEsL4iyXwR1g1/+yB/aJjimbvSKD0hmz7NIJnDOP63HX/JTgE2eH6ggGtwG4AcQlhniKCIG+SQBgb5uvHWCZdQkMfdQiOfy5sJYQQTSorQgiWhqUKSPEmNfro0CziUhhxN4AH5iJ7f95efGvxg45MpFO9qPJ7vS78RHijjWN3urQWXzxyr0SWcZHhfey9m1Ft1Qg2vn8t2I1iVN+wdIScDRxx4vvEqMgKrQjvdORXY+CuqpsuLUv/oBzSC+ic+hjAS+/+U8FtTEU1ckuyjL/oyqvss3wIf7daYssxXfHTGRONYE+Vx+O3dICdzQwbMRqVNRn0zWk1aPoVwg63FqBFEwUIrPkkeZAAAAAAA="
     },
     {
       "id": "interior-bedroom",
@@ -30,7 +39,10 @@
       "title": "Koupelní 2 · ložnice",
       "subtitle": "Interiérová vizualizace",
       "source": "https://koupelni.hireal.cz/galerie/",
-      "preview": "assets/v7/art/textures/interior-bedroom.webp"
+      "preview": "assets/v7/art/textures/interior-bedroom.webp",
+      "width": 1024,
+      "height": 576,
+      "miniature": "data:image/webp;base64,UklGRkgCAABXRUJQVlA4IDwCAABwDACdASpIACkAPq1Mn0smJCKhpnVd+MAViWcAwrRD6V/Nna/MuCe2lzBtKjaUgYWjg5tE7ioB5hsn0Bl6jkD5jQISH9VPyzqjyPD5hLKQBcxxy1Ynceq8pxlr8LTr2NEX1AlZ/OiKI/HN/gAA/tMfVNZf2WyP0hjTzH5w3IhUVSDEjcdtDV0YXUIm+uQRWa/EwNzkrgyZf2xZym5u0fgYjcmh85nKv4V0d9FQOHanEJGQThz3qCKtoLu5bXUvd+/epJVjApej5PDo9XKq67CvB5OHx/iAjykTyFooSCIFC6l7ZHVE4Gnvt8d/JYblxbgbc+64ixFPmYzgIYK1KtDWhwfz7Wvx60O7iZ+tAhKH9Re9vU3+vtmGJblVgZnOkS2wF7iiDDlI09Q+mNnQGw74qbJSkj/HWWnR795qrYvBMiTJ9Jyd7RTeUoFCkpQNI7E2GSU7XCHo3uiWKCThXQByAgh91U4h2IL8WfhVzTaNosHWvI82cykrEEqRIoh9kMlBcYKkYbmFMiM2qQNCMs2I8As1o5R6BGOioyN5tYUoUTN3sWodrExNJfoq0HnIjswBZ7AW+JD2FMNyAmo+Ik0CG+wY0q/rC1cAf5rOQrGc9Ge9THYq1Ut5I7NVI/IfLAFZ6oKWQmyC5HYOAF9klDYzy5lALkhWxOW6bUwgrM4/NP++r6wWnFBMFeLSt4olzutfteIdHSHX0+AkXxqzMd8KVoc1bs/FmKo9DPJoXW4JjZdKI230o95jzYAAAA=="
     },
     {
       "id": "interior-room",
@@ -38,7 +50,10 @@
       "title": "Koupelní 2 · pokoj",
       "subtitle": "Interiérová vizualizace",
       "source": "https://koupelni.hireal.cz/galerie/",
-      "preview": "assets/v7/art/textures/interior-room.webp"
+      "preview": "assets/v7/art/textures/interior-room.webp",
+      "width": 1024,
+      "height": 576,
+      "miniature": "data:image/webp;base64,UklGRvICAABXRUJQVlA4IOYCAABQDgCdASpIACkAPq1On0wmJCKiKJQLoMAViWUAtoRbqWvNlyssqdWJYb357XXOT3HHGYpnUPsBkb7p+NRZtiFRDzXhfiSUb9/dHZHLVmR+oHHkCJaBRTnbG09RmgX0scT7iEqFma+powq7jgUsD41OaV9CgKLNaqqkCTAA/u1End0ALQ9ZZa/FLAosuhL4J+qu4T5NHJA7LKFzVYvWM/N6/AEs8aC+vdP8BdeJt7klYOOLjY2T+/6xQmkQKJpANDJHOYZSweYxvu3sJ42MvGFMyw90mMNm717bMjElv6GOb+C9+M7YpBPmnkuM5d+xV61R26kX66AD4zifholyK2ryBeZO6SBDQdr5qKsaOZV9SidUGwI1gnEguk3znn4aDz6Drl+QCIJGfhfVDQRh9RyX2WrnxlC4MMcPoSk++MvCAab2EXP/wcrz0hnn467ln/yNFjyHwbY3936peoeEXupmqFC+fpgJMWkoCif4SWuT/MTXuPhd25Bh6b+So1KJGe8TWwGLt6ogwqY1B8KwGpBzteD9SUdXlkTqXPtoYTWw+Y+QWA7qDbJIxpIcULQPhh5XnWXFfhY80KWPIQlw8NUuyVq67flLtIrkVWWJtm1C9quCr/02lUw1B5L7/K9LeyCb81NlPMMmnMZyiq8wauYUFB2aOQiWMjmayY1xbyTTp73CBgSiinMf4Xd4FUAS+nvuIrF3/fwfJIN/701QXZPitxPgvsKOsiRb7Drj6btJSmJFoq6y/1VSRcGLHhzjrR2U5OGGT4YNvft3HOk5mBqQ8JxdrMsTjbJcK0PzVKJen9RMuJBPYAEJw2XvteylGoDG202XQ+K3L30xrFkBseoIrcOvr3fZNMdGKB4PHg4AwpSgqWDMzWOhww0Pg5xjYfj9+0myL73DRPuG6qPeUroDdIUbwdz9lSjTTGJJcCtNmVuwvqa0ux5XKkJWmJlnq5lYLX3+sYXeec9mHdsuZzrIQaVAoCgA"
     },
     {
       "id": "real-building",
@@ -46,7 +61,10 @@
       "title": "Koupelní 2 · současná podoba domu",
       "subtitle": "Skutečná fotografie",
       "source": "https://www.hiarch.cz/polyfunkcni-dum-hodonin-koupelni-2/",
-      "preview": "assets/v7/art/textures/real-building.webp"
+      "preview": "assets/v7/art/textures/real-building.webp",
+      "width": 1024,
+      "height": 768,
+      "miniature": "data:image/webp;base64,UklGRmYDAABXRUJQVlA4IFoDAACQDwCdASpIADYAPq1MnEqmJCKhrNQMqMAViWMAvNfsS5a5/LAHmOSPjlyaadpQ4r+A3iI11Okf+n6ImhNscDTJcWIdd70amBvsxEq2ZbQvzsoxjhJfyG6h0b54RYP7P/EiVno+qzAbjZGRajdOaoLkjxhtB+mlNX5GeGr/4GdZ/owIOhYAAP7096DFrQy3ljkS+gzNP0H/kc7JtPZeDQ+NaV7kbRPoCPOxDrqa+7tITpv4YFLezsdS1l/xHBg63OHfqxbMz18KMpysxVKPJr11TRej2VVkAxK3lqIXWWPZuiuf0ddBI6glxJel4/pqJ2/jbWTsbig6+ORVnBlwPYmaJCElNW0RPWmz0m1RNI/V5J3pHI3gPq4EqPLUGnQjukv7iwcP+zNDE/np4gV/VzR1gmPqYOyS6EnH3jhfxUb2onw3bbzgkJ2fP9IFCjmUlL+nBzs1u2PJ0SedvJPzH0LyLFiaqlm3qBx1Yf9lw3mHXMLLcCKD/cN4FfUpKf0mDtXThQi0B/7KBqEy24JUdlY7hdEqm8ZoUTtU0auY93OqPZWkfL6Kl0QcNHr8zrN90nIxz9vRvBDrDgai5Eqmbn2NFK0tRu3fevIZdDHXFXSmZ4RSe8b/6srmcYiEMc6tE/BF9QHk2C2ddox+KDTUXEuXJNTRtfpZgxPGD8hd+EMZybBt/TcDtoPtWkL6v+0mW9vEHtMHnOPg2PHFl+sCjJByjdHBaG3IxAyq1Ma7jY1FKPJ0ncvtbfDl5UCsfHkEjVbxOh4hq5DyFoyGDTfL9M2izbUUUUppfZ0KKaaiOg8iHXAFXjlurX8k4BNwvkfVziIS1oP5tAz3ZZDhA7tzqIcgmhjVOS411eR14tDeucAs5EkZGf5Bi2FvqAmH78YjZWZQgiyvBFKiYNUYveK9/zyGD6CVJX0cdijhOafjdUNRNYKK5dVN4wzxR//tAoJQal6BElhAthGlodciIPssE1zwq9EGqQerkU0D0VZEmNbIsdJO7oyJSTUXv40qYjd4LguD67lSlOofLphGqSFKhAKhjnypsDQZow8sZOHw7diGkc6BPhWoi3vQOcturx2zaPxUZLQQ5CetTNRGNp+0pbgDMzBQK4rwLP9CblchwsRu1HjTtbgilttwAAA="
     }
   ]
 }

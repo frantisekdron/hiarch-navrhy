@@ -94,10 +94,17 @@
       "locationPrecision": "obec",
       "mediaLabel": "Fotografický podklad · sjednocené světlo, kontrast a perspektiva · lokální odstranění aut",
       "gallery": [
-        "assets/v6/photos/wurmova.webp"
+        "assets/v6/photos/wurmova.webp",
+        "assets/v6/photos/wurmova-strecha.webp",
+        "assets/v6/photos/wurmova-garaz.webp"
       ],
       "thumbnail": "assets/v6/thumbs/wurmova.webp",
-      "preview": "assets/v6/preview-photos/wurmova.webp"
+      "preview": "assets/v6/preview-photos/wurmova.webp",
+      "photoTitles": {
+        "assets/v6/photos/wurmova.webp": "Dům z ulice",
+        "assets/v6/photos/wurmova-strecha.webp": "Krytina a uliční arkýř",
+        "assets/v6/photos/wurmova-garaz.webp": "Boční pohled od garáže"
+      }
     },
     {
       "id": "bystrc",
