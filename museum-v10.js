@@ -162,7 +162,7 @@ function enterGallery(){
  const first=tables[0],view=exhibitView(first,camera,THREE,mobile.matches),end=view.position,target=view.target;
  const curve=new THREE.CatmullRomCurve3([from,new THREE.Vector3(0,mobile.matches?3.5:2.9,22),new THREE.Vector3(0,2.9,14.1),new THREE.Vector3(end.x*.72,3.15,end.z+1.4),end],false,'centripetal');
  completeEntry=()=>{doorProgress=1;doorPose();camera.position.copy(end);cameraTarget.copy(target);camera.lookAt(cameraTarget);renderer.shadowMap.needsUpdate=true;$('selectedExhibit').hidden=walking||mapMode||selected<0;updateSelection();syncControls();shell.dataset.entryComplete='true';markEntered();if(selected===0&&!walking&&!mapMode)say('Koupelní 2. Tahem do stran můžete model obcházet.')};
- if(reduced.matches){const finish=completeEntry;completeEntry=null;finish();scheduleRender();return}
+ // Opening the doors is an explicit visitor action, including in reduced-motion mode.
  shell.dataset.entryComplete='false';const duration=2400;let began=null;
  const step=now=>{if(began===null)began=now;const t=Math.min(1,(now-began)/duration),open=clockEase(Math.min(1,t/.47)),move=clockEase(Math.max(0,Math.min(1,(t-.12)/.88)));doorProgress=open;doorPose();camera.position.copy(curve.getPoint(move));cameraTarget.lerpVectors(fromTarget,target,clockEase(t));camera.lookAt(cameraTarget);render();if(t<1)cameraFrame=requestAnimationFrame(step);else{cameraFrame=0;const finish=completeEntry;completeEntry=null;finish?.()}};
  cameraFrame=requestAnimationFrame(step);
@@ -497,7 +497,7 @@ async function init(){
        });
      }).catch(()=>{})
    ]);
-   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.domElement.setAttribute('aria-hidden','true');host.append(renderer.domElement);buildRoom();renderer.shadowMap.needsUpdate=true;shell.dataset.renderer='webgl';shell.dataset.exhibits=String(tables.length);shell.dataset.roomReady='true';host.setAttribute('aria-disabled','false');shell.dataset.revision='23.0';shell.dataset.reducedMotion=String(reduced.matches);shell.dataset.artworks=String(artworks.length);shell.dataset.facadeMode='geometric';say('Výstavní sál je připravený.');let lastWidth=0,lastHeight=0,lastMobile=mobile.matches;
+   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.domElement.setAttribute('aria-hidden','true');host.append(renderer.domElement);buildRoom();renderer.shadowMap.needsUpdate=true;shell.dataset.renderer='webgl';shell.dataset.exhibits=String(tables.length);shell.dataset.roomReady='true';host.setAttribute('aria-disabled','false');shell.dataset.revision='23.1';shell.dataset.reducedMotion=String(reduced.matches);shell.dataset.artworks=String(artworks.length);shell.dataset.facadeMode='geometric';say('Výstavní sál je připravený.');let lastWidth=0,lastHeight=0,lastMobile=mobile.matches;
  const resize=()=>{
    const w=host.clientWidth,h=host.clientHeight;
    if(!w||!h||(w===lastWidth&&h===lastHeight))return;
