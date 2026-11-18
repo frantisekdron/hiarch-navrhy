@@ -1,0 +1,854 @@
+{
+  "revision": 28,
+  "metresPerWorldUnit": 0.5,
+  "hall": {
+    "url": "assets/v28/industrial-hall.glb",
+    "rootScale": 2,
+    "physicalMetres": {
+      "width": 16,
+      "depth": 30,
+      "eaves": 7.4399999999999995,
+      "ridge": 9.719999999999999
+    },
+    "images": {
+      "european_walnut_veneer_04_nor_gl_1k.jpg": [
+        1024,
+        1024
+      ],
+      "honey-roof-boards.jpg": [
+        1024,
+        1024
+      ],
+      "HoneyTimber-material.jpg": [
+        1024,
+        1024
+      ],
+      "brick_wall_13_nor_gl_1k.jpg": [
+        1024,
+        1024
+      ],
+      "reclaimed-brick.jpg": [
+        1024,
+        1024
+      ],
+      "ReclaimedBrick-material.jpg": [
+        1024,
+        1024
+      ],
+      "concrete_floor_worn_001_nor_gl_1k.jpg": [
+        1024,
+        1024
+      ],
+      "limestone-concrete.jpg": [
+        1024,
+        1024
+      ],
+      "HonedConcrete-material.jpg": [
+        1024,
+        1024
+      ],
+      "park-day.jpg": [
+        2048,
+        1024
+      ],
+      "oiled-walnut.jpg": [
+        1024,
+        1024
+      ],
+      "OiledWalnut-material.jpg": [
+        1024,
+        1024
+      ]
+    },
+    "triangles": 75020,
+    "meshObjects": 79,
+    "constructionMeshes": 127
+  },
+  "lightmap": {
+    "desktop": "assets/v28/light-day.jpg",
+    "mobile": "assets/v28/light-day-mobile.jpg",
+    "uvChannel": 1,
+    "flipY": false,
+    "encoding": "srgb",
+    "gain": 2.245044279098511,
+    "size": 2048,
+    "texelsPerMetre": 76,
+    "p75": 0.1964360773563385,
+    "p99": 2.0409493446350098,
+    "samples": 256,
+    "bakeType": "Cycles diffuse direct and indirect irradiance without albedo",
+    "desktopSize": 2048,
+    "mobileSize": 1024,
+    "filtered": "Range-weighted bilateral and low-strength nonlocal chroma denoising; linear-light mobile downsample; JPEG 4:4:4 quality 93"
+  },
+  "foliage": {
+    "url": "assets/v25/foliage-shadow.png",
+    "domain": [
+      -16.0,
+      -30.0,
+      16.0,
+      30.0
+    ]
+  },
+  "tables": [
+    {
+      "id": "koupelni",
+      "x": -5.333333333333334,
+      "z": 16.583333333333332,
+      "width": 12.584497288295202,
+      "depth": 8.414093399047852,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_koupelni",
+      "displayScale": 0.14285714285714285,
+      "measuredMetres": [
+        42.6457405090332,
+        28.04932689666748,
+        28.533632286460943
+      ],
+      "scaleEstimated": true,
+      "dx": -0.0,
+      "dz": -0.0,
+      "rotationY": 0.0,
+      "yaw": 0.0,
+      "sourceMetresXYZ": [
+        42.6457405090332,
+        28.533632286460943,
+        28.04932689666748
+      ],
+      "plaqueY": 1.945
+    },
+    {
+      "id": "hustopece",
+      "x": -3.1,
+      "z": -7.25,
+      "width": 17.257142857142856,
+      "depth": 14.661160714285717,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_hustopece",
+      "displayScale": 0.14285714285714285,
+      "measuredMetres": [
+        53.3427734375,
+        39.828125,
+        10.47216796875
+      ],
+      "scaleEstimated": false,
+      "dx": 0.14285714285714288,
+      "dz": 1.4408482142857144,
+      "rotationY": 0.0,
+      "yaw": 0.0,
+      "sourceMetresXYZ": [
+        53.3427734375,
+        10.47216796875,
+        39.828125
+      ],
+      "plaqueY": 1.945
+    },
+    {
+      "id": "transped",
+      "x": -5.333333333333334,
+      "z": 6.5,
+      "width": 12.687388392857144,
+      "depth": 7.6571428571428575,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_transped",
+      "displayScale": 0.14285714285714285,
+      "measuredMetres": [
+        30.01171875,
+        12.83984375,
+        12.72900390625
+      ],
+      "scaleEstimated": false,
+      "dx": 1.8563058035714286,
+      "dz": -0.942857142857143,
+      "rotationY": 0.0,
+      "yaw": 0.0,
+      "sourceMetresXYZ": [
+        30.01171875,
+        12.72900390625,
+        12.83984375
+      ],
+      "plaqueY": 1.945
+    },
+    {
+      "id": "wurmova",
+      "x": 11.633333333333335,
+      "z": 26.633333333333336,
+      "width": 5.498493303571429,
+      "depth": 4.362890625000001,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_wurmova",
+      "displayScale": 0.14285714285714285,
+      "measuredMetres": [
+        13.8701171875,
+        17.8447265625,
+        11.14111328125
+      ],
+      "scaleEstimated": false,
+      "dx": -0.0,
+      "dz": 0.0,
+      "rotationY": -1.5707963267948966,
+      "yaw": -1.5707963267948966,
+      "sourceMetresXYZ": [
+        13.8701171875,
+        11.14111328125,
+        17.8447265625
+      ],
+      "plaqueY": 1.945
+    },
+    {
+      "id": "bystrc",
+      "x": 10.250000000000002,
+      "z": 17.666666666666668,
+      "width": 9.542857142857144,
+      "depth": 8.771428571428572,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_bystrc",
+      "displayScale": 0.14285714285714285,
+      "measuredMetres": [
+        30.80859375,
+        28.203125,
+        9.0732421875
+      ],
+      "scaleEstimated": false,
+      "dx": 0.0,
+      "dz": -0.0,
+      "rotationY": 0.0,
+      "yaw": 0.0,
+      "sourceMetresXYZ": [
+        30.80859375,
+        9.0732421875,
+        28.203125
+      ],
+      "plaqueY": 1.945
+    },
+    {
+      "id": "selska84",
+      "x": 11.583333333333334,
+      "z": -19.46666666666667,
+      "width": 6.822712053571429,
+      "depth": 5.585825892857144,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_selska84",
+      "displayScale": 0.14285714285714285,
+      "measuredMetres": [
+        18.150390625,
+        22.4794921875,
+        11.759796142578125
+      ],
+      "scaleEstimated": false,
+      "dx": -0.0,
+      "dz": 0.0,
+      "rotationY": 1.5707963267948966,
+      "yaw": 1.5707963267948966,
+      "sourceMetresXYZ": [
+        18.150390625,
+        11.759796142578125,
+        22.4794921875
+      ],
+      "plaqueY": 1.945
+    },
+    {
+      "id": "ivancice",
+      "x": 12.0,
+      "z": -1.7500000000000002,
+      "width": 6.180133928571429,
+      "depth": 25.548437500000002,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_ivancice",
+      "displayScale": 0.14285714285714285,
+      "measuredMetres": [
+        88.01953125,
+        20.23046875,
+        12.5
+      ],
+      "scaleEstimated": false,
+      "dx": -0.0,
+      "dz": 0.0,
+      "rotationY": 1.5707963267948966,
+      "yaw": 1.5707963267948966,
+      "sourceMetresXYZ": [
+        88.01953125,
+        12.5,
+        20.23046875
+      ],
+      "plaqueY": 1.945
+    },
+    {
+      "id": "nebovidy",
+      "x": -4.866666666666667,
+      "z": -20.55,
+      "width": 13.717522321428572,
+      "depth": 6.598102678571429,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_nebovidy",
+      "displayScale": 0.14285714285714285,
+      "measuredMetres": [
+        46.611328125,
+        21.693359375,
+        11.7666015625
+      ],
+      "scaleEstimated": false,
+      "dx": -0.0,
+      "dz": -0.0,
+      "rotationY": 0.0,
+      "yaw": 0.0,
+      "sourceMetresXYZ": [
+        46.611328125,
+        11.7666015625,
+        21.693359375
+      ],
+      "plaqueY": 1.945
+    }
+  ],
+  "benches": [
+    {
+      "id": "bench-right-front",
+      "x": -7.166666666666667,
+      "z": -28.350000000000005,
+      "seat": [
+        -7.166666666666667,
+        2.25,
+        -28.200000000000006
+      ],
+      "lookAt": [
+        -5.375,
+        4.2,
+        -18.350000000000005
+      ],
+      "approach": [
+        -7.166666666666667,
+        3.2,
+        -26.500000000000004
+      ],
+      "halfWidth": 3.42,
+      "halfDepth": 0.69,
+      "node": "Bench_1",
+      "original": [
+        8.35,
+        8.5
+      ],
+      "rotationY": 1.5707963267948966
+    },
+    {
+      "id": "bench-right-back",
+      "x": 7.283333333333334,
+      "z": -28.350000000000005,
+      "seat": [
+        7.283333333333334,
+        2.25,
+        -28.200000000000006
+      ],
+      "lookAt": [
+        5.4625,
+        4.2,
+        -18.350000000000005
+      ],
+      "approach": [
+        7.283333333333334,
+        3.2,
+        -26.500000000000004
+      ],
+      "halfWidth": 3.7,
+      "halfDepth": 0.69,
+      "node": "Bench_2",
+      "original": [
+        8.35,
+        -2.5
+      ],
+      "rotationY": 1.5707963267948966
+    }
+  ],
+  "artworks": [
+    {
+      "id": "real-building",
+      "position": [
+        -15.266666666666667,
+        4.32,
+        14.000000000000002
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 5.777777777777779,
+      "height": 3.12,
+      "scope": "hall"
+    },
+    {
+      "id": "interior-living",
+      "position": [
+        -15.266666666666667,
+        4.32,
+        3.2666666666666666
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 6.666666666666667,
+      "height": 2.6999999999999997,
+      "scope": "hall"
+    },
+    {
+      "id": "interior-bedroom",
+      "position": [
+        -15.266666666666667,
+        4.32,
+        -7.45
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 6.666666666666667,
+      "height": 2.6999999999999997,
+      "scope": "hall"
+    },
+    {
+      "id": "interior-room",
+      "position": [
+        -15.266666666666667,
+        4.32,
+        -18.166666666666668
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 6.666666666666667,
+      "height": 2.6999999999999997,
+      "scope": "hall"
+    },
+    {
+      "id": "floor-5np",
+      "position": [
+        22.733333333333334,
+        4.464,
+        -17.926666666666666
+      ],
+      "rotationY": 3.141592653589793,
+      "width": 5.466666666666667,
+      "height": 2.7828841313385553,
+      "scope": "salon"
+    },
+    {
+      "id": "axonometry",
+      "position": [
+        22.733333333333334,
+        4.464,
+        -31.40666666666667
+      ],
+      "rotationY": 0,
+      "width": 5.466666666666667,
+      "height": 2.9250891795481566,
+      "scope": "salon"
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "fixture-1",
+      "projectId": "wurmova",
+      "position": [
+        8.411391258239746,
+        13.261938095092773,
+        27.330867767333984
+      ],
+      "target": [
+        11.633333206176758,
+        3.6279239654541016,
+        26.633333206176758
+      ]
+    },
+    {
+      "id": "fixture-2",
+      "projectId": "koupelni",
+      "position": [
+        -8.386083602905273,
+        13.262950897216797,
+        17.28015899658203
+      ],
+      "target": [
+        -5.333333492279053,
+        6.01318359375,
+        16.58333396911621
+      ]
+    },
+    {
+      "id": "fixture-3",
+      "projectId": "bystrc",
+      "position": [
+        8.406563758850098,
+        13.260690689086914,
+        18.36418342590332
+      ],
+      "target": [
+        10.25,
+        3.344330310821533,
+        17.66666603088379
+      ]
+    },
+    {
+      "id": "fixture-4",
+      "projectId": "transped",
+      "position": [
+        -8.383402824401855,
+        13.264140129089355,
+        6.254782676696777
+      ],
+      "target": [
+        -3.477027654647827,
+        3.8456919193267822,
+        5.557142734527588
+      ]
+    },
+    {
+      "id": "fixture-5",
+      "projectId": "ivancice",
+      "position": [
+        8.412747383117676,
+        13.262423515319824,
+        -1.0524787902832031
+      ],
+      "target": [
+        12.0,
+        3.8142857551574707,
+        -1.75
+      ]
+    },
+    {
+      "id": "fixture-6",
+      "projectId": "hustopece",
+      "position": [
+        -8.382499694824219,
+        13.264619827270508,
+        -5.11140251159668
+      ],
+      "target": [
+        -2.9571428298950195,
+        3.5361828804016113,
+        -5.809151649475098
+      ]
+    },
+    {
+      "id": "fixture-7",
+      "projectId": "selska84",
+      "position": [
+        8.411320686340332,
+        13.261917114257812,
+        -18.769155502319336
+      ],
+      "target": [
+        11.583333015441895,
+        3.7127718925476074,
+        -19.46666717529297
+      ]
+    },
+    {
+      "id": "fixture-8",
+      "projectId": "nebovidy",
+      "position": [
+        -8.387574195861816,
+        13.262301445007324,
+        -19.852460861206055
+      ],
+      "target": [
+        -4.866666793823242,
+        3.71370530128479,
+        -20.549999237060547
+      ]
+    }
+  ],
+  "doors": [
+    {
+      "name": "Door_Left",
+      "side": -1,
+      "travelMetres": 1.8000000000000003
+    },
+    {
+      "name": "Door_Right",
+      "side": 1,
+      "travelMetres": 1.8000000000000003
+    }
+  ],
+  "salon": {
+    "root": "Salon_Static",
+    "portal": "Salon_Portal",
+    "doors": [
+      {
+        "name": "Salon_Door_Left",
+        "hingeSign": 1,
+        "openRadians": 1.5707963267948966
+      },
+      {
+        "name": "Salon_Door_Right",
+        "hingeSign": -1,
+        "openRadians": -1.5707963267948966
+      }
+    ],
+    "bounds": {
+      "min": [
+        15.966666666666667,
+        0.0,
+        -32.0
+      ],
+      "max": [
+        31.799999999999997,
+        8.64,
+        -17.333333333333336
+      ]
+    },
+    "entrance": {
+      "outside": [
+        5.666666666666667,
+        3.2,
+        -24.666666666666668
+      ],
+      "lookAt": [
+        15.966666666666667,
+        3.36,
+        -24.666666666666668
+      ],
+      "inside": [
+        19.833333333333336,
+        3.2,
+        -24.666666666666668
+      ],
+      "insideLookAt": [
+        25.833333333333336,
+        2.28,
+        -24.666666666666668
+      ]
+    },
+    "label": {
+      "position": [
+        15.783333333333335,
+        6.48,
+        -24.666666666666668
+      ],
+      "rotationY": -1.5707963267948966,
+      "width": 4.8,
+      "height": 0.528
+    }
+  },
+  "brands": [
+    {
+      "id": "hiarch",
+      "position": [
+        -15.395000000000001,
+        7.859999999999999,
+        14.000000000000002
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 5.5,
+      "height": 0.8160000000000001
+    },
+    {
+      "id": "hiplan",
+      "position": [
+        -15.395000000000001,
+        7.859999999999999,
+        3.2666666666666666
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 5.5,
+      "height": 0.8160000000000001
+    },
+    {
+      "id": "hireal",
+      "position": [
+        -15.395000000000001,
+        7.859999999999999,
+        -7.45
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 5.5,
+      "height": 0.8160000000000001
+    },
+    {
+      "id": "entrance",
+      "position": [
+        0.0,
+        7.4399999999999995,
+        30.061666666666667
+      ],
+      "rotationY": 0,
+      "width": 8.116666666666667,
+      "height": 0.8999999999999999
+    }
+  ],
+  "sources": {
+    "park": "https://polyhaven.com/a/autumn_park",
+    "brick": "https://polyhaven.com/a/brick_wall_13",
+    "concrete": "https://polyhaven.com/a/concrete_floor_worn_001",
+    "walnut": "https://polyhaven.com/a/european_walnut_veneer_04"
+  },
+  "shellHorizontalScale": 1.6666666666666667,
+  "shellVerticalScale": 1.2,
+  "entrance": {
+    "doorPlaneZ": 29.250000000000004,
+    "openingHalfWidth": 3.55,
+    "openingHeight": 6.24
+  },
+  "displayRatio": 7,
+  "entryCamera": [
+    0.3,
+    3.2,
+    28.5
+  ],
+  "entryLookAt": [
+    -2.386,
+    4.402,
+    16.866
+  ],
+  "atlasCamera": [
+    -10.05,
+    3.45,
+    24.8
+  ],
+  "atlasCameraMobile": [
+    -4.25,
+    3.3,
+    26.05
+  ],
+  "atlasCenter": [
+    -15.366666666666669,
+    3.3,
+    24.416666666666668
+  ],
+  "routes": {
+    "worldUnitsPerMetre": 2,
+    "connectedVisitorDiameterMetres": 0.9,
+    "verifiedApproaches": {
+      "entry": [
+        0.3,
+        28.5
+      ],
+      "salonOutside": [
+        5.666666666666667,
+        -24.666666666666668
+      ],
+      "salonDoor": [
+        14.133333333333335,
+        -25.383333333333336
+      ],
+      "atlas": [
+        -10.0,
+        24.7
+      ],
+      "bench-right-front": [
+        -7.166666666666667,
+        -26.500000000000004
+      ],
+      "bench-right-back": [
+        7.283333333333334,
+        -26.500000000000004
+      ],
+      "art1": [
+        -13.566666666666668,
+        14.000000000000002
+      ],
+      "art2": [
+        -13.566666666666668,
+        3.2666666666666666
+      ],
+      "art3": [
+        -13.566666666666668,
+        -7.45
+      ],
+      "art4": [
+        -13.566666666666668,
+        -18.166666666666668
+      ],
+      "koupelni": [
+        -11.669689690629237,
+        21.688213159859743
+      ],
+      "hustopece": [
+        5.746990178243198,
+        -15.452556884403805
+      ],
+      "transped": [
+        -12.549004057022852,
+        10.5469901782432
+      ],
+      "wurmova": [
+        8.839978968399317,
+        23.554054893830852
+      ],
+      "bystrc": [
+        5.434463715423125,
+        22.95021407938344
+      ],
+      "selska84": [
+        8.127869593399316,
+        -23.157412740097726
+      ],
+      "ivancice": [
+        8.691514286042517,
+        11.896195277260947
+      ],
+      "nebovidy": [
+        2.036202207195923,
+        -24.7468844662882
+      ]
+    },
+    "minimumClearMainAisleMetres": 1.6906808035714285,
+    "artLaneMetres": 1.7690476190476199,
+    "suggestedWalkBounds": [
+      -14.166666666666668,
+      -27.2,
+      14.166666666666668,
+      28.9
+    ]
+  },
+  "sideTables": [
+    {
+      "original": [
+        8.34,
+        12.84
+      ],
+      "x": -14.2,
+      "z": -28.350000000000005
+    },
+    {
+      "original": [
+        8.34,
+        4.1
+      ],
+      "x": 0.0,
+      "z": -28.350000000000005
+    },
+    {
+      "original": [
+        8.34,
+        -7.08
+      ],
+      "x": 14.583333333333334,
+      "z": -28.350000000000005
+    }
+  ],
+  "planters": [
+    {
+      "original": [
+        -7.4,
+        -15.26
+      ],
+      "x": -12.333333333333334,
+      "z": -25.433333333333334
+    },
+    {
+      "original": [
+        8,
+        -9.24
+      ],
+      "x": 5.833333333333334,
+      "z": 27.75
+    }
+  ],
+  "heightReview": {
+    "tallestExhibit": "koupelni",
+    "topMetres": 5.126233183780134,
+    "conservativeEaveMetres": 7.319999999999999,
+    "ridgeMetres": 9.606
+  },
+  "entryVerticalFov": 68,
+  "entryCameraMobile": [
+    2.7,
+    3.2,
+    28.5
+  ],
+  "entryLookAtMobile": [
+    -3.9,
+    4.25,
+    18.7
+  ],
+  "entryMobileHorizontalFov": 62
+}

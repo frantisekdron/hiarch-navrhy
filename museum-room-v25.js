@@ -1,10 +1,14 @@
+import {
+  loadMaterialFinishes, hasHallFinish, refineHallMaterial, bakedReliefStrength,
+  createRoomProbe, applyFloorReflection, applyHallGlassFresnel, refineExhibitMaterials, calibrateExhibitFixture
+} from './museum-materials-v28.js?v=28.0';
 import { PICK_LAYER } from './museum-performance-v25.js?v=25.0';
 import { RectAreaLightUniformsLib } from './assets/vendor/RectAreaLightUniformsLib.js';
-import { addExhibitUplighting } from './museum-exhibit-lighting-v16.js?v=21.0';
+import { addExhibitUplighting } from './museum-exhibit-lighting-v28.js?v=28.0';
 import {
-  EXHIBIT_POSITIONS, EXHIBIT_SCALE, MODEL_METRIC_SIZES, WORLD_UNITS_PER_METRE,
-  placeExhibitModel, plinthSize
-} from './museum-placement-v25.js?v=27.1';
+  DISPLAY_DENOMINATOR, EXHIBIT_SCALE, MODEL_METRIC_SIZES, WORLD_UNITS_PER_METRE,
+  placeExhibitModel
+} from './museum-placement-v28.js?v=28.0';
 
 const assetDirectory = new URL('./assets/v25/', import.meta.url);
 const exhibitIds = Object.keys(MODEL_METRIC_SIZES);
@@ -13,8 +17,8 @@ let areaLightLibraryReady = false;
 const studioNames = { hiarch: 'HiARCH', hiplan: 'HiPLAN', hireal: 'HiREAL', entrance: 'HiARCH  ·  HiPLAN  ·  HiREAL' };
 const lightLevels = {
   day: { sky: 0xC5B6A0, hemisphere: .78, sun: .62, spots: 15, environment: .68, park: 1, print: 1, fixture: .58 },
-  evening: { sky: 0x171815, hemisphere: .045, sun: 0, spots: 27, environment: .14, park: .018, print: .80, fixture: 1.25 },
-  neon: { sky: 0x101512, hemisphere: .032, sun: 0, spots: 23, environment: .12, park: .008, print: .70, fixture: 1.15 }
+  evening: { sky: 0x171815, hemisphere: .045, sun: 0, spots: 27, environment: .061, park: .018, print: .80, fixture: 1.25 },
+  neon: { sky: 0x101512, hemisphere: .032, sun: 0, spots: 23, environment: .046, park: .008, print: .70, fixture: 1.15 }
 };
 
 function assetUrl(name) {
@@ -23,29 +27,30 @@ function assetUrl(name) {
 
 export async function loadIndustrialAssets({ THREE, mobile = false }) {
   const [response, { GLTFLoader }, { MeshoptDecoder }] = await Promise.all([
-    fetch(assetUrl('assets/v27/scene.json')),
+    fetch(assetUrl('assets/v28/scene.json')),
     import('./assets/vendor/GLTFLoader.js'),
     import('./assets/vendor/meshopt_decoder.module.js')
   ]);
   if (!response.ok) throw new Error(`Industrial gallery manifest: HTTP ${response.status}`);
   const metadata = await response.json();
-  if (metadata.revision !== 27 || metadata.hall?.rootScale !== WORLD_UNITS_PER_METRE) {
+  if (metadata.revision !== 28 || metadata.hall?.rootScale !== WORLD_UNITS_PER_METRE) {
     throw new Error('Industrial gallery manifest has an unsupported scale or revision.');
   }
   const textures = new THREE.TextureLoader();
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   const mobileAtlas = typeof mobile === 'boolean' ? mobile : mobile.matches;
   const atlas = mobileAtlas ? metadata.lightmap.mobile : metadata.lightmap.desktop;
-  const [gltf, lightmap, foliage] = await Promise.all([
+  const [gltf, lightmap, foliage, finishes] = await Promise.all([
     loader.loadAsync(assetUrl(metadata.hall.url)),
     textures.loadAsync(assetUrl(atlas)),
-    textures.loadAsync(assetUrl(metadata.foliage.url))
+    textures.loadAsync(assetUrl(metadata.foliage.url)),
+    loadMaterialFinishes(THREE, mobileAtlas, metadata.hall.physicalMetres)
   ]);
   lightmap.channel = metadata.lightmap.uvChannel;
   lightmap.flipY = metadata.lightmap.flipY;
   lightmap.colorSpace = THREE.SRGBColorSpace;
   foliage.colorSpace = THREE.NoColorSpace;
-  return { root: gltf.scene, metadata, lightmap, foliage, loader };
+  return { root: gltf.scene, metadata, lightmap, foliage, loader, finishes };
 }
 
 function named(root, name) {
@@ -147,16 +152,20 @@ function pickProxy(THREE, parent, material, width, height, depth, y, data) {
   return proxy;
 }
 
-function placeModel(THREE, model, id) {
-  const placement = placeExhibitModel(model, id, THREE, capTop);
+function placeModel(THREE, model, id, surfaceY) {
+  const placement = placeExhibitModel(model, id, THREE, surfaceY);
   model.traverse(node => {
     node.userData.projectId = id;
-    node.castShadow = node.receiveShadow = false;
+    if(node.isMesh){
+      const materials=Array.isArray(node.material)?node.material:[node.material];
+      node.castShadow=materials.some(m=>m&&!m.transparent);
+      node.receiveShadow=true;
+    }
   });
   return placement;
 }
 
-function disposeModel(model) {
+function disposeModel(model, sharedTextures) {
   const resources = new Set();
   model.traverse(mesh => {
     if (!mesh.isMesh) return;
@@ -164,7 +173,7 @@ function disposeModel(model) {
     for (const material of meshMaterials(mesh)) {
       resources.add(material);
       for (const value of Object.values(material)) {
-        if (value?.isTexture && value !== material.envMap) resources.add(value);
+        if (value?.isTexture && value !== material.envMap && !sharedTextures.has(value)) resources.add(value);
       }
     }
   });
@@ -204,27 +213,34 @@ function contactTexture(THREE) {
   return texture;
 }
 
-function prepareHall(THREE, root, lightmap, foliage, domain) {
+function prepareHall(THREE, root, lightmap, foliage, domain, finishes) {
   const baked = new Set(), furniture = new Set(), leaves = [];
   const time = { value: 0 }, goboStrength = { value: 0 };
   const bounds = new THREE.Vector4(...domain);
-  const floor = named(root, 'Baked_Floor');
+  const floor = root.getObjectByName('Baked_Floor');
+  if (lightmap && !floor) throw new Error('Industrial hall floor missing.');
   const variants = new Map();
   let batches = 0;
 
   function finish(source, kind) {
     const key = `${source.id}/${kind}`;
     if (variants.has(key)) return variants.get(key);
-    const material = source.clone();
+    const material = refineHallMaterial(THREE, source, finishes);
     variants.set(key, material);
-    const usesDayBake = kind !== 'leaves' && lightmap && material.isMeshStandardMaterial;
+    const usesDayBake = Boolean((kind === 'baked' || kind === 'floor') && lightmap && material.isMeshStandardMaterial);
     if (usesDayBake) {
       material.lightMap = lightmap;
       baked.add(material);
     }
     if (kind === 'baked' && !usesDayBake) return material;
-    material.customProgramCacheKey = () => `industrial-${kind}-${usesDayBake ? 'day-bake' : 'runtime'}-v25`;
+    const relief = bakedReliefStrength(material).toFixed(2);
+    const projectedFloor = kind === 'floor' && Boolean(finishes.projectedProbe);
+    const glass = material.name === 'ClearGlass';
+    material.customProgramCacheKey = () =>
+      `industrial-v28-${kind}-${usesDayBake}-${relief}-${projectedFloor}-${glass}`;
     material.onBeforeCompile = shader => {
+      if (projectedFloor) applyFloorReflection(THREE, shader, finishes.projectedProbe);
+      if (glass) applyHallGlassFresnel(shader);
       if (usesDayBake) {
         // Cycles baked the diffuse response with unit albedo, including its Lambert factor.
         shader.fragmentShader = shader.fragmentShader.replace(
@@ -232,12 +248,16 @@ function prepareHall(THREE, root, lightmap, foliage, domain) {
           #ifdef USE_LIGHTMAP
             if (lightMapIntensity > 0.0) {
               reflectedLight.directDiffuse = vec3(0.0);
-              reflectedLight.indirectDiffuse = lightMapIrradiance * material.diffuseColor;
+              // Reorient the first, window-facing bounce around the baked geometric normal.
+              // The photographed normal map now responds without erasing baked contact shade.
+              vec3 v28Light = normalize((viewMatrix * vec4(.74, .56, .20, 0.0)).xyz);
+              float v28Relief = clamp(dot(normal - nonPerturbedNormal, v28Light) * ${relief}, -.25, .25);
+              reflectedLight.indirectDiffuse = lightMapIrradiance * material.diffuseColor * (1.0 + v28Relief);
             }
           #endif`
         );
       }
-      if (kind === 'baked') return;
+      if (kind === 'baked' || !kind) return;
       shader.uniforms.uIndustrialTime = time;
       if (kind === 'leaves') {
         shader.vertexShader = `uniform float uIndustrialTime;\n${shader.vertexShader}`.replace(
@@ -285,9 +305,9 @@ function prepareHall(THREE, root, lightmap, foliage, domain) {
       if (lightmap && (kind === 'baked' || kind === 'floor') && !node.geometry.hasAttribute('uv1')) {
         throw new Error(`Industrial gallery mesh ${node.name} is missing UV1.`);
       }
-      if ((kind && node.geometry.hasAttribute('uv1')) || kind === 'leaves') {
-        mapMaterials(node, material => finish(material, kind));
-      }
+      const authoredBake = kind && node.geometry.hasAttribute('uv1');
+      mapMaterials(node, material => authoredBake || kind === 'leaves' || hasHallFinish(material)
+        ? finish(material, authoredBake || kind === 'leaves' ? kind : '') : material);
       meshMaterials(node).forEach(material => furniture.add(material));
     }
     for (const child of node.children) visit(child, kind);
@@ -296,7 +316,7 @@ function prepareHall(THREE, root, lightmap, foliage, domain) {
   visit(root);
   if (lightmap && !baked.size) throw new Error('Industrial gallery has no baked meshes with UV1.');
   root.updateWorldMatrix(true, true);
-  const visibleBounds = [floor, ...leaves].map(mesh => new THREE.Box3().setFromObject(mesh).expandByScalar(.08));
+  const visibleBounds = [floor, ...leaves].filter(Boolean).map(mesh => new THREE.Box3().setFromObject(mesh).expandByScalar(.08));
   const frustum = new THREE.Frustum(), cameraProjection = new THREE.Matrix4();
   return {
     baked, furniture, batches, goboStrength, time,
@@ -337,7 +357,7 @@ export function buildGalleryRoom({
   THREE, renderer, projects, makeProjectModel, labelTexture, artworks = [],
   requestRender = () => {}, industrialAssets
 }) {
-  const { root, metadata, lightmap, foliage } = industrialAssets;
+  const { root, metadata, lightmap, foliage, finishes } = industrialAssets;
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(lightLevels.day.sky);
   scene.fog = new THREE.Fog(lightLevels.day.sky, 47, 110);
@@ -363,39 +383,41 @@ export function buildGalleryRoom({
   const tables = exhibitIds.map((id, index) => {
     const project = projects.find(item => item.id === id);
     const authored = metadata.tables.find(item => item.id === id);
-    const [x, z] = EXHIBIT_POSITIONS[index];
-    const { width, depth } = plinthSize(id);
-    const expected = { x, z, width, depth, surfaceY: capTop };
-    if (!project || !authored || Object.entries(expected).some(([key, value]) =>
-      !Number.isFinite(authored[key]) || Math.abs(authored[key] - value) > .002
-    )) {
-      throw new Error(`Industrial gallery plinth geometry does not match the exhibit placement for ${id}.`);
+    if (!project || !authored || !(authored.width>0 && authored.depth>0) ||
+        Math.abs(authored.displayScale - 1/DISPLAY_DENOMINATOR)>1e-7) {
+      throw new Error('Invalid exhibition placement: '+id);
     }
+    const {x,z,width,depth,dx=0,dz=0,yaw=0,surfaceY=capTop,plaqueY=surfaceY-.15}=authored;
+    const frame=new THREE.Group();
+    frame.position.set(dx,0,dz);
+    frame.rotation.y=yaw;
 
     const group = new THREE.Group();
     group.position.set(x, 0, z);
     group.userData.projectId = id;
+    group.add(frame);
     scene.add(group);
-    pickProxy(THREE, group, proxyMaterial, width, capTop, depth, capTop / 2, { projectId: id });
+    pickProxy(THREE, group, proxyMaterial, width, surfaceY, depth, surfaceY / 2, { projectId: id });
     const linked = /^https?:\/\/(?:[^/]+\.)?hiarch\.cz(?:\/|$)/i.test(project.source || '');
     const plaqueWidth = Math.min(width - .075, .97), plaqueX = linked ? -plaqueWidth * .115 : 0;
     const plaque = textPlane(THREE, labelTexture, [project.name], plaqueWidth * (linked ? .72 : 1), .12);
-    plaque.position.set(plaqueX, 1.95, depth / 2 + .007);
+    plaque.position.set(plaqueX, plaqueY, depth / 2 + .007);
     plaque.userData.projectId = id;
     group.add(plaque);
     if (linked) {
       const label = textPlane(THREE, labelTexture, ['HiARCH'], plaqueWidth * .23, .12, '#e8bb82');
-      label.position.set(plaqueWidth * .37, 1.95, plaque.position.z);
+      label.position.set(plaqueWidth * .37, plaqueY, plaque.position.z);
       label.userData.companyId = 'hiarch';
       group.add(label);
     }
 
     const model = makeProjectModel(id, THREE);
-    const placement = placeModel(THREE, model, id);
-    group.add(model);
+    refineExhibitMaterials(model, id, finishes);
+    const placement = placeModel(THREE, model, id, surfaceY);
+    frame.add(model);
     pickables.push(group);
     plinthGlows.push(glowMaterials(THREE, named(root, authored.glow || `Glow_Plinth_${id}`)));
-    return { x, z, group, model, featured: id === 'koupelni', hotspots: [], width, depth, ...placement };
+    return { x, z, centerX:x+dx, centerZ:z+dz, surfaceY, yaw, frame, group, model, featured: id === 'koupelni', hotspots: [], width, depth, ...placement };
   });
 
   const benches = metadata.benches.map(record => {
@@ -422,18 +444,39 @@ export function buildGalleryRoom({
 
   const fixtureGlow = glowMaterials(THREE, named(root, 'Glow_Fixtures'));
   const parkMaterials = prepareParkMaterials(root);
-  const hall = prepareHall(THREE, root, lightmap, foliage, metadata.foliage.domain);
-  configureEnvironment(THREE, renderer, scene);
+  // Capture only the static shell before applying any of the final PBR materials.
+  finishes.projectedProbe = createRoomProbe(THREE, renderer, scene, root, finishes);
+  if (!finishes.projectedProbe) configureEnvironment(THREE, renderer, scene);
+  const hall = prepareHall(THREE, root, lightmap, foliage, metadata.foliage.domain, finishes);
+  const salonFinishes = prepareHall(THREE, salon, null, null, metadata.foliage.domain, finishes);
   const hemisphere = new THREE.HemisphereLight(0xFFF0D6, 0x9A7762);
   const sun = new THREE.DirectionalLight(0xFFE0B4);
-  sun.position.set(7.5, 10, 5.2);
+  // Match the sun used in the Cycles atlas. Only movable exhibit LODs need a shadow map.
+  // It is reused across camera movement. The floor and walls already carry baked shadows.
+  sun.position.set(48,36.48,18.24);
+  sun.castShadow=true;
+  const side=industrialAssets.finishes.mobile?768:1536;
+  sun.shadow.mapSize.set(side,side);
+  Object.assign(sun.shadow.camera,{left:-34,right:34,top:28,bottom:-28,near:12,far:110});
+  sun.shadow.camera.updateProjectionMatrix();
+  sun.shadow.normalBias=.025;sun.shadow.bias=-.00016;sun.shadow.autoUpdate=false;sun.shadow.needsUpdate=true;
+  for(const name of ['Hall_IronBlack','Hall_SteelEdge','Hall_BrushedNickel']){
+    root.getObjectByName(name)?.traverse(node=>{if(node.isMesh){node.castShadow=name!=='Hall_BrushedNickel';node.receiveShadow=true}});
+  }
+  let shadowRefresh;
+  function refreshDayShadows(){
+    clearTimeout(shadowRefresh);
+    shadowRefresh=setTimeout(()=>{sun.shadow.needsUpdate=true;renderer.shadowMap.needsUpdate=true;requestRender()},160);
+  }
   scene.add(hemisphere, sun);
 
-  const fixtures = metadata.fixtures.map(({ id, position, target }) => {
+  const fixtureTables = new Map(tables.map(table => [table.group.userData.projectId, table]));
+  const fixtures = metadata.fixtures.map(({ id, position, target, projectId }) => {
     const light = new THREE.SpotLight(0xFFF0D8, 0, 25, .32, .82, 1.45);
     light.name = id;
     light.position.fromArray(position);
     light.target.position.fromArray(target);
+    light.userData.finishGain = calibrateExhibitFixture(THREE, light, fixtureTables.get(projectId));
     scene.add(light, light.target);
     return light;
   });
@@ -443,7 +486,7 @@ export function buildGalleryRoom({
   scene.userData.fixedExhibitLights = fixturePositions;
   scene.userData.staticArchitecture = { batches: hall.batches };
   scene.userData.entranceDesign = 'industrial-steel-sliding-doors-v25';
-  scene.userData.roomFinish = hall.baked.size ? 'blender-uv1-day-lightmap-v25' : 'blender-v25';
+  scene.userData.roomFinish = hall.baked.size ? 'blender-uv1-day-lightmap-pbr-v28' : 'blender-pbr-v28';
 
   const inputs = tables.map(table => ownModelMaterials(table.model));
   const uplighting = addExhibitUplighting({ THREE, tables });
@@ -485,6 +528,7 @@ export function buildGalleryRoom({
     sun.intensity = level.sun;
     environmentLevel = level.environment;
     hall.furniture.forEach(updateEnvironment);
+    salonFinishes.furniture.forEach(updateEnvironment);
     for (const table of tables) {
       updateModelEnvironment(table.model);
       if (table.approach) updateModelEnvironment(table.approach);
@@ -494,7 +538,7 @@ export function buildGalleryRoom({
     if (!day) hall.time.value = 0;
     prints.forEach(print => print.material.color.setScalar(level.print));
     fixtures.forEach((light, index) => {
-      light.intensity = level.spots;
+      light.intensity = level.spots * light.userData.finishGain;
       light.color.setHex(neon ? 0xFFF2EE : 0xFFF0D8);
       fixturePositions[index].intensity = light.intensity;
     });
@@ -515,10 +559,10 @@ export function buildGalleryRoom({
     if (!contactMaterial) return;
     if (!table.contact) {
       table.contact = new THREE.Mesh(contactGeometry, contactMaterial);
-      table.contact.position.y = capTop + .002;
+      table.contact.position.y = table.surfaceY + .002;
       table.contact.rotation.x = -Math.PI / 2;
       table.contact.raycast = () => {};
-      table.group.add(table.contact);
+      table.frame.add(table.contact);
     }
     table.contact.visible = !table.model.userData.loading;
     table.contact.scale.set(table.scaledSize.x + .16, table.scaledSize.z + .16, 1);
@@ -536,12 +580,12 @@ export function buildGalleryRoom({
       ids.forEach((id, index) => {
         const table = tables.find(item => item.group.userData.projectId === id);
         const mount = new THREE.Group();
-        mount.position.y = capTop;
+        mount.position.y = table.surfaceY;
         mount.scale.setScalar(EXHIBIT_SCALE);
         mount.add(parts[index]);
         mount.visible = !table.model.userData.loading;
         mount.traverse(object => { object.raycast = () => {}; });
-        table.group.add(mount);
+        table.frame.add(mount);
         table.approach = mount;
         updateModelEnvironment(mount);
       });
@@ -570,17 +614,19 @@ export function buildGalleryRoom({
     const table = tables.find(item => item.group.userData.projectId === id);
     if (!table || table.featured || table.model.userData.assetTier === tier) return false;
     const model = makeProjectModel(id, THREE);
+    refineExhibitMaterials(model, id, finishes);
     if (model.userData.loading) return false;
     const previous = table.model, inputs = ownModelMaterials(model);
-    Object.assign(table, placeModel(THREE, model, id), { model });
-    table.group.remove(previous);
-    table.group.add(model);
+    Object.assign(table, placeModel(THREE, model, id, table.surfaceY), { model });
+    table.frame.remove(previous);
+    table.frame.add(model);
     setUplightCount(uplighting.replaceTable(table));
     releaseUplightInputs(model, inputs);
     updateModelEnvironment(model);
     updateContact(table);
+    refreshDayShadows();
     if (table.approach) table.approach.visible = true;
-    disposeModel(previous);
+    disposeModel(previous, finishes.textures);
     requestRender();
     return true;
   }
@@ -598,6 +644,7 @@ export function buildGalleryRoom({
   }
 
   setLighting();
+  refreshDayShadows();
   return { scene, tables, benches, pickables, doors, replaceModel, setLighting, loadPlinthContact, loadSiteWorks, updateAtmosphere, hasVisibleAtmosphere };
 }
 
@@ -620,13 +667,17 @@ export function addIndustrialSalon({
     return door;
   });
   const targets = [portal, ...doors];
-  const prints = addPrints(THREE, interior, pickables, metadata.artworks, artworks, 'salon', true);
+  const printWall=new THREE.Group();
+  group.add(printWall);
+  const prints = addPrints(THREE, printWall, pickables, metadata.artworks, artworks, 'salon', true);
   if (labelTexture && config.label) {
     const { width, height, position, rotationY } = config.label;
     const label = textPlane(THREE, labelTexture, ['ŠACHOVÝ SALONEK'], width / 2, height / 2);
     label.position.fromArray(position).multiplyScalar(.5);
     label.rotation.y = rotationY;
-    portal.add(label);
+    label.userData.chessPortal=true;
+    group.add(label);
+    pickables.push(label);
   }
   for (const target of targets) {
     target.traverse(object => {
@@ -658,7 +709,7 @@ export function addIndustrialSalon({
   }
 
   function setInteriorVisible(visible) {
-    interior.visible = state.interiorVisible = !!visible;
+    printWall.visible = interior.visible = state.interiorVisible = !!visible;
     lights.forEach(light => { light.intensity = visible ? power : 0; });
     requestRender();
   }

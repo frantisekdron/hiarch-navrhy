@@ -1,16 +1,16 @@
-import {exhibitView,exhibitOrbitFitDistance,DISPLAY_SCALE_LABEL,KOUPLENI_MODEL_NOTE} from './museum-placement-v25.js?v=27.1';
-import {loadIndustrialAssets,addIndustrialSalon} from './museum-room-v25.js?v=27.1';
-import {PICK_LAYER,reachableHit,galleryPixelRatio,galleryFieldOfView} from './museum-performance-v25.js?v=25.0';
-import {isWalkableRegion,navigationBounds} from './museum-salon-navigation-v18.js?v=18.0';
+import {exhibitView,exhibitOrbitFitDistance,DISPLAY_SCALE_LABEL,KOUPLENI_MODEL_NOTE} from './museum-placement-v28.js?v=28.0';
+import {loadIndustrialAssets,addIndustrialSalon} from './museum-room-v25.js?v=28.0';
+import {PICK_LAYER,reachableHit,galleryPixelRatio,galleryFieldOfView as baselineFov} from './museum-performance-v28.js?v=28.0';
+import {createGallerySpace,orbitDistance} from './museum-space-v28.js?v=28.0';
 import {createWindowLife} from './museum-window-life-v16.js?v=21.0';
 
 import {createChessExhibit} from './museum-chess-v15.js?v=18.0';
 import * as THREE from './assets/vendor/three.module.min.js';
 import {makeProjectModel,loadClientModels,getModelState,prioritizeModel,setModelLoadingPaused} from './museum-models-v22.js?v=26.0';
-import {buildGalleryRoom} from './museum-room-v25.js?v=27.1';
+import {buildGalleryRoom} from './museum-room-v25.js?v=28.0';
 import {addWallMap} from './museum-wallmap-v18.js?v=18.0';
 import {OrbitControls} from './assets/vendor/OrbitControls.js';
-import {bindGalleryTouch, roomOrbitDistance} from './museum-touch-v25.js?v=25.0';
+import {bindGalleryTouch} from './museum-touch-v25.js?v=25.0';
 import {findPath} from './fd-pathfinding-v8.js';
 import {bindMovePad} from './museum-input-v8.js?v=11.0';
 
@@ -19,7 +19,7 @@ const shell=$('museum'),host=$('museumCanvas'),status=$('museumStatus');
 const reduced=matchMedia('(prefers-reduced-motion:reduce)'),mobile=matchMedia('(max-width:650px), (pointer:coarse) and (max-height:520px)');
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const companies={hiarch:{name:'HiARCH',role:'Architektura a povolení',copy:'Navrhujeme architekturu a připravujeme povolení. Od prvního záměru po potřebnou dokumentaci.'},hiplan:{name:'HiPLAN',role:'Vlastní developerské projekty',copy:'Realizujeme vlastní developerské projekty.'},hireal:{name:'HiREAL',role:'Realitní činnost',copy:'Věnujeme se realitní činnosti a nabývání nemovitostí.'}};
-let industrialAssets=null,roomAtmosphere=null;
+let industrialAssets=null,roomAtmosphere=null,space=null,layout=null;
 let projects=[],renderer=null,scene=null,camera=null,selected=-1,entered=false,walking=false,visible=true;
 let cameraTarget=new THREE.Vector3(),cameraFrame=0,movementFrame=0,renderFrame=0,frameCount=0;
 let yaw=0,pitch=-.05,gesture=null,lastMove=0;
@@ -29,7 +29,7 @@ let loadPlinthContact=null,galleryMapLight=null,installModel=null,chessSalon=nul
 let lounge=null,chessExhibit=null,chessSession=null,chessMode=false,chessLoading=null,chessSelected=null,chessLevel='medium',chessFocus='e2',chessKeyboard=false,chessFen='',promotionMove=null,sceneObstacles=[],ambientTimer=0;
 let windowLife=null,windowLayouts={},lifePlay=!reduced.matches,lifeUserChoice=false,lifeTime=0,lifeLast=0;
 const viewFrustum=new THREE.Frustum(),viewProjection=new THREE.Matrix4();
-const portalBounds=new THREE.Box3(new THREE.Vector3(9.0,0,-16.45),new THREE.Vector3(9.77,4.65,-13.15));
+const portalBounds=new THREE.Box3();
 const windowBounds=new THREE.Sphere(new THREE.Vector3(),2.2);
 let pendingEntry=false;
 let galleryRoot=null,salonVisible=false,visitStarted=false,pendingProject=null,contextLost=false,pausedByBlur=false;
@@ -58,7 +58,7 @@ function updateExhibitDetail(){
      for(const table of tables){
        const id=table.group.userData.projectId;
        if(id!=='hustopece'&&id!=='bystrc')continue;
-       const dx=camera.position.x-table.x,dz=camera.position.z-table.z,d2=dx*dx+dz*dz;
+       const dx=Math.max(0,Math.abs(camera.position.x-table.x)-table.width/2),dz=Math.max(0,Math.abs(camera.position.z-table.z)-table.depth/2),d2=dx*dx+dz*dz;
        const limit=id===nearbyModel?4.25:3.15;
        if(d2<limit*limit&&d2<nearest){nearest=d2;wanted=id}
      }
@@ -73,10 +73,10 @@ const thumb=p=>p.thumbnail||`assets/v4/thumbs/${p.id}.webp`;
 function updateRoomVisibility(){
  camera.updateMatrixWorld();
  viewFrustum.setFromProjectionMatrix(viewProjection.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse));
- const inside=camera.position.x>9.72 && camera.position.z> -19.2 && camera.position.z< -10.4;
+ const inside=space.insideSalon(camera.position.x,camera.position.z);
  const doorwayInSight=viewFrustum.intersectsBox(portalBounds);
  galleryRoot.visible=!inside||doorwayInSight;
- const show=inside||(salonDoor>0&&doorwayInSight);
+ const show=inside||((salonDoor>0||salonStage==='door'||salonTransit)&&doorwayInSight);
  if(show!==salonVisible){
    salonVisible=show;chessSalon.setInteriorVisible(show);
    if(chessExhibit)chessExhibit.group.visible=show;
@@ -108,14 +108,14 @@ function render(){
  shell.dataset.cameraAngle=Math.atan2(camera.position.x-cameraTarget.x,camera.position.z-cameraTarget.z).toFixed(3);
  if(mapMode)updateWallMap();
  if(walking&&!salonTransit){
-   if(camera.position.x>9.75&&salonStage!=='inside')setSalonStage('inside');
-   else if(camera.position.x<8.5&&salonStage==='inside')setSalonStage('none');
+   if(space.insideSalon(camera.position.x,camera.position.z)&&salonStage!=='inside')setSalonStage('inside');
+   else if(camera.position.x<space.portal[0]-.6&&salonStage==='inside')setSalonStage('none');
  }
  if(movingAtmosphere)startAmbientMotion();else stopAmbientMotion();
 }
 function scheduleRender(){if(!renderer||renderFrame)return;renderFrame=requestAnimationFrame(()=>{renderFrame=0;render()})}
 function stopFrames(){salonTransit=false;cancelAnimationFrame(cameraFrame);cancelAnimationFrame(movementFrame);cameraFrame=0;movementFrame=0;keys.clear();route=null;finishFlight=null;touchController?.reset();padController?.reset();lastMove=0;if(completeEntry){const finish=completeEntry;completeEntry=null;finish()}}
-function doorPose(){doors.forEach(d=>{const side=d.userData.doorSide==='left'?-1:1;d.rotation.y=0;d.position.x=(d.userData.closedX??side*3.75)+side*doorProgress*(d.userData.slideDistance??3.6)})}
+function doorPose(){doors.forEach(d=>{const side=d.userData.doorSide===-1||d.userData.doorSide==='left'?-1:1;d.rotation.y=0;d.position.x=(d.userData.closedX??side*3.75)+side*doorProgress*(d.userData.slideDistance??3.6)})}
 function syncControls(){
  if(!controls)return;
  controls.target.copy(cameraTarget);
@@ -124,7 +124,7 @@ function syncControls(){
  controls.minPolarAngle=orbiting?.22:0;
  controls.maxPolarAngle=orbiting?1.77:Math.PI;
  const freeView=mapMode||walking||seatMode||chessMode;
- controls.minDistance=freeView?.5:Math.max(.22,(tables[selected]?.focusRadius||.3)+.045);
+ controls.minDistance=freeView?.5:.22;
  controls.maxDistance=freeView?40:Math.max(3,(tables[selected]?.focusRadius||.5)*7);
  controls.update();
 }
@@ -174,7 +174,15 @@ function markEntered(){
  host.setAttribute('role','group');host.setAttribute('aria-label','Výstavní sál. Vyberte stůl kliknutím nebo použijte nástěnnou mapu.');host.removeAttribute('aria-disabled');
  if(shell.dataset.entryComplete!=='false')document.body.classList.remove('gallery-at-entry');
 }
-function overview(){if(camera?.position.x>9.6||salonTransit){leaveSalon(overview);return}setSalonStage('none');setWalking(false);selected=-1;activeNote=null;$('selectedExhibit').hidden=true;updateSelection();markEntered();flyTo(mobile.matches?[0,5.2,23]:[0,4.3,15],[0,1.5,-3]);say('Celý sál. Klikněte na vitrínu, nebo na volnou podlahu pro přechod.')}
+function overview(){if(camera&&space.insideSalon(camera.position.x,camera.position.z)||salonTransit){leaveSalon(overview);return}setSalonStage('none');setWalking(false);selected=-1;activeNote=null;$('selectedExhibit').hidden=true;updateSelection();markEntered();flyTo([0,4.3,space.depth-1.2],layout.entryLookAt);say('Celý sál. Klikněte na vitrínu, nebo na volnou podlahu pro přechod.')}
+function galleryFieldOfView(width,height,stage,playingChess,walk=false){
+ if(!walk && selected>=0 && projects[selected]?.id==='koupelni' && stage==='none' && !playingChess){
+   const aspect=width/Math.max(1,height);
+   return aspect<.8?Math.min(114,2*Math.atan(Math.tan(34*Math.PI/180)/aspect)*180/Math.PI):65;
+ }
+ return baselineFov(width,height,stage,playingChess,walk);
+}
+function entryPoint(){return mobile.matches && layout.entryCameraMobile ? layout.entryCameraMobile : layout.entryCamera}
 function enterGallery(){
  if(entered||!camera||!tables.length)return;
  shell.dataset.entryComplete='false';
@@ -182,8 +190,8 @@ function enterGallery(){
  if(!lightWasChosen&&lighting.preset!=='day'){lighting.preset='day';applyLighting()}
  updateSelection();$('selectedExhibit').hidden=true;$('navigationMode').textContent='Vstup do galerie';say('Dveře se otevírají. Vstupujete do výstavního sálu.');
  // Stop just inside the entrance, within the walkable floor. No exhibit is selected.
- const end=new THREE.Vector3(0,3.2,14.6),target=new THREE.Vector3(0,3.2+Math.sin(.025)*8,14.6-Math.cos(.025)*8);
- const curve=new THREE.CatmullRomCurve3([from,new THREE.Vector3(0,3.5,22),new THREE.Vector3(0,3.25,18.2),end],false,'centripetal');
+ const end=new THREE.Vector3(...entryPoint()),target=new THREE.Vector3(...(mobile.matches && layout.entryLookAtMobile ? layout.entryLookAtMobile : layout.entryLookAt));
+ const curve=new THREE.CatmullRomCurve3([from,new THREE.Vector3(0,3.5,space.depth+3.5),new THREE.Vector3(0,3.25,space.depth+.2),end],false,'centripetal');
  completeEntry=()=>{doorProgress=1;doorPose();camera.position.copy(end);cameraTarget.copy(target);camera.lookAt(cameraTarget);renderer.shadowMap.needsUpdate=true;setWalking(true,true);shell.dataset.entryComplete='true';markEntered();say($('walkHelp').textContent);scheduleRender()};
  // Opening the doors is an explicit visitor action, including in reduced-motion mode.
  shell.dataset.entryComplete='false';const duration=2400,entryFov=camera.fov,walkFov=galleryFieldOfView(host.clientWidth,host.clientHeight,'none',false,true);let began=null;
@@ -195,7 +203,7 @@ function focusProject(id,scroll=false,move=true,duration=900){
    if(shell.dataset.renderer==='html')openProject(id);else pendingProject={id,scroll};
    return;
  }
- if(camera&&(camera.position.x>9.6||salonTransit)){leaveSalon(()=>focusProject(id,scroll,move,duration));return}setSalonStage('none');
+ if(camera&&(space.insideSalon(camera.position.x,camera.position.z)||salonTransit)){leaveSalon(()=>focusProject(id,scroll,move,duration));return}setSalonStage('none');
  const i=projects.findIndex(p=>p.id===id);if(i<0)return;
  if(!lightWasChosen&&lighting.preset!=='day'){lighting.preset='day';applyLighting()}
  if(id==='bystrc')requestSiteWorks('quay');
@@ -224,12 +232,12 @@ function updateSelection(){syncMapLighting();$('walkPad').hidden=!entered||(!wal
  document.querySelectorAll('[data-focus]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.focus===projects[selected]?.id)));
  syncSalonUI();updateHotspots();updateWallMap();scheduleRender();
 }
-function clearFloor(x,z){return isWalkableRegion(x,z,salonDoor>=.999)&&benches.every(b=>Math.abs(x-b.seat[0])>(b.halfWidth||.62)+.15||Math.abs(z-b.seat[2])>(b.halfDepth||1.40)+.15)&&sceneObstacles.every(o=>Math.abs(x-o.x)>o.halfWidth+.18||Math.abs(z-o.z)>o.halfDepth+.18)&&tables.every(t=>Math.abs(x-t.x)>((t.width||3.8)/2+.35)||Math.abs(z-t.z)>((t.depth||2.7)/2+.35))}
-function walkPosition(x,z){const b=navigationBounds(salonDoor>=.999);x=THREE.MathUtils.clamp(x,b[0],b[2]);z=THREE.MathUtils.clamp(z,b[1],b[3]);return clearFloor(x,z)?[x,z]:null}
+function clearFloor(x,z){return space.walkable(x,z,salonDoor>=.999)&&benches.every(b=>Math.abs(x-b.x)>(b.halfWidth||.62)+.15||Math.abs(z-b.z)>(b.halfDepth||1.40)+.15)&&sceneObstacles.every(o=>Math.abs(x-o.x)>o.halfWidth+.18||Math.abs(z-o.z)>o.halfDepth+.18)&&tables.every(t=>Math.abs(x-t.x)>((t.width||3.8)/2+.35)||Math.abs(z-t.z)>((t.depth||2.7)/2+.35))}
+function walkPosition(x,z){const b=space.navigationBounds(salonDoor>=.999);x=THREE.MathUtils.clamp(x,b[0],b[2]);z=THREE.MathUtils.clamp(z,b[1],b[3]);return clearFloor(x,z)?[x,z]:null}
 function setWalking(value,keepPosition=false){
  if(chessMode){chessMode=false;shell.classList.remove('playing-chess');$('chessPanel').hidden=true;chessSelected=null;promotionMove=null;if(chessSession)chessExhibit.setBoard(chessSession.state().board,{lastMove:chessSession.state().lastMove});}walking=value;seatMode=null;mapMode=false;activeNote=null;shell.classList.toggle('walking',value);$('walkPad').hidden=!entered||!value;$('walkToggle').setAttribute('aria-pressed',String(value));$('walkToggle').innerHTML=value?'Prohlédnout model <span>↗</span>':'Procházet sál <span>↗</span>';if(controls)controls.enabled=!value&&selected>=0;
  keys.clear();cancelAnimationFrame(movementFrame);movementFrame=0;lastMove=0;
- if(value){markEntered();$('selectedExhibit').hidden=true;let pos=keepPosition?walkPosition(camera.position.x,camera.position.z):null;const direction=cameraTarget.clone().sub(camera.position);yaw=keepPosition?Math.atan2(-direction.x,-direction.z):0;pitch=keepPosition?Math.asin(THREE.MathUtils.clamp(direction.clone().normalize().y,-.7,.7)):-.05;const x=pos?pos[0]:0,z=pos?pos[1]:12.4;flyTo([x,3.2,z],[x-Math.sin(yaw)*Math.cos(pitch)*8,3.2+Math.sin(pitch)*8,z-Math.cos(yaw)*Math.cos(pitch)*8],keepPosition?0:600);say('Pohyb: šipky nebo palcový ovladač. Rozhlížení: tažením. Klikněte na model, obraz nebo volnou podlahu.');host.focus({preventScroll:true})}
+ if(value){markEntered();$('selectedExhibit').hidden=true;let pos=keepPosition?walkPosition(camera.position.x,camera.position.z):null;const direction=cameraTarget.clone().sub(camera.position);yaw=keepPosition?Math.atan2(-direction.x,-direction.z):0;pitch=keepPosition?Math.asin(THREE.MathUtils.clamp(direction.clone().normalize().y,-.7,.7)):-.05;const x=pos?pos[0]:entryPoint()[0],z=pos?pos[1]:entryPoint()[2];flyTo([x,3.2,z],[x-Math.sin(yaw)*Math.cos(pitch)*8,3.2+Math.sin(pitch)*8,z-Math.cos(yaw)*Math.cos(pitch)*8],keepPosition?0:600);say('Pohyb: šipky nebo palcový ovladač. Rozhlížení: tažením. Klikněte na model, obraz nebo volnou podlahu.');host.focus({preventScroll:true})}
  updateSelection();
 }
 function orbitAction(action){
@@ -240,7 +248,7 @@ function orbitAction(action){
  if(action==='near'||action==='far')offset.multiplyScalar(action==='near'?.78:1.28);
  const min=controls?.minDistance??2.5,max=controls?.maxDistance??6;
  const radius=THREE.MathUtils.clamp(offset.length(),min,max);
- offset.normalize();offset.multiplyScalar(roomOrbitDistance(cameraTarget,offset,radius));
+ offset.normalize();offset.multiplyScalar(orbitDistance(tables[selected],cameraTarget,offset,radius));
  const next=cameraTarget.clone().add(offset);
  flyTo(next.toArray(),cameraTarget.toArray(),reduced.matches?0:260);
 }
@@ -251,13 +259,13 @@ function moveLoop(now){
  const dt=lastMove?Math.min(.035,(now-lastMove)/1000):.016;lastMove=now;
  if(keys.has('turnLeft'))yaw+=dt*1.35;if(keys.has('turnRight'))yaw-=dt*1.35;
  let f=navForward+(keys.has('forward')?1:0)-(keys.has('back')?1:0),side=navSide+(keys.has('right')?1:0)-(keys.has('left')?1:0);
- if(f||side){route=null;cancelAnimationFrame(cameraFrame);cameraFrame=0;finishFlight=null;const norm=Math.max(1,Math.hypot(f,side)),speed=2.7*dt/norm;const b=navigationBounds(salonDoor>=.999),nx=THREE.MathUtils.clamp(camera.position.x+(-Math.sin(yaw)*f+Math.cos(yaw)*side)*speed,b[0],b[2]),nz=THREE.MathUtils.clamp(camera.position.z+(-Math.cos(yaw)*f-Math.sin(yaw)*side)*speed,b[1],b[3]);if(clearFloor(nx,camera.position.z))camera.position.x=nx;if(clearFloor(camera.position.x,nz))camera.position.z=nz;}
+ if(f||side){route=null;cancelAnimationFrame(cameraFrame);cameraFrame=0;finishFlight=null;const norm=Math.max(1,Math.hypot(f,side)),speed=2.7*dt/norm;const b=space.navigationBounds(salonDoor>=.999),nx=THREE.MathUtils.clamp(camera.position.x+(-Math.sin(yaw)*f+Math.cos(yaw)*side)*speed,b[0],b[2]),nz=THREE.MathUtils.clamp(camera.position.z+(-Math.cos(yaw)*f-Math.sin(yaw)*side)*speed,b[1],b[3]);if(clearFloor(nx,camera.position.z))camera.position.x=nx;if(clearFloor(camera.position.x,nz))camera.position.z=nz;}
  if(route){let distance=3.5*dt;while(route&&distance>0){const target=route[0],dx=target[0]-camera.position.x,dz=target[1]-camera.position.z,length=Math.hypot(dx,dz);if(length<=distance){camera.position.x=target[0];camera.position.z=target[1];distance-=length;route.shift();if(!route.length)route=null}else{camera.position.x+=dx/length*distance;camera.position.z+=dz/length*distance;distance=0}}}
  camera.position.y=3.2;lookFromWalk();render();
  if(keys.size||navForward||navSide||route)ensureMovement();else lastMove=0;
 }
 function floorReach(ax,az,bx,bz){const steps=Math.max(1,Math.ceil(Math.hypot(bx-ax,bz-az)/.08));for(let i=0;i<=steps;i++){const x=ax+(bx-ax)*i/steps,z=az+(bz-az)*i/steps;if(!clearFloor(x,z))return false}return true}
-function walkTo(x,z){if(!walking)setWalking(true,true);stopFrames();const result=findPath({reach:floorReach},[camera.position.x,camera.position.z],[x,z],{cell:.25,bounds:navigationBounds(salonDoor>=.999),snap:.25,maxChecks:25000});route=result.points.slice(1);shell.dataset.routePoints=String(route.length);if(!route.length)return;say(result.complete?'Přecházíte na vybrané místo. Šipkou nebo tažením můžete změnit směr.':'K tomuto místu není volný průchod. Přesun k nejbližšímu volnému místu.');ensureMovement()}
+function walkTo(x,z){if(!walking)setWalking(true,true);stopFrames();const result=findPath({reach:floorReach},[camera.position.x,camera.position.z],[x,z],{cell:.25,bounds:space.navigationBounds(salonDoor>=.999),snap:.25,maxChecks:25000});route=result.points.slice(1);shell.dataset.routePoints=String(route.length);if(!route.length)return;say(result.complete?'Přecházíte na vybrané místo. Šipkou nebo tažením můžete změnit směr.':'K tomuto místu není volný průchod. Přesun k nejbližšímu volnému místu.');ensureMovement()}
 function lookFromWalk(){cameraTarget.set(camera.position.x-Math.sin(yaw)*Math.cos(pitch)*8,camera.position.y+Math.sin(pitch)*8,camera.position.z-Math.cos(yaw)*Math.cos(pitch)*8);camera.lookAt(cameraTarget)}
 function startStep(key){if(!walking)setWalking(true,true);keys.add(key);ensureMovement()}
 function openCompany(id){suspendNavigation();const c=companies[id];if(!c)return;$('companyDialogBody').innerHTML=`<article class="company-profile"><span class="eyebrow">${esc(c.role)}</span><h2>${esc(c.name)}</h2><p>${esc(c.copy)}</p><a href="mailto:info@hiarch.cz">Kontaktovat skupinu ↗</a></article>`;if(!$('companyDialog').open)$('companyDialog').showModal()}
@@ -292,7 +300,13 @@ function glowPlane(w,h,x,y,z,text,color='#dceccc'){
  const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:textureText([text],{glow:true,color}),transparent:true,depthWrite:false,toneMapped:false}));m.position.set(x,y,z);scene.add(m);return m;
 }
 function buildRoom(){
- const room=buildGalleryRoom({THREE,renderer,projects,makeProjectModel:(id,T)=>makeProjectModel(id,T,facadeTextures),labelTexture:textureText,artworks,requestRender:scheduleRender,industrialAssets});roomAtmosphere=room;scene=room.scene;benches=room.benches||[];windowLife=createWindowLife({THREE,scene,layouts:windowLayouts});tables.length=0;shell.dataset.floorReflections='room-probe';shell.dataset.floorMirrorPasses='0';shell.dataset.architectureBatches=String(scene.userData.staticArchitecture?.batches||0);shell.dataset.entranceDesign=scene.userData.entranceDesign||'';shell.dataset.modelWindows=String(room.tables.find(t=>t.featured)?.model?.userData.windowCount||0);tables.push(...room.tables);tables.forEach(addLifeTable);shell.dataset.modelSizing=DISPLAY_SCALE_LABEL;shell.dataset.hallAuthoring='Blender';shell.dataset.hallPhysicalMetres='9.6 × 18';shell.dataset.modelPlacement=JSON.stringify(tables.map(t=>({id:t.group.userData.projectId,...t.model.userData.displayPlacement})));shell.dataset.koupelniBatches=JSON.stringify(tables[0].model.userData.staticBatches);syncLifeButton();pickables.push(...room.pickables);doors=room.doors;doors.forEach(d=>d.userData.closedX=d.position.x);installModel=room.replaceModel;loadPlinthContact=room.loadPlinthContact;lightRig=room.setLighting;wallMap=addWallMap({THREE,scene,geo:czGeo,projects,pickables,labelTexture:textureText});const mapLight=galleryMapLight=new THREE.PointLight(0xf4f4dd,5,7,2);wallMap.group.position.set(-9.22,3.3,14.65);wallMap.group.rotation.y=Math.PI/2;wallMap.group.scale.setScalar(.74);wallMap.lookFrom=[-2.4,3.45,14.0];wallMap.lookAt=[-9.22,3.3,14.65];wallMap.group.updateMatrixWorld(true);mapLight.position.set(-8.3,5.1,14.65);scene.add(mapLight);lounge=null;// All opaque room contents can be skipped behind the salon wall.
+ const meta=industrialAssets.metadata;
+ space=createGallerySpace(meta);layout=meta.visitorLayout || meta;
+ sceneObstacles=[...(layout.planters||[]).map(p=>({...p,halfWidth:.52,halfDepth:.52})),
+   ...(layout.sideTables||[]).map(p=>({...p,halfWidth:.62,halfDepth:.64}))];
+ const [px,,pz]=space.portal;
+ portalBounds.set(new THREE.Vector3(px-.6,0,pz-space.doorHalf-.22),new THREE.Vector3(px+.2,5.5,pz+space.doorHalf+.22));
+ const room=buildGalleryRoom({THREE,renderer,projects,makeProjectModel:(id,T)=>makeProjectModel(id,T,facadeTextures),labelTexture:textureText,artworks,requestRender:scheduleRender,industrialAssets});roomAtmosphere=room;scene=room.scene;benches=room.benches||[];windowLife=createWindowLife({THREE,scene,layouts:windowLayouts});tables.length=0;shell.dataset.floorReflections='room-probe';shell.dataset.floorMirrorPasses='0';shell.dataset.architectureBatches=String(scene.userData.staticArchitecture?.batches||0);shell.dataset.entranceDesign=scene.userData.entranceDesign||'';shell.dataset.modelWindows=String(room.tables.find(t=>t.featured)?.model?.userData.windowCount||0);tables.push(...room.tables);const planters=(layout.planters||[]).map((p,i)=>[p.x,p.z,i===0?6.4:5.2]);for(const table of tables){table.planters=planters;table.orbitBounds=space.orbitBounds;table.entryViews=[layout.entryCamera,layout.entryCameraMobile];addLifeTable(table)}shell.dataset.modelSizing=DISPLAY_SCALE_LABEL;shell.dataset.hallAuthoring='Blender';shell.dataset.hallPhysicalMetres=space.width+' × '+space.depth;shell.dataset.modelPlacement=JSON.stringify(tables.map(t=>({id:t.group.userData.projectId,...t.model.userData.displayPlacement})));shell.dataset.koupelniBatches=JSON.stringify(tables[0].model.userData.staticBatches);syncLifeButton();pickables.push(...room.pickables);doors=room.doors;doors.forEach(d=>d.userData.closedX=d.position.x);installModel=room.replaceModel;loadPlinthContact=room.loadPlinthContact;lightRig=room.setLighting;wallMap=addWallMap({THREE,scene,geo:czGeo,projects,pickables,labelTexture:textureText});const mapLight=galleryMapLight=new THREE.PointLight(0xf4f4dd,5,7,2);const atlas=layout.atlasCenter||layout.atlasPosition||[-space.width+.40,3.3,14.65*space.stretch];wallMap.group.position.fromArray(atlas);wallMap.group.rotation.y=Math.PI/2;wallMap.group.scale.setScalar(.74);wallMap.lookFrom=layout.atlasCamera;wallMap.lookAt=atlas;wallMap.group.updateMatrixWorld(true);mapLight.position.set(atlas[0]+.9,atlas[1]+1.8,atlas[2]);scene.add(mapLight);lounge=null;// All opaque room contents can be skipped behind the salon wall.
  galleryRoot=new THREE.Group();
  galleryRoot.name='Main gallery';
  for(const object of [...scene.children])if(object.isMesh||object.isGroup||object.isLine)galleryRoot.add(object);
@@ -302,30 +316,30 @@ function buildRoom(){
  chessSalon.setInteriorVisible(false);
  updatePickRoots();
  shell.dataset.aquarium='removed';shell.dataset.lifeCars='0';shell.dataset.lifePedestrians='0';shell.dataset.darts='removed';applyLighting();
- camera=new THREE.PerspectiveCamera(mobile.matches?84:52,1,.035,220);camera.position.set(mobile.matches?0:1.85,3.65,mobile.matches?29.4:31.0);cameraTarget.set(0,mobile.matches?3.4:3.1,17.5);camera.lookAt(cameraTarget);doorPose();
+ camera=new THREE.PerspectiveCamera(mobile.matches?84:52,1,.035,220);camera.position.set(mobile.matches?0:1.85,3.65,space.depth+(mobile.matches?11.4:13.0)*space.stretch);cameraTarget.set(0,mobile.matches?3.4:3.1,space.depth-.5);camera.lookAt(cameraTarget);doorPose();
  controls=new OrbitControls(camera,renderer.domElement);syncTouchPolicy();controls.enabled=false;controls.enableDamping=false;controls.enablePan=false;controls.minPolarAngle=0;controls.maxPolarAngle=Math.PI;controls.rotateSpeed=.65;controls.zoomSpeed=.8;controls.target.copy(cameraTarget);controls.update();controls.addEventListener('change',()=>{
    cameraTarget.copy(controls.target);
    if(controls.enabled&&selected>=0){
      desktopOffset.copy(camera.position).sub(cameraTarget);
      const r=desktopOffset.length();desktopOffset.normalize();
-     const safe=roomOrbitDistance(cameraTarget,desktopOffset,r);
-     if(r>safe)camera.position.copy(cameraTarget).addScaledVector(desktopOffset,safe);
+     const safe=orbitDistance(tables[selected],cameraTarget,desktopOffset,r);
+     if(Math.abs(r-safe)>.0001)camera.position.copy(cameraTarget).addScaledVector(desktopOffset,safe);
    }
    scheduleRender();
  });controls.addEventListener('start',()=>{touchRadius=0;cancelAnimationFrame(cameraFrame);cameraFrame=0});
 }
 function prepareChessTable(){
  if(chessExhibit)return;
- chessExhibit=createChessExhibit({THREE,scene,pickables,requestRender:scheduleRender,position:[15.5,0,-14.8]});
+ chessExhibit=createChessExhibit({THREE,scene,pickables,requestRender:scheduleRender,position:chessSalon.entrance.insideLookAt.map((v,i)=>i===1?0:v)});
  // Legacy game geometry uses metres; match the Blender hall's two units/metre.
- const chessCenter=new THREE.Vector3(15.5,0,-14.8);
+ const chessCenter=chessExhibit.group.position.clone();
  chessExhibit.group.scale.setScalar(2);
  for(const key of ['lookAt','lookFrom','mobileLookFrom']){const point=new THREE.Vector3(...chessExhibit[key]);point.sub(chessCenter).multiplyScalar(2).add(chessCenter);chessExhibit[key]=point.toArray()}
- for(const obstacle of chessExhibit.obstacles){obstacle.x=15.5+(obstacle.x-15.5)*2;obstacle.z=-14.8+(obstacle.z+14.8)*2;obstacle.halfWidth*=2;obstacle.halfDepth*=2}
+ for(const obstacle of chessExhibit.obstacles){obstacle.x=chessCenter.x+(obstacle.x-chessCenter.x)*2;obstacle.z=chessCenter.z+(obstacle.z-chessCenter.z)*2;obstacle.halfWidth*=2;obstacle.halfDepth*=2}
  chessExhibit.group.updateMatrixWorld(true);
  chessExhibit.setLighting(lighting);
  chessExhibit.group.visible=salonVisible;
- sceneObstacles=chessExhibit.obstacles;
+ sceneObstacles.push(...chessExhibit.obstacles);
  updatePickRoots();
 }
 function updateHotspots(){
@@ -334,8 +348,8 @@ function updateHotspots(){
  const card=$('annotationCard');card.hidden=!activeNote;if(activeNote){card.style.left=mobile.matches?'5vw':'3.5vw';card.style.top='auto';card.style.bottom=mobile.matches?'225px':'160px'}
 }
 function syncMapLighting(){if(galleryMapLight)galleryMapLight.intensity=lighting.preset==='day'||mapMode?5:.3;if(!wallMap)return;wallMap.group.traverse(o=>{for(const m of Array.isArray(o.material)?o.material:[o.material]){if(!m?.isMeshBasicMaterial&&!m?.isLineBasicMaterial)continue;if(!mapColors.has(m))mapColors.set(m,m.color.clone());m.color.copy(mapColors.get(m)).multiplyScalar(lighting.preset==='day'||mapMode?1:.27)}})}
-function applyLighting(){if(!lightRig)return;lightRig(lighting);chessSalon?.setLighting(lighting);lounge?.setLighting(lighting);chessExhibit?.setLighting(lighting);windowLife?.setLighting(lighting);shell.dataset.litExhibits=String(scene.userData.fixedExhibitLights?.length||0);shell.dataset.neonModels=String(scene.userData.allExhibitLighting?.count||0);shell.dataset.fixturePositions=JSON.stringify(scene.userData.fixedExhibitLights||[]);shell.dataset.exhibitLightStrength=String(scene.userData.allExhibitLighting?.strength||0);shell.dataset.roomFinish=scene.userData.roomFinish||'';syncMapLighting();renderer.toneMappingExposure=lighting.preset==='day'?1.05:lighting.preset==='neon'?.84:.89;shell.dataset.lightingProfile='blender-bake-and-eight-fixtures-v25';shell.dataset.lighting=lighting.preset;shell.dataset.ledColor=lighting.color;$('lightingValue').textContent=Math.round(lighting.intensity*100)+' %';document.querySelectorAll('.light-presets button[data-light-preset]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lightPreset===lighting.preset)));document.querySelectorAll('.led-colors button[data-led-color]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ledColor===lighting.color)));scheduleRender()}
-function showWallMap(){if(camera?.position.x>9.6||salonTransit){leaveSalon(showWallMap);return}setSalonStage('none');seatMode=null;if(mapMode){focusProject(lastProject);return}setWalking(false);mapMode=true;activeNote=null;selected=-1;$('selectedExhibit').hidden=true;markEntered();$('walkToggle').innerHTML='Ke vitríně <span>↗</span>';updateSelection();$('wallMapButton').setAttribute('aria-pressed','true');if(wallMap)flyTo(mobile.matches?[-.6,3.3,14]:wallMap.lookFrom,wallMap.lookAt,850);say('Vyberte projekt na nástěnné mapě. Přesunete se přímo k jeho vitríně.')}
+function applyLighting(){if(!lightRig)return;lightRig(lighting);chessSalon?.setLighting(lighting);lounge?.setLighting(lighting);chessExhibit?.setLighting(lighting);windowLife?.setLighting(lighting);shell.dataset.litExhibits=String(scene.userData.fixedExhibitLights?.length||0);shell.dataset.neonModels=String(scene.userData.allExhibitLighting?.count||0);shell.dataset.fixturePositions=JSON.stringify(scene.userData.fixedExhibitLights||[]);shell.dataset.exhibitLightStrength=String(scene.userData.allExhibitLighting?.strength||0);shell.dataset.roomFinish=scene.userData.roomFinish||'';syncMapLighting();renderer.toneMappingExposure=lighting.preset==='day'?1.05:lighting.preset==='neon'?.84:.89;shell.dataset.lightingProfile='blender-cycles-and-eight-fixtures-v28';shell.dataset.lighting=lighting.preset;shell.dataset.ledColor=lighting.color;$('lightingValue').textContent=Math.round(lighting.intensity*100)+' %';document.querySelectorAll('.light-presets button[data-light-preset]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lightPreset===lighting.preset)));document.querySelectorAll('.led-colors button[data-led-color]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ledColor===lighting.color)));scheduleRender()}
+function showWallMap(){if(camera&&space.insideSalon(camera.position.x,camera.position.z)||salonTransit){leaveSalon(showWallMap);return}setSalonStage('none');seatMode=null;if(mapMode){focusProject(lastProject);return}setWalking(false);mapMode=true;activeNote=null;selected=-1;$('selectedExhibit').hidden=true;markEntered();$('walkToggle').innerHTML='Ke vitríně <span>↗</span>';updateSelection();$('wallMapButton').setAttribute('aria-pressed','true');if(wallMap)flyTo(mobile.matches?layout.atlasCameraMobile:wallMap.lookFrom,wallMap.lookAt,850);say('Vyberte projekt na nástěnné mapě. Přesunete se přímo k jeho vitríně.')}
 function updateWallMap(){
  const layer=$('wallMapLayer');if(!layer||!camera||!wallMap)return;layer.hidden=!mapMode;$('wallMapButton').setAttribute('aria-pressed',String(mapMode));if(!mapMode)return;
  if(!layer.children.length)layer.innerHTML='<h2>Mapa projektů</h2>'+projects.map(p=>`<button class="map-project-hit" data-focus="${esc(p.id)}" aria-label="Přejít k vitríně ${esc(p.name)}"><b>${esc(p.name)}</b><small>${esc(p.city)}</small><i>↗</i></button>`).join('');
@@ -354,7 +368,7 @@ function updatePickRoots(){
  for(const t of tables)if(!tableBounds.has(t.group)){
    tableBounds.set(t.group,new THREE.Box3(
      new THREE.Vector3(t.x-t.width/2-.06,0,t.z-t.depth/2-.06),
-     new THREE.Vector3(t.x+t.width/2+.06,3.65,t.z+t.depth/2+.06)));
+     new THREE.Vector3(t.x+t.width/2+.06,t.targetY+t.scaledSize.y*.52+.10,t.z+t.depth/2+.06)));
  }
 }
 const pickerRay=new THREE.Raycaster(),mousePoint=new THREE.Vector2(),floorPoint=new THREE.Vector3();
@@ -370,7 +384,7 @@ function firstPick(roots,limit=Infinity){
    for(let node=root;node;node=node.parent)if(!node.visible)return false;
    const box=tableBounds.get(root);return !box||pickerRay.ray.intersectsBox(box);
  });
- return pickerRay.intersectObjects(candidates,true).find(hit=>reachableHit(hit,camera.position,salonDoor,limit));
+ return pickerRay.intersectObjects(candidates,true).find(hit=>reachableHit(hit,camera.position,salonDoor,limit,space));
 }
 function hoverExhibit(event){
  if(!renderer||!camera||gesture||!entered||contextLost)return;
@@ -381,12 +395,12 @@ function hoverExhibit(event){
  host.title=hit?.userData.chessPortal?'Vstoupit do šachového salonku':hit?.userData.artworkId?'Otevřít výstavní panel':hit?.userData.seatId?'Posadit se na lavičku':'';
 }
 let hoverFrame=0;host.addEventListener('pointermove',event=>{if(event.pointerType!=='mouse'||gesture||hoverFrame)return;hoverFrame=requestAnimationFrame(()=>{hoverFrame=0;hoverExhibit(event)})});
-function sitAtBench(id){if(camera?.position.x>9.6||salonTransit){leaveSalon(()=>sitAtBench(id));return}setSalonStage('none');const bench=benches.find(b=>b.id===id);if(!bench)return;setWalking(false);selected=-1;seatMode=id;markEntered();$('selectedExhibit').hidden=true;updateSelection();$('walkToggle').innerHTML='Vstát a projít galerii <span>↗</span>';flyTo(bench.seat,bench.lookAt,800);host.focus({preventScroll:true});say('Sedíte v galerii. Tažením nebo šipkami se rozhlédněte. Tlačítkem Vstát se vrátíte k chůzi.')}
+function sitAtBench(id){if(camera&&space.insideSalon(camera.position.x,camera.position.z)||salonTransit){leaveSalon(()=>sitAtBench(id));return}setSalonStage('none');const bench=benches.find(b=>b.id===id);if(!bench)return;setWalking(false);selected=-1;seatMode=id;markEntered();$('selectedExhibit').hidden=true;updateSelection();$('walkToggle').innerHTML='Vstát a projít galerii <span>↗</span>';flyTo(bench.seat,bench.lookAt,800);host.focus({preventScroll:true});say('Sedíte v galerii. Tažením nebo šipkami se rozhlédněte. Tlačítkem Vstát se vrátíte k chůzi.')}
 function pick(event){
  if(!renderer||contextLost)return;if(!entered){enterGallery();return}pointPicker(event);
  const floorHit=pickerRay.ray.intersectPlane(floorPlane,floorPoint);
  const hit=firstPick(hitRoots,floorHit?camera.position.distanceTo(floorHit)+.01:Infinity);
- if(hit){let o=hit.object;while(o&&!o.userData.chessSquares&&!o.userData.chessTable&&!o.userData.chessPortal&&!o.userData.wallMap&&!o.userData.annotationId&&!o.userData.companyId&&!o.userData.projectId&&!o.userData.artworkId&&!o.userData.seatId)o=o.parent;if(o?.userData.chessSquares||o?.userData.chessTable){if(!chessMode)startChess();else handleChessSquare(chessExhibit.squareFromHit(hit));return}if(chessMode)return;if(o?.userData.chessPortal){camera.position.x>9.75?leaveSalon():enterSalon();return}if(o?.userData.wallMap){if(!mapMode)showWallMap();return}if(o?.userData.artworkId){openArtwork(o.userData.artworkId);return}if(o?.userData.seatId){sitAtBench(o.userData.seatId);return}if(o?.userData.annotationId){showNote(o.userData.annotationId);return}if(o?.userData.companyId){openCompany(o.userData.companyId);return}if(o?.userData.projectId){if(!walking&&projects[selected]?.id===o.userData.projectId)openProject(o.userData.projectId);else focusProject(o.userData.projectId);return}}
+ if(hit){let o=hit.object;while(o&&!o.userData.chessSquares&&!o.userData.chessTable&&!o.userData.chessPortal&&!o.userData.wallMap&&!o.userData.annotationId&&!o.userData.companyId&&!o.userData.projectId&&!o.userData.artworkId&&!o.userData.seatId)o=o.parent;if(o?.userData.chessSquares||o?.userData.chessTable){if(!chessMode)startChess();else handleChessSquare(chessExhibit.squareFromHit(hit));return}if(chessMode)return;if(o?.userData.chessPortal){space.insideSalon(camera.position.x,camera.position.z)?leaveSalon():enterSalon();return}if(o?.userData.wallMap){if(!mapMode)showWallMap();return}if(o?.userData.artworkId){openArtwork(o.userData.artworkId);return}if(o?.userData.seatId){sitAtBench(o.userData.seatId);return}if(o?.userData.annotationId){showNote(o.userData.annotationId);return}if(o?.userData.companyId){openCompany(o.userData.companyId);return}if(o?.userData.projectId){if(!walking&&projects[selected]?.id===o.userData.projectId)openProject(o.userData.projectId);else focusProject(o.userData.projectId);return}}
  if(!entered){focusProject('koupelni');return}
  if(seatMode||chessMode||!floorHit)return;const pos=walkPosition(floorHit.x,floorHit.z);if(!pos)return;walkTo(pos[0],pos[1]);
 }
@@ -400,7 +414,8 @@ function syncSalonUI(){
  if(camera){const next=galleryFieldOfView(host.clientWidth,host.clientHeight,salonStage,chessMode,walking);if(camera.fov!==next){camera.fov=next;camera.updateProjectionMatrix();shell.dataset.fov=String(next)}}
 }
 function focusSalonDoor(){
- if(!chessSalon)return;if(camera.position.x>9.75){returnToSalon();return}
+ if(!chessSalon)return;if(space.insideSalon(camera.position.x,camera.position.z)){returnToSalon();return}
+ prepareChessTable();
  $('leisureMenu').open=false;setWalking(false);selected=-1;activeNote=null;markEntered();$('selectedExhibit').hidden=true;setSalonStage('door');updateSelection();
  flyTo(chessSalon.entrance.outside,chessSalon.entrance.lookAt,850);say('Šachový salonek. Klikněte na dveře nebo na Vstoupit do salonku.');
 }
@@ -413,9 +428,9 @@ function salonPassage(enter,after){
  if(!chessSalon||!camera)return;
  if(enter&&shell.getBoundingClientRect().top< -20)shell.scrollIntoView({block:'start',behavior:'instant'});
  prepareChessTable();stopFrames();setWalking(false);selected=-1;activeNote=null;markEntered();$('selectedExhibit').hidden=true;salonTransit=true;setSalonStage('transit');syncControls();
- const start=camera.position.clone(),startTarget=cameraTarget.clone(),outside=new THREE.Vector3(7.9,3.2,-14.8),inside=new THREE.Vector3(10.1,3.2,-14.8),end=enter?inside:outside;
- const target=new THREE.Vector3(...(enter?[15.5,2.6,-14.8]:[0,1.8,-8])),doorStart=salonDoor;
- const points=enter?[start,outside,new THREE.Vector3(9.58,3.1,-14.8),inside]:[start,new THREE.Vector3(10.65,2.5,-14.8),new THREE.Vector3(9.58,3.2,-14.8),outside];
+ const start=camera.position.clone(),startTarget=cameraTarget.clone(),outside=new THREE.Vector3(...space.portalPoint(-1.6,3.2)),inside=new THREE.Vector3(...space.portalPoint(.75,3.2)),end=enter?inside:outside;
+ const target=new THREE.Vector3(...(enter?chessSalon.entrance.insideLookAt:space.hallPoint(0,2.5,-8))),doorStart=salonDoor;
+ const points=enter?[start,outside,new THREE.Vector3(...space.portalPoint(0,3.1)),inside]:[start,new THREE.Vector3(...space.portalPoint(1.15,2.9)),new THREE.Vector3(...space.portalPoint(0,3.2)),outside];
  const curve=new THREE.CatmullRomCurve3(points,false,'centripetal');let done=false,began=null;
  const apply=t=>{if(done)return;salonDoor=doorStart+(1-doorStart)*clockEase(Math.min(1,t/.42));chessSalon.setDoorOpen(salonDoor,false);const move=clockEase(Math.max(0,(t-.14)/.86));camera.position.copy(curve.getPoint(move));cameraTarget.lerpVectors(startTarget,target,clockEase(t));camera.lookAt(cameraTarget);shell.dataset.salonDoor=salonDoor.toFixed(3);render();if(t===1){done=true;salonTransit=false;salonDoor=1;chessSalon.setDoorOpen(1);camera.position.copy(end);cameraTarget.copy(target);camera.lookAt(cameraTarget);renderer.shadowMap.needsUpdate=true;if(enter){beginSalonWalk();say('Šachový salonek. Můžete se projít nebo usednout ke stolu.')}else{setSalonStage('none');updateSelection();syncControls();after?.()}}};
  if(reduced.matches){apply(1);return}
@@ -424,13 +439,13 @@ function salonPassage(enter,after){
 function enterSalon(){salonPassage(true)}
 function leaveSalon(after){salonPassage(false,typeof after==='function'?after:()=>focusProject(lastProject))}
 function returnToSalon(){
- if(!chessSalon)return;setWalking(false);selected=-1;setSalonStage('inside');flyTo([10.1,3.2,-14.8],[15.5,2.6,-14.8],650,beginSalonWalk);say('Jste zpět v šachovém salonku.');
+ if(!chessSalon)return;setWalking(false);selected=-1;setSalonStage('inside');flyTo(space.portalPoint(.75,3.2),chessSalon.entrance.insideLookAt,650,beginSalonWalk);say('Jste zpět v šachovém salonku.');
 }
 function hasVisibleWindows(){
  if(!entered||mapMode||seatMode||chessMode||salonStage!=='none')return false;
  for(const table of tables){
    if(table.model.userData.loading)continue;
-   windowBounds.center.set(table.x,table.targetY,table.z);
+   windowBounds.center.set(table.centerX,table.targetY,table.centerZ);
    if(camera.position.distanceToSquared(windowBounds.center)<225 && viewFrustum.intersectsSphere(windowBounds))return true;
  }
  return false;
@@ -473,7 +488,7 @@ async function ensureChess(){
  chessLoading=import('./museum-chess-engine-v15.js?v=15.0').then(({createChessSession})=>{chessSession=createChessSession({onChange:state=>updateChess(state)});chessSession.setDifficulty(chessLevel);updateChess();return chessSession}).catch(error=>{$('chessStatus').textContent='Šachy se nepodařilo načíst. Zkuste novou partii.';chessLoading=null;return null});return chessLoading;
 }
 function startChess(){
- if(!chessExhibit)return;if(camera.position.x<9.75){focusSalonDoor();return}setSalonStage('inside');$('leisureMenu').open=false;setWalking(false);selected=-1;mapMode=false;seatMode=null;activeNote=null;chessMode=true;markEntered();$('selectedExhibit').hidden=true;$('chessPanel').hidden=false;shell.classList.add('playing-chess');updateSelection();flyTo(mobile.matches?chessExhibit.mobileLookFrom:chessExhibit.lookFrom,chessExhibit.lookAt,850);ensureChess().then(game=>{if(chessMode&&game)updateChess()});say('Šachy proti počítači. Vyberte obtížnost, potom svou figuru a cílové pole.');
+ if(!chessExhibit)return;if(!space.insideSalon(camera.position.x,camera.position.z)){focusSalonDoor();return}setSalonStage('inside');$('leisureMenu').open=false;setWalking(false);selected=-1;mapMode=false;seatMode=null;activeNote=null;chessMode=true;markEntered();$('selectedExhibit').hidden=true;$('chessPanel').hidden=false;shell.classList.add('playing-chess');updateSelection();flyTo(mobile.matches?chessExhibit.mobileLookFrom:chessExhibit.lookFrom,chessExhibit.lookAt,850);ensureChess().then(game=>{if(chessMode&&game)updateChess()});say('Šachy proti počítači. Vyberte obtížnost, potom svou figuru a cílové pole.');
 }
 function handleChessSquare(square,keyboard=false){
  if(!chessSession||!chessMode)return;chessKeyboard=keyboard;const state=chessSession.state();if(state.thinking||state.gameOver||state.turn!=='w')return;
@@ -539,7 +554,7 @@ async function init(){
        });
      }).catch(()=>{})
    ]);
-   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.domElement.setAttribute('aria-hidden','true');host.append(renderer.domElement);buildRoom();renderer.shadowMap.needsUpdate=true;shell.dataset.renderer='webgl';shell.dataset.exhibits=String(tables.length);shell.dataset.roomReady='true';host.setAttribute('aria-disabled','false');shell.dataset.revision='27.1';shell.dataset.reducedMotion=String(reduced.matches);shell.dataset.artworks=String(artworks.length);shell.dataset.facadeMode='geometric';say('Výstavní sál je připravený.');let lastWidth=0,lastHeight=0,lastMobile=mobile.matches;
+   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.domElement.setAttribute('aria-hidden','true');host.append(renderer.domElement);buildRoom();renderer.shadowMap.needsUpdate=true;shell.dataset.renderer='webgl';shell.dataset.exhibits=String(tables.length);shell.dataset.roomReady='true';host.setAttribute('aria-disabled','false');shell.dataset.revision='28.0';shell.dataset.reducedMotion=String(reduced.matches);shell.dataset.artworks=String(artworks.length);shell.dataset.facadeMode='geometric';say('Výstavní sál je připravený.');let lastWidth=0,lastHeight=0,lastMobile=mobile.matches;
  let lastOrientation=globalThis.screen?.orientation?.type;
  const resize=()=>{
    const w=host.clientWidth,h=host.clientHeight;
@@ -570,7 +585,7 @@ async function init(){
        const oldFit=exhibitOrbitFitDistance(table,cameraTarget,direction,previousProjection,THREE,previousMobile);
        const newFit=exhibitOrbitFitDistance(table,cameraTarget,direction,camera,THREE,isMobile);
        const limit=THREE.MathUtils.clamp(distance*newFit/oldFit,controls.minDistance,controls.maxDistance);
-       camera.position.copy(cameraTarget).addScaledVector(direction,roomOrbitDistance(cameraTarget,direction,limit));
+       camera.position.copy(cameraTarget).addScaledVector(direction,orbitDistance(tables[selected],cameraTarget,direction,limit));
      }
      touchRadius=0;touchController?.reset();camera.lookAt(cameraTarget);syncControls();
      if(atStartView)canonicalOrbitView={table,position:camera.position.clone(),target:cameraTarget.clone()};
@@ -636,7 +651,7 @@ padController=bindMovePad({pad:$('walkPad'),onStart:()=>{if(!walking)setWalking(
 function applyTouchOrbit(angle){
  orbitDirection.copy(camera.position).sub(cameraTarget).normalize();
  if(angle)orbitDirection.applyAxisAngle(orbitUp,angle);
- const distance=roomOrbitDistance(cameraTarget,orbitDirection,touchRadius);
+ const distance=orbitDistance(tables[selected],cameraTarget,orbitDirection,touchRadius);
  camera.position.copy(cameraTarget).addScaledVector(orbitDirection,distance);
  controls.update();
 }
