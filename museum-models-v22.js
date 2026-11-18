@@ -1,3 +1,5 @@
+import {applyExhibitSurfaceDetail} from './museum-exhibit-surfaces-v30.js?v=30.0';
+import {addKoupelniShades} from './museum-koupelni-shades-v30.js';
 import {makeProjectModel as makeKoupelni} from './museum-koupelni-v18.js?v=18.0';
 
 const ids = ['hustopece','transped','wurmova','bystrc','selska84','ivancice','nebovidy'];
@@ -119,8 +121,8 @@ function prepare(scene,THREE,id) {
  return scene;
 }
 
-export function makeProjectModel(id,THREE) {
- if (id === 'koupelni') return makeKoupelni(id,THREE);
+export function makeProjectModel(id,THREE,anisotropy=4) {
+ if (id === 'koupelni') return addKoupelniShades(makeKoupelni(id,THREE),THREE);
  const slot = slots.get(id);
  if (!slot?.visible) {
   const group = new THREE.Group();
@@ -146,11 +148,11 @@ export function makeProjectModel(id,THREE) {
   mesh.userData.projectId = id;
   mesh.material = Array.isArray(mesh.material) ? mesh.material.map(finish) : finish(mesh.material);
  });
- return model;
+ return applyExhibitSurfaceDetail(model,id,{anisotropy});
 }
 
 function validAsset(asset,id,folder) {
- return asset?.url === 'assets/v22/'+folder+'/'+id+'.glb' && Number.isSafeInteger(asset.bytes) && asset.bytes > 0;
+ return asset?.url === 'assets/v30/'+folder+'/'+id+'.glb' && Number.isSafeInteger(asset.bytes) && asset.bytes > 0;
 }
 
 export function loadClientModels(THREE,{onUpdate=()=>{}}={}) {
@@ -160,17 +162,16 @@ export function loadClientModels(THREE,{onUpdate=()=>{}}={}) {
  async function start() {
   try {
    const [response,{GLTFLoader},{MeshoptDecoder}] = await Promise.all([
-    fetch(new URL('assets/v22/models/manifest.json?v=26',document.baseURI)),
+    fetch(new URL('assets/v30/models/manifest.json',document.baseURI)),
     import('./assets/vendor/GLTFLoader.js'),import('./assets/vendor/meshopt_decoder.module.js')
    ]);
    if (!response.ok) throw new Error('manifest unavailable');
    const manifest = await response.json();
-   if (manifest.revision !== 22 || !Array.isArray(manifest.models)) throw new Error('invalid model manifest');
+   if (manifest.revision !== 30 || !Array.isArray(manifest.models)) throw new Error('invalid model manifest');
    revision = manifest.revision;
    const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
    loadAsset = async (id,asset) => {
     const url = new URL(asset.url,document.baseURI);
-    if (asset.updatedIn === 26) url.searchParams.set('v',asset.sha256.slice(0,12));
     return prepare((await loader.loadAsync(url.href)).scene,THREE,id);
    };
    for (const id of ids) {

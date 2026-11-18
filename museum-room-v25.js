@@ -3,7 +3,6 @@ import {
   createRoomProbe, applyFloorReflection, applyHallGlassFresnel, refineExhibitMaterials, calibrateExhibitFixture
 } from './museum-materials-v29.js?v=29.0';
 import { PICK_LAYER } from './museum-performance-v25.js?v=25.0';
-import { RectAreaLightUniformsLib } from './assets/vendor/RectAreaLightUniformsLib.js';
 import { addExhibitUplighting } from './museum-exhibit-lighting-v28.js?v=28.0';
 import {
   DISPLAY_DENOMINATOR, EXHIBIT_SCALE, WORLD_UNITS_PER_METRE,
@@ -12,7 +11,6 @@ import {
 
 const assetDirectory = new URL('./assets/v25/', import.meta.url);
 const capTop = 2.1;
-let areaLightLibraryReady = false;
 const studioNames = { hiarch: 'HiARCH', hiplan: 'HiPLAN', hireal: 'HiREAL', entrance: 'HiARCH  ·  HiPLAN  ·  HiREAL' };
 const lightLevels = {
   day: { sky: 0xC5B6A0, hemisphere: .78, sun: .62, spots: 15, environment: .68, park: 1, print: 1, fixture: .58 },
@@ -24,15 +22,15 @@ function assetUrl(name) {
   return new URL(name, name.startsWith('assets/') ? import.meta.url : assetDirectory).href;
 }
 
-export async function loadIndustrialAssets({ THREE, mobile = false }) {
+export async function loadIndustrialAssets({ THREE, mobile = false, onHallProgress }) {
   const [response, { GLTFLoader }, { MeshoptDecoder }] = await Promise.all([
-    fetch(assetUrl('assets/v29/scene.json')),
+    fetch(assetUrl('assets/v30/scene.json')),
     import('./assets/vendor/GLTFLoader.js'),
     import('./assets/vendor/meshopt_decoder.module.js')
   ]);
   if (!response.ok) throw new Error(`Industrial gallery manifest: HTTP ${response.status}`);
   const metadata = await response.json();
-  if (metadata.revision !== 29 || metadata.hall?.rootScale !== WORLD_UNITS_PER_METRE) {
+  if (metadata.revision !== 30 || metadata.hall?.rootScale !== WORLD_UNITS_PER_METRE) {
     throw new Error('Industrial gallery manifest has an unsupported scale or revision.');
   }
   const textures = new THREE.TextureLoader();
@@ -40,7 +38,7 @@ export async function loadIndustrialAssets({ THREE, mobile = false }) {
   const mobileAtlas = typeof mobile === 'boolean' ? mobile : mobile.matches;
   const atlas = mobileAtlas ? metadata.lightmap.mobile : metadata.lightmap.desktop;
   const [gltf, lightmap, foliage, finishes] = await Promise.all([
-    loader.loadAsync(assetUrl(metadata.hall.url)),
+    loader.loadAsync(assetUrl(metadata.hall.url), onHallProgress),
     textures.loadAsync(assetUrl(atlas)),
     textures.loadAsync(assetUrl(metadata.foliage.url)),
     loadMaterialFinishes(THREE, mobileAtlas, metadata.hall.physicalMetres)
@@ -650,11 +648,6 @@ export function buildGalleryRoom({
 export function addIndustrialSalon({
   THREE, scene, pickables, industrialAssets, artworks = [], labelTexture, requestRender = () => {}
 }) {
-  // The separately loaded chess table has one rectangular task light.
-  if (!areaLightLibraryReady) {
-    RectAreaLightUniformsLib.init();
-    areaLightLibraryReady = true;
-  }
   const { metadata, salon: group } = industrialAssets;
   const config = metadata.salon;
   const interior = named(group, config.root);

@@ -1,13 +1,13 @@
 import {exhibitView,exhibitOrbitFitDistance,DISPLAY_SCALE_LABEL,KOUPLENI_MODEL_NOTE} from './museum-placement-v29.js?v=29.0';
-import {loadIndustrialAssets,addIndustrialSalon} from './museum-room-v25.js?v=29.0';
+import {loadIndustrialAssets,addIndustrialSalon} from './museum-room-v25.js?v=30.0';
 import {PICK_LAYER,reachableHit,galleryPixelRatio,galleryFieldOfView} from './museum-performance-v28.js?v=28.0';
 import {createGallerySpace,orbitDistance} from './museum-space-v29.js?v=29.0';
 import {createWindowLife} from './museum-window-life-v16.js?v=21.0';
 
 import {createChessExhibit} from './museum-chess-v15.js?v=18.0';
 import * as THREE from './assets/vendor/three.module.min.js';
-import {makeProjectModel,loadClientModels,getModelState,prioritizeModel,setModelLoadingPaused} from './museum-models-v22.js?v=26.0';
-import {buildGalleryRoom} from './museum-room-v25.js?v=29.0';
+import {makeProjectModel,loadClientModels,prioritizeModel,setModelLoadingPaused} from './museum-models-v22.js?v=30.0';
+import {buildGalleryRoom} from './museum-room-v25.js?v=30.0';
 import {addWallMap} from './museum-wallmap-v18.js?v=18.0';
 import {OrbitControls} from './assets/vendor/OrbitControls.js';
 import {bindGalleryTouch} from './museum-touch-v25.js?v=25.0';
@@ -24,15 +24,26 @@ let projects=[],renderer=null,scene=null,camera=null,selected=-1,entered=false,w
 let cameraTarget=new THREE.Vector3(),cameraFrame=0,movementFrame=0,renderFrame=0,frameCount=0;
 let yaw=0,pitch=-.05,gesture=null,lastMove=0;
 let controls=null,doors=[],doorProgress=0,activeNote=null,completeEntry=null;
-let mapMode=false,wallMap=null,czGeo=null,facadeTextures={},lightRig=null,lastProject=null,artworks=[],benches=[],seatMode=null;
+let mapMode=false,wallMap=null,czGeo=null,lightRig=null,lastProject=null,artworks=[],benches=[],seatMode=null;
 let loadPlinthContact=null,galleryMapLight=null,installModel=null,chessSalon=null,salonStage='none',salonDoor=0,salonTransit=false;const mapColors=new Map();
 let lounge=null,chessExhibit=null,chessSession=null,chessMode=false,chessLoading=null,chessSelected=null,chessLevel='medium',chessFocus='e2',chessKeyboard=false,chessFen='',promotionMove=null,sceneObstacles=[],ambientTimer=0;
 let windowLife=null,windowLayouts={},lifePlay=!reduced.matches,lifeUserChoice=false,lifeTime=0,lifeLast=0;
 const viewFrustum=new THREE.Frustum(),viewProjection=new THREE.Matrix4();
 const portalBounds=new THREE.Box3();
 const windowBounds=new THREE.Sphere(new THREE.Vector3(),2.2);
-let pendingEntry=false;
-let galleryRoot=null,salonVisible=false,visitStarted=false,pendingProject=null,contextLost=false,pausedByBlur=false;
+let galleryReady=false;
+const completed = { hall:0, models:0, sources:0, interior:0, surroundings:0, frame:0 };
+function loadProgress(part, fraction) {
+ if (shell.dataset.renderer==='html') return;
+ completed[part]=Math.max(completed[part],Math.min(1,fraction));
+ const amount=Math.floor(42*completed.hall+32*completed.models+7*completed.sources+
+   9*completed.interior+6*completed.surroundings+4*completed.frame);
+ $('galleryProgress').value=amount;
+ $('galleryLoadingValue').textContent=amount+' %';
+ const label=completed.interior?'Připravuji první pohled':completed.hall===1&&completed.models<1?'Načítám modely staveb':'Načítám galerii';
+ if ($('galleryLoadingStep').textContent!==label) $('galleryLoadingStep').textContent=label;
+}
+let galleryRoot=null,salonVisible=false,visitStarted=false,contextLost=false,pausedByBlur=false;
 const limitedDevice=(navigator.deviceMemory>0&&navigator.deviceMemory<=4)||(navigator.hardwareConcurrency>0&&navigator.hardwareConcurrency<=4)||!!navigator.connection?.saveData;
 let lightWasChosen=false;
 const lighting={preset:'day',color:'#a9dcc6',intensity:1};
@@ -82,9 +93,9 @@ function updateRoomVisibility(){
    if(chessExhibit)chessExhibit.group.visible=show;
  }
 }
-function render(){
+function render(force=false){
  if(renderFrame){cancelAnimationFrame(renderFrame);renderFrame=0}
- if(!renderer||!camera||contextLost||!visible||document.hidden||document.querySelector('dialog[open]'))return;
+ if(!renderer||!camera||contextLost||(!force&&(!visible||document.hidden||document.querySelector('dialog[open]'))))return;
  updateRoomVisibility();
  updateExhibitDetail();
  const movingWindows=lifePlay&&!pausedByBlur&&hasVisibleWindows();
@@ -139,19 +150,17 @@ function flyTo(position,target,duration=850,onComplete=null,resolveFinalView=nul
  finishFlight=()=>apply(1);
  const step=now=>{if(began===null)began=now;const t=Math.min(1,(now-began)/duration);if(t<1){apply(clockEase(t));cameraFrame=requestAnimationFrame(step)}else{cameraFrame=0;finishFlight=null;apply(1)}};cameraFrame=requestAnimationFrame(step);
 }
-function requestSiteWorks(kind){
+function requestSiteWorks(kind,required=false){
  const state=kind==='quay'?'quayStatus':'streetStatus';
  if(!roomAtmosphere || ['loading','ready'].includes(shell.dataset[state]))return;
  shell.dataset[state]='loading';
- roomAtmosphere.loadSiteWorks(kind).then(()=>{
+ return roomAtmosphere.loadSiteWorks(kind).then(()=>{
    shell.dataset[state]='ready';
- }).catch(()=>{shell.dataset[state]='unavailable'});
+ }).catch(error=>{shell.dataset[state]='unavailable';if(required)throw error});
 }
 function startVisitAssets(){
  if(visitStarted||!camera||contextLost)return;
  visitStarted=true;
- loadPlinthContact?.();
- requestSiteWorks('streets');
  const loader=new THREE.ImageLoader();
  for(const art of artworks){
    loader.load(art.preview||art.image,image=>{
@@ -161,12 +170,7 @@ function startVisitAssets(){
      art.texture.image=image;art.texture.needsUpdate=true;scheduleRender();
    },undefined,()=>{art.previewFailed=true;});
  }
- syncModelLoading();
- shell.dataset.modelLoadStartMs=performance.now().toFixed(1);
- loadClientModels(THREE,{onUpdate:updateModelProgress}).then(()=>{
-   requestSiteWorks('quay');
-   shell.dataset.modelsCompleteMs=performance.now().toFixed(1);
- });
+
 }
 function markEntered(){
  startVisitAssets();
@@ -177,7 +181,7 @@ function markEntered(){
 function overview(){if(camera&&space.insideSalon(camera.position.x,camera.position.z)||salonTransit){leaveSalon(overview);return}setSalonStage('none');setWalking(false);selected=-1;activeNote=null;$('selectedExhibit').hidden=true;updateSelection();markEntered();flyTo([0,4.3,space.depth-1.2],layout.entryLookAt);say('Celý sál. Klikněte na vitrínu, nebo na volnou podlahu pro přechod.')}
 function entryPoint(){return mobile.matches && layout.entryCameraMobile ? layout.entryCameraMobile : layout.entryCamera}
 function enterGallery(){
- if(entered||!camera||!tables.length)return;
+ if(!galleryReady||entered||!camera||!tables.length)return;
  shell.dataset.entryComplete='false';
  const from=camera.position.clone(),fromTarget=cameraTarget.clone();stopFrames();selected=-1;activeNote=null;mapMode=false;seatMode=null;markEntered();controls.enabled=false;
  if(!lightWasChosen&&lighting.preset!=='day'){lighting.preset='day';applyLighting()}
@@ -187,15 +191,12 @@ function enterGallery(){
  const curve=new THREE.CatmullRomCurve3([from,new THREE.Vector3(0,3.5,space.depth+3.5),new THREE.Vector3(0,3.25,space.depth+.2),end],false,'centripetal');
  completeEntry=()=>{doorProgress=1;doorPose();camera.position.copy(end);cameraTarget.copy(target);camera.lookAt(cameraTarget);renderer.shadowMap.needsUpdate=true;setWalking(true,true);shell.dataset.entryComplete='true';markEntered();say($('walkHelp').textContent);scheduleRender()};
  // Opening the doors is an explicit visitor action, including in reduced-motion mode.
- shell.dataset.entryComplete='false';const duration=2400,entryFov=camera.fov,walkFov=galleryFieldOfView(host.clientWidth,host.clientHeight,'none',false,true);let began=null;
+ shell.dataset.entryComplete='false';const duration=reduced.matches?240:1150,entryFov=camera.fov,walkFov=galleryFieldOfView(host.clientWidth,host.clientHeight,'none',false,true);let began=null;
  const step=now=>{if(began===null)began=now;const t=Math.min(1,(now-began)/duration),open=clockEase(Math.min(1,t/.47)),move=clockEase(Math.max(0,Math.min(1,(t-.12)/.88)));doorProgress=open;doorPose();camera.fov=THREE.MathUtils.lerp(entryFov,walkFov,move);camera.updateProjectionMatrix();camera.position.copy(curve.getPoint(move));cameraTarget.lerpVectors(fromTarget,target,clockEase(t));camera.lookAt(cameraTarget);render();if(t<1)cameraFrame=requestAnimationFrame(step);else{cameraFrame=0;const finish=completeEntry;completeEntry=null;finish?.()}};
  cameraFrame=requestAnimationFrame(step);
 }
 function focusProject(id,scroll=false,move=true,duration=900){
- if(!camera||contextLost){
-   if(shell.dataset.renderer==='html')openProject(id);else pendingProject={id,scroll};
-   return;
- }
+ if(!galleryReady||contextLost)return;
  if(camera&&(space.insideSalon(camera.position.x,camera.position.z)||salonTransit)){leaveSalon(()=>focusProject(id,scroll,move,duration));return}setSalonStage('none');
  const i=projects.findIndex(p=>p.id===id);if(i<0)return;
  if(!lightWasChosen&&lighting.preset!=='day'){lighting.preset='day';applyLighting()}
@@ -299,7 +300,7 @@ function buildRoom(){
    ...(layout.sideTables||[]).map(p=>({...p,halfWidth:.62,halfDepth:.64}))];
  const [px,,pz]=space.portal;
  portalBounds.set(new THREE.Vector3(px-.6,0,pz-space.doorHalf-.22),new THREE.Vector3(px+.2,5.5,pz+space.doorHalf+.22));
- const room=buildGalleryRoom({THREE,renderer,projects,makeProjectModel:(id,T)=>makeProjectModel(id,T,facadeTextures),labelTexture:textureText,artworks,requestRender:scheduleRender,industrialAssets});roomAtmosphere=room;scene=room.scene;benches=room.benches||[];windowLife=createWindowLife({THREE,scene,layouts:windowLayouts});tables.length=0;shell.dataset.floorReflections='room-probe';shell.dataset.floorMirrorPasses='0';shell.dataset.architectureBatches=String(scene.userData.staticArchitecture?.batches||0);shell.dataset.entranceDesign=scene.userData.entranceDesign||'';shell.dataset.modelWindows=String(room.tables.find(t=>t.featured)?.model?.userData.windowCount||0);tables.push(...room.tables);const planters=(layout.planters||[]).map((p,i)=>[p.x,p.z,i===0?6.4:5.2]);for(const table of tables){table.planters=planters;table.orbitBounds=space.orbitBounds;table.focusViews=layout.focusViews?.[table.group.userData.projectId];addLifeTable(table)}shell.dataset.modelSizing=DISPLAY_SCALE_LABEL;shell.dataset.hallAuthoring='Blender';shell.dataset.hallPhysicalMetres=space.width+' × '+space.depth;shell.dataset.modelPlacement=JSON.stringify(tables.map(t=>({id:t.group.userData.projectId,...t.model.userData.displayPlacement})));shell.dataset.koupelniBatches=JSON.stringify(tables.find(t=>t.featured)?.model.userData.staticBatches || {});syncLifeButton();pickables.push(...room.pickables);doors=room.doors;doors.forEach(d=>d.userData.closedX=d.position.x);installModel=room.replaceModel;loadPlinthContact=room.loadPlinthContact;lightRig=room.setLighting;wallMap=addWallMap({THREE,scene,geo:czGeo,projects,pickables,labelTexture:textureText});const mapLight=galleryMapLight=new THREE.PointLight(0xf4f4dd,5,7,2);const atlas=layout.atlasCenter||layout.atlasPosition||[-space.width+.40,3.3,14.65*space.stretch];wallMap.group.position.fromArray(atlas);wallMap.group.rotation.y=Math.PI/2;wallMap.group.scale.setScalar(.74);wallMap.lookFrom=layout.atlasCamera;wallMap.lookAt=atlas;wallMap.group.updateMatrixWorld(true);mapLight.position.set(atlas[0]+.9,atlas[1]+1.8,atlas[2]);scene.add(mapLight);lounge=null;// All opaque room contents can be skipped behind the salon wall.
+ const room=buildGalleryRoom({THREE,renderer,projects,makeProjectModel:(id,T)=>makeProjectModel(id,T,Math.min(renderer.capabilities.getMaxAnisotropy(),mobile.matches||limitedDevice?2:6)),labelTexture:textureText,artworks,requestRender:scheduleRender,industrialAssets});roomAtmosphere=room;scene=room.scene;benches=room.benches||[];windowLife=createWindowLife({THREE,scene,layouts:windowLayouts});tables.length=0;shell.dataset.floorReflections='room-probe';shell.dataset.floorMirrorPasses='0';shell.dataset.architectureBatches=String(scene.userData.staticArchitecture?.batches||0);shell.dataset.entranceDesign=scene.userData.entranceDesign||'';shell.dataset.modelWindows=String(room.tables.find(t=>t.featured)?.model?.userData.windowCount||0);tables.push(...room.tables);const planters=(layout.planters||[]).map((p,i)=>[p.x,p.z,i===0?6.4:5.2]);for(const table of tables){table.planters=planters;table.orbitBounds=space.orbitBounds;table.focusViews=layout.focusViews?.[table.group.userData.projectId];addLifeTable(table)}shell.dataset.modelSizing=DISPLAY_SCALE_LABEL;shell.dataset.hallAuthoring='Blender';shell.dataset.hallPhysicalMetres=space.width+' × '+space.depth;shell.dataset.modelPlacement=JSON.stringify(tables.map(t=>({id:t.group.userData.projectId,...t.model.userData.displayPlacement})));shell.dataset.koupelniBatches=JSON.stringify(tables.find(t=>t.featured)?.model.userData.staticBatches || {});syncLifeButton();pickables.push(...room.pickables);doors=room.doors;doors.forEach(d=>d.userData.closedX=d.position.x);installModel=room.replaceModel;loadPlinthContact=room.loadPlinthContact;lightRig=room.setLighting;wallMap=addWallMap({THREE,scene,geo:czGeo,projects,pickables,labelTexture:textureText});const mapLight=galleryMapLight=new THREE.PointLight(0xf4f4dd,5,7,2);const atlas=layout.atlasCenter||layout.atlasPosition||[-space.width+.40,3.3,14.65*space.stretch];wallMap.group.position.fromArray(atlas);wallMap.group.rotation.y=Math.PI/2;wallMap.group.scale.setScalar(.74);wallMap.lookFrom=layout.atlasCamera;wallMap.lookAt=atlas;wallMap.group.updateMatrixWorld(true);mapLight.position.set(atlas[0]+.9,atlas[1]+1.8,atlas[2]);scene.add(mapLight);lounge=null;// All opaque room contents can be skipped behind the salon wall.
  galleryRoot=new THREE.Group();
  galleryRoot.name='Main gallery';
  for(const object of [...scene.children])if(object.isMesh||object.isGroup||object.isLine)galleryRoot.add(object);
@@ -309,7 +310,8 @@ function buildRoom(){
  chessSalon.setInteriorVisible(false);
  updatePickRoots();
  shell.dataset.aquarium='removed';shell.dataset.lifeCars='0';shell.dataset.lifePedestrians='0';shell.dataset.darts='removed';applyLighting();
- camera=new THREE.PerspectiveCamera(mobile.matches?84:52,1,.035,220);camera.position.set(mobile.matches?0:1.85,3.65,space.depth+(mobile.matches?11.4:13.0)*space.stretch);cameraTarget.set(0,mobile.matches?3.4:3.1,space.depth-.5);camera.lookAt(cameraTarget);doorPose();
+ // From outside the entrance the far side of the park dome is up to 269 world units away.
+ camera=new THREE.PerspectiveCamera(mobile.matches?84:52,1,.035,280);camera.position.set(mobile.matches?0:1.85,3.65,space.depth+(mobile.matches?11.4:13.0)*space.stretch);cameraTarget.set(0,mobile.matches?3.4:3.1,space.depth-.5);camera.lookAt(cameraTarget);doorPose();
  controls=new OrbitControls(camera,renderer.domElement);syncTouchPolicy();controls.enabled=false;controls.enableDamping=false;controls.enablePan=false;controls.minPolarAngle=0;controls.maxPolarAngle=Math.PI;controls.rotateSpeed=.65;controls.zoomSpeed=.8;controls.target.copy(cameraTarget);controls.update();controls.addEventListener('change',()=>{
    cameraTarget.copy(controls.target);
    if(controls.enabled&&selected>=0){
@@ -329,6 +331,14 @@ function prepareChessTable(){
  chessExhibit.group.scale.setScalar(2);
  for(const key of ['lookAt','lookFrom','mobileLookFrom']){const point=new THREE.Vector3(...chessExhibit[key]);point.sub(chessCenter).multiplyScalar(2).add(chessCenter);chessExhibit[key]=point.toArray()}
  for(const obstacle of chessExhibit.obstacles){obstacle.x=chessCenter.x+(obstacle.x-chessCenter.x)*2;obstacle.z=chessCenter.z+(obstacle.z-chessCenter.z)*2;obstacle.halfWidth*=2;obstacle.halfDepth*=2}
+ // Only the chess table uses Three's area-light lookup textures.
+ const areaLights=[];
+ chessExhibit.group.traverse(object=>{if(object.isRectAreaLight){object.visible=false;areaLights.push(object)}});
+ import('./assets/vendor/RectAreaLightUniformsLib.js').then(({RectAreaLightUniformsLib})=>{
+   RectAreaLightUniformsLib.init();
+   for(const light of areaLights)light.visible=true;
+   scheduleRender();
+ }).catch(()=>{ /* The salon also has baked lighting and other fixtures. */ });
  chessExhibit.group.updateMatrixWorld(true);
  chessExhibit.setLighting(lighting);
  chessExhibit.group.visible=salonVisible;
@@ -499,6 +509,7 @@ $('chessUndo').addEventListener('click',()=>{chessSelected=null;promotionMove=nu
 $('chessExit').addEventListener('click',returnToSalon);
 
 function updateModelProgress(state){
+ if(!galleryReady)loadProgress('models',state.loadedIds.length/7);
  const missing=Object.keys(state.errors).length;modelStatusSuffix=missing?` ${missing} ze 7 modelů se nepodařilo načíst. Fotografie jsou v detailu projektu.`:'';
  status.textContent=statusMessage+modelStatusSuffix;
  shell.dataset.detailedModels=['koupelni',...state.fullIds].join(',');
@@ -511,7 +522,36 @@ function updateModelProgress(state){
    if(link)link.textContent=state.errors[state.id]?'Znovu načíst 3D model ↻':'Obejít 3D model ↗';
  }
 }
-function setFallback(){$('entrancePoster').hidden=true;document.body.classList.add('gallery-fallback');shell.dataset.renderer='html';$('museumFallback').hidden=false;say('Projekty jsou dostupné v přehledu pod galerií.');document.body.classList.remove('gallery-at-entry');host.setAttribute('aria-disabled','true')}
+function setFallback(){
+ galleryReady=false;
+ shell.dataset.roomReady='false';
+ shell.dataset.renderer='html';
+ shell.setAttribute('aria-busy','false');
+ $('galleryLoading').hidden=true;
+ $('entrancePoster').hidden=true;
+ $('museumFallback').hidden=false;
+ host.inert=true;
+ host.setAttribute('aria-disabled','true');
+ host.setAttribute('aria-hidden','true');
+ document.body.classList.add('gallery-fallback');
+ document.body.classList.remove('gallery-at-entry');
+ say('Fotografie a výkresy jsou v přehledu projektů.');
+}
+function unlockEntrance(){
+ galleryReady=true;
+ shell.dataset.renderer='webgl';
+ shell.dataset.roomReady='true';
+ shell.dataset.readyMs=performance.now().toFixed(1);
+ shell.setAttribute('aria-busy','false');
+ $('galleryLoading').hidden=true;
+ $('entrancePoster').hidden=true;
+ $('museumFallback').hidden=true;
+ host.inert=false;host.tabIndex=0;
+ host.removeAttribute('aria-hidden');
+ host.setAttribute('aria-disabled','false');
+ for(const button of document.querySelectorAll('.card-actions [data-focus]'))button.disabled=false;
+ say('Výstavní sál je připravený.');
+}
 async function init(){
  try{const response=await fetch('assets/v29/projects.json');if(!response.ok)throw Error();const data=await response.json();projects=data.projects||[];if(!projects.length)throw Error();lastProject=projects[0].id;}catch{setFallback();say('Projektové podklady se nepodařilo načíst. Obnovte stránku.');return}
  buildInterface();
@@ -522,8 +562,16 @@ async function init(){
  else if(linkedProject)lighting.preset='day';
  try{
    renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'low-power'});
+   loadProgress('sources',.3);
+   shell.dataset.modelLoadStartMs=performance.now().toFixed(1);
    await Promise.all([
-     loadIndustrialAssets({THREE,requestRender:scheduleRender,mobile:mobile.matches||limitedDevice}).then(assets=>industrialAssets=assets),
+     loadClientModels(THREE,{onUpdate:updateModelProgress}).then(state=>{
+       if(state.loadedIds.length!==7||Object.keys(state.errors).length)throw Error('Incomplete model set');
+       shell.dataset.modelsCompleteMs=performance.now().toFixed(1);
+     }),
+     loadIndustrialAssets({THREE,mobile:mobile.matches||limitedDevice,onHallProgress:event=>{
+       if(event.total>0)loadProgress('hall',.9*event.loaded/event.total);
+     }}).then(assets=>{industrialAssets=assets;loadProgress('hall',1)}),
      document.fonts.load('500 20px "Space Grotesk"','Výstavní sál · Koupelní 2').catch(()=>{}),
      fetch('assets/v21/window-layouts.json').then(r=>r.json()).then(d=>windowLayouts=d.layouts||{}).catch(()=>{shell.dataset.lifeError='window-layout'}),
      fetch('assets/v2/czech-detailed.geojson').then(r=>r.json()).then(g=>czGeo=g).catch(()=>{}),
@@ -546,7 +594,14 @@ async function init(){
        });
      }).catch(()=>{})
    ]);
-   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.domElement.setAttribute('aria-hidden','true');host.append(renderer.domElement);buildRoom();renderer.shadowMap.needsUpdate=true;shell.dataset.renderer='webgl';shell.dataset.exhibits=String(tables.length);shell.dataset.roomReady='true';host.setAttribute('aria-disabled','false');shell.dataset.revision='29.0';shell.dataset.reducedMotion=String(reduced.matches);shell.dataset.artworks=String(artworks.length);shell.dataset.facadeMode='geometric';say('Výstavní sál je připravený.');let lastWidth=0,lastHeight=0,lastMobile=mobile.matches;
+   loadProgress('sources',1);
+   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.domElement.setAttribute('aria-hidden','true');host.append(renderer.domElement);buildRoom();
+   if(tables.length!==projects.length||tables.some(t=>t.model.userData.loading))throw Error('Exhibit not mounted');
+   loadPlinthContact?.();
+   loadProgress('interior',1);
+   await Promise.all(['streets','quay'].map(kind=>requestSiteWorks(kind,true)));
+   loadProgress('surroundings',1);
+   renderer.shadowMap.needsUpdate=true;shell.dataset.exhibits=String(tables.length);shell.dataset.revision='30.0';shell.dataset.reducedMotion=String(reduced.matches);shell.dataset.artworks=String(artworks.length);shell.dataset.facadeMode='geometric';let lastWidth=0,lastHeight=0,lastMobile=mobile.matches;
  let lastOrientation=globalThis.screen?.orientation?.type;
  const resize=()=>{
    const w=host.clientWidth,h=host.clientHeight;
@@ -587,21 +642,23 @@ async function init(){
    cancelAnimationFrame(renderFrame);renderFrame=0;render();
  };
  new ResizeObserver(resize).observe(host);resize();
- const entryCover=$('entrancePoster');
- const wasFocused=entryCover===document.activeElement;
- const earlyVisit=location.hash==='#vstoupit';
- if(earlyVisit)history.replaceState(history.state,'',location.pathname+location.search);
- entryCover.hidden=true;
- host.removeAttribute('aria-hidden');host.tabIndex=0;
- if(wasFocused)host.focus({preventScroll:true});
- if(pendingProject){const {id,scroll}=pendingProject;pendingProject=null;focusProject(id,scroll);}
- else if(pendingEntry||earlyVisit)enterGallery();
- else if(linkedProject)focusProject(linkedProject.id,false,true,0);
+ // Keep the static door photograph in place through the first complete GPU frame.
+ await new Promise(requestAnimationFrame);
+ render(true);
+ if(!frameCount||renderer.getContext().isContextLost())throw Error('First gallery frame unavailable');
+ loadProgress('frame',1);
+ await new Promise(requestAnimationFrame);
+ unlockEntrance();
+ if(linkedProject)focusProject(linkedProject.id,false,true,0);
+ else if(location.hash==='#vstoupit'){
+   history.replaceState(history.state,'',location.pathname+location.search);
+   enterGallery();
+ }
  renderer.domElement.addEventListener('webglcontextlost',event=>{
    event.preventDefault();contextLost=true;syncModelLoading();stopAmbientMotion();stopFrames();setFallback();
  });
  renderer.domElement.addEventListener('webglcontextrestored',()=>{
-   contextLost=false;syncModelLoading();shell.dataset.renderer='webgl';$('museumFallback').hidden=true;
+   contextLost=false;syncModelLoading();renderer.shadowMap.needsUpdate=true;render(true);unlockEntrance();
    document.body.classList.remove('gallery-fallback');
    document.body.classList.toggle('gallery-at-entry',!entered);
    host.setAttribute('aria-disabled','false');renderer.shadowMap.needsUpdate=true;
@@ -623,11 +680,6 @@ $('chessButton').addEventListener('click',focusSalonDoor);$('salonEnter').addEve
 $('lifeMotion').addEventListener('click',()=>{lifeUserChoice=true;lifePlay=!lifePlay;stopAmbientMotion();lifeLast=0;syncLifeButton();scheduleRender()});
 reduced.addEventListener('change',event=>{if(!lifeUserChoice)lifePlay=!event.matches;syncLifeButton();scheduleRender()});
 $('wallMapButton').addEventListener('click',showWallMap);$('ledIntensity').addEventListener('input',event=>{lighting.intensity=Number(event.target.value)/100;applyLighting()});
-// Before the modules arrive, the ordinary link records the same request in the fragment.
-$('entrancePoster').addEventListener('click',event=>{
- event.preventDefault();pendingEntry=true;
- if(camera&&!entered)enterGallery();
-});
 // Interface works independently of the 3D canvas.
 document.addEventListener('click',event=>{const b=event.target.closest('button');if(!b)return;if(b.dataset.lightPreset){lighting.preset=b.dataset.lightPreset;lightWasChosen=true;applyLighting();syncProjectLinks();return}if(b.dataset.ledColor){lighting.color=b.dataset.ledColor;applyLighting();return}if(b.hasAttribute('data-note-close')){activeNote=null;updateHotspots();return}if(b.dataset.note){showNote(b.dataset.note);return}if(b.dataset.company){openCompany(b.dataset.company);return}if(b.dataset.focus){focusProject(b.dataset.focus,b.hasAttribute('data-scroll'));return}if(b.dataset.open){openProject(b.dataset.open);return}if(b.hasAttribute('data-close'))b.closest('dialog')?.close()});
 host.addEventListener('keydown',event=>{
@@ -705,8 +757,9 @@ function suspendNavigation(){
  gesture=null;host.classList.remove('is-dragging');
 }
 function syncModelLoading(){
- setModelLoadingPaused(!visible||document.hidden||contextLost);
- shell.dataset.modelLoadingPaused=String(!visible||document.hidden||contextLost);
+ const paused=document.hidden||contextLost||(galleryReady&&!visible);
+ setModelLoadingPaused(paused);
+ shell.dataset.modelLoadingPaused=String(paused);
 }
 new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;syncModelLoading();if(!visible)suspendNavigation();else{scheduleRender()}},{threshold:.03}).observe(shell);
 document.addEventListener('visibilitychange',()=>{syncModelLoading();if(document.hidden)suspendNavigation();else{scheduleRender()}});window.addEventListener('blur',()=>{pausedByBlur=true;suspendNavigation()});window.addEventListener('focus',()=>{pausedByBlur=false;lifeLast=0;scheduleRender()});

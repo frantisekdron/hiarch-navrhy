@@ -1,0 +1,68 @@
+.museum-shell[data-renderer="loading"]::after { display: none }
+.museum-shell[data-room-ready="false"] .entrance-poster { cursor: progress }
+.gallery-loading {
+  position: absolute;
+  z-index: 5;
+  inset: auto 0 0;
+  display: grid;
+  justify-content: center;
+  gap: .62rem;
+  padding: clamp(3rem, 9vh, 7rem) 1.5rem max(2.4rem, env(safe-area-inset-bottom));
+  color: #fbf4e5;
+  background: linear-gradient(transparent, rgb(16 20 17 / 78%));
+  pointer-events: none;
+}
+.gallery-loading[hidden],
+.entrance-poster[hidden] { display: none }
+.gallery-loading-label {
+  width: min(16.5rem, 74vw);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  font: 500 .83rem/1.35 system-ui, sans-serif;
+  letter-spacing: .025em;
+  text-shadow: 0 1px 5px #171a16;
+}
+#galleryLoadingValue { font-variant-numeric: tabular-nums }
+#galleryProgress {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  border: 0;
+  border-radius: 2px;
+  overflow: hidden;
+  background: #66665b;
+  accent-color: #efdab3;
+}
+#galleryProgress::-webkit-progress-bar { background: #66665b }
+#galleryProgress::-webkit-progress-value { background: #efdab3; transition: width .16s linear }
+#galleryProgress::-moz-progress-bar { background: #efdab3 }
+#galleryProgress:indeterminate {
+  background: linear-gradient(90deg,#626358 20%,#f0dab3 50%,#626358 80%) 0 0 / 200% 100%;
+  animation: museum-prepare 1.4s ease-in-out infinite alternate;
+}
+#galleryProgress:indeterminate::-webkit-progress-bar { background: transparent }
+@keyframes museum-prepare { to { background-position: 100% 0 } }
+@media (prefers-reduced-motion: reduce) {
+  #galleryProgress:indeterminate { animation: none }
+  #galleryProgress::-webkit-progress-value { transition: none }
+}
+#museumFallback button {
+  background: #f1e5d0;
+  color: #212a23;
+  border: 1px solid currentColor;
+  border-radius: 2rem;
+  padding: .65rem 1.15rem;
+  font: inherit;
+  cursor: pointer;
+}
+#loadingProjects:not([hidden]) {
+  justify-self: start;
+  color: #fff6e7;
+  text-underline-offset: .22em;
+  padding: .28rem 0;
+  font: 500 .78rem/1.45 system-ui,sans-serif;
+  pointer-events: auto;
+}
