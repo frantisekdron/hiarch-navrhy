@@ -1,13 +1,13 @@
 import {exhibitView} from './museum-placement-v19.js?v=23.0';
-import {addChessSalon} from './museum-chess-salon-v20.js';
+import {addChessSalon} from './museum-chess-salon-v20.js?v=24.0';
 import {PICK_LAYER,reachableHit,galleryPixelRatio,galleryFieldOfView} from './museum-performance-v20.js';
 import {isWalkableRegion,navigationBounds} from './museum-salon-navigation-v18.js?v=18.0';
 import {createWindowLife} from './museum-window-life-v16.js?v=21.0';
 import {addGalleryLounge} from './museum-lounge-v19.js?v=19.0';
 import {createChessExhibit} from './museum-chess-v15.js?v=18.0';
 import * as THREE from './assets/vendor/three.module.min.js';
-import {makeProjectModel,loadClientModels,getModelState,prioritizeModel} from './museum-models-v22.js';
-import {buildGalleryRoom} from './museum-room-v10.js?v=23.0';
+import {makeProjectModel,loadClientModels,getModelState,prioritizeModel,setModelLoadingPaused} from './museum-models-v22.js?v=24.0';
+import {buildGalleryRoom} from './museum-room-v10.js?v=24.0';
 import {addWallMap} from './museum-wallmap-v18.js?v=18.0';
 import {OrbitControls} from './assets/vendor/OrbitControls.js';
 import {bindGalleryTouch, roomOrbitDistance} from './museum-touch-v11.js?v=11.0';
@@ -44,7 +44,7 @@ let finishFlight=null;
 let padController=null,navSide=0,navForward=0,route=null;
 let hitRoots=[],hoverRoots=[];
 const tableBounds=new WeakMap();
-let modelStatusSuffix='';
+let modelStatusSuffix='',statusMessage='';
 let nearbyModel=null;
 function updateExhibitDetail(){
  if(!entered)return;
@@ -66,7 +66,7 @@ function updateExhibitDetail(){
  nearbyModel=wanted;
  prioritizeModel(wanted);
 }
-const say=text=>status.textContent=text+modelStatusSuffix;
+const say=text=>{statusMessage=text;status.textContent=text+modelStatusSuffix};
 const clockEase=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
 const thumb=p=>p.thumbnail||`assets/v4/thumbs/${p.id}.webp`;
 function updateRoomVisibility(){
@@ -82,6 +82,7 @@ function updateRoomVisibility(){
  }
 }
 function render(){
+ if(renderFrame){cancelAnimationFrame(renderFrame);renderFrame=0}
  if(!renderer||!camera||contextLost||!visible||document.hidden||document.querySelector('dialog[open]'))return;
  updateRoomVisibility();
  updateExhibitDetail();
@@ -143,6 +144,7 @@ function startVisitAssets(){
      art.texture.image=image;art.texture.needsUpdate=true;scheduleRender();
    },undefined,()=>{art.previewFailed=true;});
  }
+ syncModelLoading();
  shell.dataset.modelLoadStartMs=performance.now().toFixed(1);
  loadClientModels(THREE,{onUpdate:updateModelProgress}).then(()=>{
    shell.dataset.modelsCompleteMs=performance.now().toFixed(1);
@@ -377,7 +379,7 @@ function salonPassage(enter,after){
  const target=new THREE.Vector3(...(enter?[15.5,2.6,-14.8]:[0,1.8,-8])),doorStart=salonDoor;
  const points=enter?[start,outside,new THREE.Vector3(9.58,3.1,-14.8),inside]:[start,new THREE.Vector3(10.65,2.5,-14.8),new THREE.Vector3(9.58,2.35,-14.8),outside];
  const curve=new THREE.CatmullRomCurve3(points,false,'centripetal');let done=false,began=null;
- const apply=t=>{if(done)return;salonDoor=doorStart+(1-doorStart)*clockEase(Math.min(1,t/.42));chessSalon.setDoorOpen(salonDoor);const move=clockEase(Math.max(0,(t-.14)/.86));camera.position.copy(curve.getPoint(move));cameraTarget.lerpVectors(startTarget,target,clockEase(t));camera.lookAt(cameraTarget);shell.dataset.salonDoor=salonDoor.toFixed(3);render();if(t===1){done=true;salonTransit=false;salonDoor=1;chessSalon.setDoorOpen(1);camera.position.copy(end);cameraTarget.copy(target);camera.lookAt(cameraTarget);renderer.shadowMap.needsUpdate=true;if(enter){beginSalonWalk();say('Šachový salonek. Můžete se projít nebo usednout ke stolu.')}else{setSalonStage('none');updateSelection();syncControls();after?.()}}};
+ const apply=t=>{if(done)return;salonDoor=doorStart+(1-doorStart)*clockEase(Math.min(1,t/.42));chessSalon.setDoorOpen(salonDoor,false);const move=clockEase(Math.max(0,(t-.14)/.86));camera.position.copy(curve.getPoint(move));cameraTarget.lerpVectors(startTarget,target,clockEase(t));camera.lookAt(cameraTarget);shell.dataset.salonDoor=salonDoor.toFixed(3);render();if(t===1){done=true;salonTransit=false;salonDoor=1;chessSalon.setDoorOpen(1);camera.position.copy(end);cameraTarget.copy(target);camera.lookAt(cameraTarget);renderer.shadowMap.needsUpdate=true;if(enter){beginSalonWalk();say('Šachový salonek. Můžete se projít nebo usednout ke stolu.')}else{setSalonStage('none');updateSelection();syncControls();after?.()}}};
  if(reduced.matches){apply(1);return}
  finishFlight=()=>apply(1);const step=now=>{if(began===null)began=now;const t=Math.min(1,(now-began)/1650);if(t<1){apply(t);cameraFrame=requestAnimationFrame(step)}else{cameraFrame=0;finishFlight=null;apply(1)}};cameraFrame=requestAnimationFrame(step);
 }
@@ -453,14 +455,15 @@ $('chessExit').addEventListener('click',returnToSalon);
 
 function updateModelProgress(state){
  const missing=Object.keys(state.errors).length;modelStatusSuffix=missing?` ${missing} ze 7 modelů se nepodařilo načíst. Fotografie jsou v detailu projektu.`:'';
+ status.textContent=statusMessage+modelStatusSuffix;
  shell.dataset.detailedModels=['koupelni',...state.fullIds].join(',');
  shell.dataset.loadedModels=state.loadedIds.join(',');shell.dataset.previewModels=state.previewIds.join(',');
  shell.dataset.modelPayloadBytes=String(state.payloadBytes);shell.dataset.modelErrors=Object.keys(state.errors).join(',');
  shell.dataset.modelFallbacks=Object.keys(state.detailErrors).join(',');shell.dataset.modelManifest=String(state.manifestRevision||'loading');shell.dataset.modelsPending=String(state.pendingIds.length);
  if(state.id&&state.loadedIds.includes(state.id)&&installModel?.(state.id,state.previewIds.includes(state.id)?'preview':'full')){addLifeTable(tables.find(t=>t.group.userData.projectId===state.id));shell.dataset.modelPlacement=JSON.stringify(tables.map(t=>({id:t.group.userData.projectId,...t.model.userData.displayPlacement})));shell.dataset.neonModels=String(scene.userData.allExhibitLighting?.count||0);scheduleRender()}
- if(state.id&&state.errors[state.id]){
+ if(state.id){
    const link=document.querySelector('[data-project-card="'+state.id+'"] .card-actions button');
-   if(link)link.textContent='Znovu načíst 3D model ↻';
+   if(link)link.textContent=state.errors[state.id]?'Znovu načíst 3D model ↻':'Obejít 3D model ↗';
  }
 }
 function setFallback(){$('entrancePoster').hidden=true;document.body.classList.add('gallery-fallback');shell.dataset.renderer='html';$('museumFallback').hidden=false;say('Projekty jsou dostupné v přehledu pod galerií.');document.body.classList.remove('gallery-at-entry');host.setAttribute('aria-disabled','true')}
@@ -497,7 +500,7 @@ async function init(){
        });
      }).catch(()=>{})
    ]);
-   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.domElement.setAttribute('aria-hidden','true');host.append(renderer.domElement);buildRoom();renderer.shadowMap.needsUpdate=true;shell.dataset.renderer='webgl';shell.dataset.exhibits=String(tables.length);shell.dataset.roomReady='true';host.setAttribute('aria-disabled','false');shell.dataset.revision='23.1';shell.dataset.reducedMotion=String(reduced.matches);shell.dataset.artworks=String(artworks.length);shell.dataset.facadeMode='geometric';say('Výstavní sál je připravený.');let lastWidth=0,lastHeight=0,lastMobile=mobile.matches;
+   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.domElement.setAttribute('aria-hidden','true');host.append(renderer.domElement);buildRoom();renderer.shadowMap.needsUpdate=true;shell.dataset.renderer='webgl';shell.dataset.exhibits=String(tables.length);shell.dataset.roomReady='true';host.setAttribute('aria-disabled','false');shell.dataset.revision='24.0';shell.dataset.reducedMotion=String(reduced.matches);shell.dataset.artworks=String(artworks.length);shell.dataset.facadeMode='geometric';say('Výstavní sál je připravený.');let lastWidth=0,lastHeight=0,lastMobile=mobile.matches;
  const resize=()=>{
    const w=host.clientWidth,h=host.clientHeight;
    if(!w||!h||(w===lastWidth&&h===lastHeight))return;
@@ -529,10 +532,10 @@ async function init(){
  else if(pendingEntry||earlyVisit)enterGallery();
  else if(linkedProject)focusProject(linkedProject.id,false,true,0);
  renderer.domElement.addEventListener('webglcontextlost',event=>{
-   event.preventDefault();contextLost=true;stopAmbientMotion();stopFrames();setFallback();
+   event.preventDefault();contextLost=true;syncModelLoading();stopAmbientMotion();stopFrames();setFallback();
  });
  renderer.domElement.addEventListener('webglcontextrestored',()=>{
-   contextLost=false;shell.dataset.renderer='webgl';$('museumFallback').hidden=true;
+   contextLost=false;syncModelLoading();shell.dataset.renderer='webgl';$('museumFallback').hidden=true;
    document.body.classList.remove('gallery-fallback');
    document.body.classList.toggle('gallery-at-entry',!entered);
    host.setAttribute('aria-disabled','false');renderer.shadowMap.needsUpdate=true;
@@ -627,7 +630,7 @@ function toggleExpanded(){const expand=!shell.classList.contains('expanded-galle
 $('expandGallery').addEventListener('click',toggleExpanded);
 document.querySelector('.mobile-projects-link').addEventListener('click',()=>{if(shell.classList.contains('expanded-gallery'))toggleExpanded()});
 $('helpGallery').addEventListener('click',()=>{suspendNavigation();$('navigationHelp').showModal()});
-$('pagerPrevious').addEventListener('click',()=>focusProject(projects[(selected-1+projects.length)%projects.length].id));
+$('pagerPrevious').addEventListener('click',()=>focusProject(projects[selected<0?projects.length-1:(selected-1+projects.length)%projects.length]?.id));
 $('pagerNext').addEventListener('click',()=>focusProject(projects[(selected+1+projects.length)%projects.length].id));
 $('pagerDetail').addEventListener('click',()=>{if(selected>=0)openProject(projects[selected].id)});
 function suspendNavigation(){
@@ -635,6 +638,10 @@ function suspendNavigation(){
  stopAmbientMotion();stopFrames();finish?.();
  gesture=null;host.classList.remove('is-dragging');
 }
-new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(!visible)suspendNavigation();else{scheduleRender()}},{threshold:.03}).observe(shell);
-document.addEventListener('visibilitychange',()=>{if(document.hidden)suspendNavigation();else{scheduleRender()}});window.addEventListener('blur',()=>{pausedByBlur=true;suspendNavigation()});window.addEventListener('focus',()=>{pausedByBlur=false;lifeLast=0;scheduleRender()});
+function syncModelLoading(){
+ setModelLoadingPaused(!visible||document.hidden||contextLost);
+ shell.dataset.modelLoadingPaused=String(!visible||document.hidden||contextLost);
+}
+new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;syncModelLoading();if(!visible)suspendNavigation();else{scheduleRender()}},{threshold:.03}).observe(shell);
+document.addEventListener('visibilitychange',()=>{syncModelLoading();if(document.hidden)suspendNavigation();else{scheduleRender()}});window.addEventListener('blur',()=>{pausedByBlur=true;suspendNavigation()});window.addEventListener('focus',()=>{pausedByBlur=false;lifeLast=0;scheduleRender()});
 init();

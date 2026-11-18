@@ -5,6 +5,7 @@ const slots = new Map();
 const active = new Set();
 const errors = new Map(), detailErrors = new Map();
 let preferred = null, revision = null, transferred = 0, ready, initialBatch, loadAsset, notify;
+let loadingPaused = false;
 
 export function getModelState() {
  const withTier = tier => ids.filter(id => slots.get(id)?.visible === tier);
@@ -44,6 +45,7 @@ function nextJob() {
 
 async function run(job) {
  const {id,slot,tier,asset} = job;
+ let failed = false;
  try {
   slot[tier] = await loadAsset(id,asset.url);
   transferred += asset.bytes;
@@ -51,13 +53,14 @@ async function run(job) {
   detailErrors.delete(id);
   present(id);
  } catch (error) {
+  failed = true;
   const message = error?.message || 'model unavailable';
   if (tier === 'preview') slot.previewFailed = true;
   else if (slot.visible) detailErrors.set(id,message);
   else errors.set(id,message);
  } finally {
   active.delete(id);
-  notify(null);
+  notify(failed ? id : null);
   // Let the newly installed exhibit paint before another GLB is decoded.
   setTimeout(pump,0);
  }
@@ -65,7 +68,7 @@ async function run(job) {
 
 function pump() {
  if (!loadAsset) return;
- while (active.size < 2) {
+ while (!loadingPaused && active.size < 2) {
   const job = nextJob();
   if (!job) break;
   active.add(job.id);
@@ -76,6 +79,13 @@ function pump() {
   ready = null;
   done(getModelState());
  }
+}
+
+// Keep already requested assets, but do not start another decode while hidden.
+// Priority and retry changes remain queued until the caller resumes loading.
+export function setModelLoadingPaused(paused) {
+ loadingPaused = !!paused;
+ if (!loadingPaused) pump();
 }
 
 export function prioritizeModel(id,{retry=false}={}) {
@@ -161,14 +171,15 @@ export function loadClientModels(THREE,{onUpdate=()=>{}}={}) {
    loadAsset = async (id,url) => prepare((await loader.loadAsync(new URL(url,document.baseURI).href)).scene,THREE,id);
    for (const id of ids) {
     const entry = manifest.models.find(asset => asset.id === id);
-    if (!validAsset(entry,id,'models')) { errors.set(id,'missing or invalid model entry'); continue; }
+    if (!validAsset(entry,id,'models')) { errors.set(id,'missing or invalid model entry'); notify(id); continue; }
     slots.set(id,{entry,previewFailed:!validAsset(entry.preview,id,'preview'),visible:null,full:null,preview:null});
    }
    notify(null);
    pump();
   } catch (error) {
-   for (const id of ids) if (!slots.get(id)?.visible) errors.set(id,error.message);
-   notify(null);
+   const failedIds = ids.filter(id => !slots.get(id)?.visible);
+   for (const id of failedIds) errors.set(id,error.message);
+   for (const id of failedIds) notify(id);
    ready?.(getModelState());
    ready = null;
   }

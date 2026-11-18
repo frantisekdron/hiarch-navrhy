@@ -15,10 +15,12 @@ export function addFixedExhibitLights({THREE,scene,tables}){
   light.name=`exhibit-ceiling-${table.group.userData.projectId}`;
   light.position.set(table.x-.95,6.60,table.z+1.50);light.target.position.set(table.x,1.45,table.z);light.castShadow=false;
   scene.add(light,light.target);lights.push(light);
-  matrix.makeTranslation(light.position.x,6.70,light.position.z);heads.setMatrixAt(index,matrix);
-  matrix.makeTranslation(light.position.x,6.58,light.position.z);lenses.setMatrixAt(index,matrix);
   const end=new THREE.Vector3(table.x,1.45,table.z),axis=light.position.clone().sub(end),mid=light.position.clone().add(end).multiplyScalar(.5);
   const rotation=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),axis.clone().normalize());
+  // Aim the physical head and diffuser along the same axis as its light.
+  const aim=axis.clone().normalize(),scale=new THREE.Vector3(1,1,1);
+  matrix.compose(light.position.clone().addScaledVector(aim,.10),rotation,scale);heads.setMatrixAt(index,matrix);
+  matrix.compose(light.position.clone().addScaledVector(aim,-.02),rotation,scale);lenses.setMatrixAt(index,matrix);
   const cone=new THREE.ConeGeometry(1.52,axis.length(),24,1,true);
   cone.applyMatrix4(new THREE.Matrix4().compose(mid,rotation,new THREE.Vector3(1,1,1)));cones.push(cone);
  }

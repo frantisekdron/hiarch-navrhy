@@ -10,8 +10,14 @@ export function addGalleryFinishes({THREE,scene,box,limestone,mats,recessedAquar
  const metal=new THREE.MeshStandardMaterial({color:0xA38B61,roughness:.42,metalness:.68,emissive:0x88764C,emissiveIntensity:.025});
  const shadow=new THREE.MeshStandardMaterial({color:0x17251C,roughness:.82});
  const led=new THREE.MeshBasicMaterial({color:0xF0D3A8,toneMapped:false});
- const wallWash=new THREE.MeshBasicMaterial({map,transparent:false,color:0xC5CBB8,toneMapped:true});
- const ribs=[],trims=[],diffusers=[];
+ const washCanvas=document.createElement('canvas');washCanvas.width=4;washCanvas.height=128;
+ const washContext=washCanvas.getContext('2d'),washGradient=washContext.createLinearGradient(0,0,0,128);
+ washGradient.addColorStop(0,'rgba(255,255,255,.8)');
+ washGradient.addColorStop(.24,'rgba(255,255,255,.32)');
+ washGradient.addColorStop(1,'rgba(255,255,255,0)');
+ washContext.fillStyle=washGradient;washContext.fillRect(0,0,4,128);
+ const wallWash=new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(washCanvas),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,color:0xC5CBB8,toneMapped:false});
+ const ribs=[],trims=[],diffusers=[],wallWashes=[];
  const bayZ=[13.8,7.1,.5,-6.4,-14.1];
  for(const side of fullAquarium?[1]:[-1,1]){
   const lowerSegments=chessOpening&&side>0?[[-17.4,-16.24],[-13.36,17.2]]:[[-17.4,17.2]];
@@ -23,7 +29,8 @@ export function addGalleryFinishes({THREE,scene,box,limestone,mats,recessedAquar
   box(.31,.11,34.6,side*9.19,6.67,-.1,metal,scene,{castShadow:false});
   box(.045,.035,34.35,side*8.95,6.35,-.1,led,scene,{castShadow:false,receiveShadow:false});
   // A softly lit upper frieze reveals the mineral texture in the otherwise dark room.
-  box(.022,.50,34.5,side*9.375,6.02,-.1,wallWash,scene,{castShadow:false,receiveShadow:false});
+  const wash=new THREE.PlaneGeometry(34.5,.94);
+  wash.rotateY(-side*Math.PI/2);wash.translate(side*9.398,5.95,-.1);wallWashes.push(wash);
   for(const z of bayZ){
    if(side>0&&(z===13.8||(chessOpening&&z===-14.1)))continue;
    // The left map bay keeps its entire panel unobstructed.
@@ -35,6 +42,8 @@ export function addGalleryFinishes({THREE,scene,box,limestone,mats,recessedAquar
    box(.37,.13,.46,side*9.14,6.20,z,stone,scene,{castShadow:false});
   }
  }
+ const washMesh=new THREE.Mesh(mergeGeometries(wallWashes,false),wallWash);
+ wallWashes.forEach(geometry=>geometry.dispose());washMesh.raycast=()=>{};scene.add(washMesh);
  // Five shallow vault ribs soften the flat box; geometry is shared in three draws.
  for(const z of bayZ){
   const curve=new THREE.QuadraticBezierCurve3(new THREE.Vector3(-9.12,6.23,z),new THREE.Vector3(0,7.53,z),new THREE.Vector3(9.12,6.23,z));
@@ -55,15 +64,16 @@ export function addGalleryFinishes({THREE,scene,box,limestone,mats,recessedAquar
   const amount=Math.max(0,Math.min(1.5,Number(intensity)||0)),tint=new THREE.Color(preset==='neon'?color:0xF0D3A8);
   if(preset==='neon'){const h={};tint.getHSL(h);tint.setHSL(h.h,Math.max(.8,h.s),.46)}
   led.color.copy(tint).multiplyScalar(preset==='day'?.4:preset==='neon'?.8+amount*.55:.50+amount*.25);
-  stone.color.set(preset==='day'?0xCAD0BF:0x59634F);
+  stone.color.set(preset==='day'?0xDDD6C4:0x59634F);
   stone.emissiveIntensity=preset==='day'?0:.055;
   // Low, material-coloured bounce keeps the wall texture legible while the
   // actual gallery stays dark; it cannot wash out the illuminated exhibits.
   for(const surface of [mats.wall,mats.wallPanel]){surface.emissive.setHex(0xA1AF94);surface.emissiveIntensity=preset==='day'?0:preset==='neon'?.028:.040}
   stone.envMapIntensity=preset==='day'?.4:.08;
   metal.envMapIntensity=preset==='day'?.7:.22;metal.emissiveIntensity=preset==='day'?.015:.075;
-  wallWash.color.copy(preset==='neon'?tint:new THREE.Color(0xD6CDB5)).multiplyScalar(preset==='day'?.65:preset==='neon'?.075+amount*.035:.13);
+  wallWash.color.copy(preset==='neon'?tint:new THREE.Color(0xD6CDB5));
+  wallWash.opacity=preset==='day'?.10:preset==='neon'?.11+amount*.10:.12;
  }
- scene.userData.roomFinish='travertine-pilaster-bays-v21';
+ scene.userData.roomFinish='mineral-stone-brass-inlays-v24';
  return {setLighting};
 }

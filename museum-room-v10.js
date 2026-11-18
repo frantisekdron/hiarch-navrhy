@@ -1,14 +1,14 @@
 import {placeExhibitModel} from './museum-placement-v19.js?v=23.0';
 import {createPlinthContact} from './museum-plinth-contact-v22.js';
 import {loadGallerySurfaces} from './museum-surfaces-v20.js';
-import {hangGalleryPictures} from './museum-pictures-v20.js';
+import {hangGalleryPictures} from './museum-pictures-v20.js?v=24.0';
 import {instanceGalleryFittings} from './museum-performance-v20.js';
 import { mergeGeometries } from './assets/vendor/BufferGeometryUtils.js';
-import { addFixedExhibitLights } from './museum-fixed-lights-v16.js?v=21.0';
+import { addFixedExhibitLights } from './museum-fixed-lights-v16.js?v=24.0';
 import { RectAreaLightUniformsLib } from './assets/vendor/RectAreaLightUniformsLib.js';
 import { makeBrandSign, getMarbleFinish } from './museum-brand-v12.js?v=21.0';
 import { addExhibitUplighting } from './museum-exhibit-lighting-v16.js?v=21.0';
-import { addGalleryFinishes } from './museum-room-finishes-v18.js?v=21.0';
+import { addGalleryFinishes } from './museum-room-finishes-v18.js?v=24.0';
 let rectAreaInitialised = false;
 
 export function buildGalleryRoom({ THREE, renderer, projects, makeProjectModel, labelTexture, artworks = [], requestRender }) {
@@ -71,7 +71,20 @@ export function buildGalleryRoom({ THREE, renderer, projects, makeProjectModel, 
   floorSurface.position.y=.001;
   floorSurface.receiveShadow=true;
   scene.add(floorSurface);
-  const grout=new THREE.LineBasicMaterial({color:0xbfb7a9,transparent:true,opacity:.22});
+  // Thin brass inlays frame the central aisle in the same floor plane.
+  const inlayParts=[];
+  for(const [halfWidth,halfDepth] of [[8.72,16.52],[3.30,15.88]]){
+    for(const side of [-1,1]){
+      inlayParts.push(new THREE.BoxGeometry(.024,.006,halfDepth*2).translate(side*halfWidth,.005,0));
+      inlayParts.push(new THREE.BoxGeometry(halfWidth*2,.006,.024).translate(0,.005,side*halfDepth));
+    }
+  }
+  const inlayGeometry=mergeGeometries(inlayParts,false);
+  inlayParts.forEach(part=>part.dispose());
+  const inlayMaterial=material(0xA58C62,{roughness:.48,metalness:.48});
+  const inlays=new THREE.Mesh(inlayGeometry,inlayMaterial);
+  inlays.name='Inlaid brass floor borders';inlays.raycast=()=>{};scene.add(inlays);
+  const grout=new THREE.LineBasicMaterial({color:0xbfb7a9,transparent:true,opacity:.15});
   const joints=[];
   for(let x=-9.75;x<=9.751;x+=3) joints.push(x,.004,-18,x,.004,18);
   for(let z=-18;z<=18.001;z+=3) joints.push(-9.75,.004,z,9.75,.004,z);
@@ -116,7 +129,7 @@ export function buildGalleryRoom({ THREE, renderer, projects, makeProjectModel, 
     box(0.055, 0.025, 22, x, 6.962, -1.5, ceilingGlow, scene, { castShadow: false, receiveShadow: false });
   }
   // The deep timber cornice gives the pale envelope a deliberate architectural edge.
-  for(const side of [1]) box(0.19,0.29,34.4,side*9.27,6.94,-0.1,mats.wood,scene,{castShadow:false,receiveShadow:false});
+  for(const side of [-1,1]) box(0.19,0.29,34.4,side*9.27,6.94,-0.1,mats.wood,scene,{castShadow:false,receiveShadow:false});
   box(18.5,0.29,0.2,0,6.94,-17.45,mats.wood,scene,{castShadow:false,receiveShadow:false});
 
   const hemi=new THREE.HemisphereLight(0xFFF9EF,0x77887A,0.8);scene.add(hemi);
@@ -190,6 +203,21 @@ export function buildGalleryRoom({ THREE, renderer, projects, makeProjectModel, 
     box(0.045, 0.13, 0.09, handleX, 3.17, 0.075, mats.bronze, pivot);
     box(0.055, 0.55, 0.055, handleX, 3.01, 0.1, mats.glassHandle, pivot);
     pivot.userData.doorSide = side < 0 ? 'left' : 'right';
+    // Each door moves as one object; its repeated metal pieces share a draw.
+    const doorParts=new Map();
+    for(const mesh of [...pivot.children]){
+      if(mesh.material.transparent)continue;
+      mesh.updateMatrix();
+      const geometry=mesh.geometry.clone().applyMatrix4(mesh.matrix);
+      if(!doorParts.has(mesh.material))doorParts.set(mesh.material,[]);
+      doorParts.get(mesh.material).push(geometry);
+      pivot.remove(mesh);mesh.geometry.dispose();
+    }
+    for(const [finish,geometries] of doorParts){
+      const mesh=new THREE.Mesh(mergeGeometries(geometries,false),finish);
+      geometries.forEach(geometry=>geometry.dispose());
+      mesh.castShadow=true;mesh.receiveShadow=true;pivot.add(mesh);
+    }
     doors.push(pivot);
     return pivot;
   }
@@ -423,9 +451,12 @@ export function buildGalleryRoom({ THREE, renderer, projects, makeProjectModel, 
     marks.instanceMatrix.needsUpdate=true;
     marks.raycast=()=>{};scene.add(marks);
   }
-  for(const table of tables) table.group.add(new THREE.Mesh(ledFrameGeometry,accentMaterial));
+  const ledFrames=new THREE.InstancedMesh(ledFrameGeometry,accentMaterial,tables.length);
+  const ledFrameMatrix=new THREE.Matrix4();
+  tables.forEach((table,index)=>ledFrames.setMatrixAt(index,ledFrameMatrix.makeTranslation(table.x,0,table.z)));
+  ledFrames.instanceMatrix.needsUpdate=true;ledFrames.raycast=()=>{};scene.add(ledFrames);
   const modes={
-    day:{wall:0xA0AAA0,panel:0x97A398,floor:0xB0B2A6,ceiling:0xAEBBB0,bg:0x98A99D,h:.8,k:1.45,s:18,front:7,wash:6,contact:.30},
+    day:{wall:0xC7C4B9,panel:0xBEBEB1,floor:0xB0B2A6,ceiling:0x65766A,bg:0x98A99D,h:.8,k:1.45,s:18,front:7,wash:6,contact:.30},
     evening:{wall:0x101712,panel:0x141D16,floor:0x18201A,ceiling:0x040705,bg:0x020503,h:.012,k:.025,s:26,front:.25,wash:18,contact:.48},
     neon:{wall:0x09110D,panel:0x101A13,floor:0x101B14,ceiling:0x030604,bg:0x010302,h:.008,k:.015,s:23,front:.18,wash:15,contact:.48}
   };
@@ -469,7 +500,9 @@ export function buildGalleryRoom({ THREE, renderer, projects, makeProjectModel, 
     sconceGlow.color.set(preset==='neon'?0xB5D9D0:0xECE7D9).multiplyScalar(preset==='day'?.55:preset==='neon'?.28+amount*.40:.24+amount*.20);
     benchLed.color.copy(preset==='neon'?vivid:c).lerp(new THREE.Color(0xDCE8D9),preset==='neon'?.12:.55).multiplyScalar(preset==='neon'?.36+amount*.34:.45+amount*.15);
     mats.glass.opacity=preset==='day'?.2:.12;
-    grout.color.set(preset==='day'?0xBFB7A9:0x6C8170);grout.opacity=preset==='day'?.22:preset==='neon'?.065:.035;
+    grout.color.set(preset==='day'?0xBFB7A9:0x6C8170);grout.opacity=preset==='day'?.15:preset==='neon'?.035:.025;
+    inlayMaterial.envMapIntensity=preset==='day'?.52:.10;
+    inlayMaterial.emissive.setHex(0x9E8352);inlayMaterial.emissiveIntensity=preset==='day'?0:.018;
     contactMaterial.opacity=m.contact;
     tables.forEach(table=>{table.rim.material.color.copy(preset==='neon'?vivid:new THREE.Color(0xBB9D6A));table.rim.material.opacity=preset==='day'?.38:.7});
     brandSigns.forEach(sign=>sign.setLighting({preset,color,intensity:amount}));
@@ -501,15 +534,39 @@ export function buildGalleryRoom({ THREE, renderer, projects, makeProjectModel, 
   let staticBatchCount=0,staticPartsMerged=0;
   for(const members of batches.values()){
     if(members.length<3)continue;
-    const first=members[0],batch=new THREE.InstancedMesh(unitBox,first.material,members.length);
+    const first=members[0];
+    let batch;
+    if(first.material.map===limestone.map){
+      // Map stone in metres before merging. A narrow pilaster and a 36 m wall
+      // now share the same grain size instead of stretching one image to each.
+      const parts=members.map(mesh=>{
+        const geometry=mesh.geometry.clone().applyMatrix4(mesh.matrixWorld);
+        const positions=geometry.getAttribute('position'),normals=geometry.getAttribute('normal'),uv=geometry.getAttribute('uv');
+        for(let i=0;i<positions.count;i++){
+          const x=positions.getX(i),y=positions.getY(i),z=positions.getZ(i);
+          const nx=normals.getX(i),ny=normals.getY(i),nz=normals.getZ(i);
+          if(Math.abs(nx)>.5)uv.setXY(i,-Math.sign(nx)*z/4.4,y/6.4);
+          else if(Math.abs(ny)>.5)uv.setXY(i,x/4.4,-Math.sign(ny)*z/6.4);
+          else uv.setXY(i,Math.sign(nz)*x/4.4,y/6.4);
+        }
+        return geometry;
+      });
+      batch=new THREE.Mesh(mergeGeometries(parts,false),first.material);
+      parts.forEach(part=>part.dispose());
+    }else{
+      batch=new THREE.InstancedMesh(unitBox,first.material,members.length);
+      members.forEach((mesh,index)=>{
+        const p=mesh.geometry.parameters;
+        const matrix=mesh.matrixWorld.clone().multiply(new THREE.Matrix4().makeScale(p.width,p.height,p.depth));
+        batch.setMatrixAt(index,matrix);
+      });
+      batch.instanceMatrix.needsUpdate=true;
+    }
     batch.castShadow=first.castShadow;batch.receiveShadow=first.receiveShadow;batch.frustumCulled=true;
-    members.forEach((mesh,index)=>{
-      const p=mesh.geometry.parameters;
-      const matrix=mesh.matrixWorld.clone().multiply(new THREE.Matrix4().makeScale(p.width,p.height,p.depth));
-      batch.setMatrixAt(index,matrix);
+    members.forEach(mesh=>{
       scene.remove(mesh);mesh.geometry.dispose();
     });
-    batch.instanceMatrix.needsUpdate=true;scene.add(batch);staticBatchCount++;staticPartsMerged+=members.length;
+    scene.add(batch);staticBatchCount++;staticPartsMerged+=members.length;
   }
   if(!staticBatchCount)unitBox.dispose();
   scene.userData.fittings=instanceGalleryFittings(THREE,scene,tables,benches,capGeometry);
