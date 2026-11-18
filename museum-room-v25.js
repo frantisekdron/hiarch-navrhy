@@ -2,9 +2,9 @@ import { PICK_LAYER } from './museum-performance-v25.js?v=25.0';
 import { RectAreaLightUniformsLib } from './assets/vendor/RectAreaLightUniformsLib.js';
 import { addExhibitUplighting } from './museum-exhibit-lighting-v16.js?v=21.0';
 import {
-  EXHIBIT_POSITIONS, MODEL_METRIC_SIZES, WORLD_UNITS_PER_METRE,
+  EXHIBIT_POSITIONS, EXHIBIT_SCALE, MODEL_METRIC_SIZES, WORLD_UNITS_PER_METRE,
   placeExhibitModel, plinthSize
-} from './museum-placement-v25.js';
+} from './museum-placement-v25.js?v=26.0';
 
 const assetDirectory = new URL('./assets/v25/', import.meta.url);
 const exhibitIds = Object.keys(MODEL_METRIC_SIZES);
@@ -45,7 +45,7 @@ export async function loadIndustrialAssets({ THREE, mobile = false }) {
   lightmap.flipY = metadata.lightmap.flipY;
   lightmap.colorSpace = THREE.SRGBColorSpace;
   foliage.colorSpace = THREE.NoColorSpace;
-  return { root: gltf.scene, metadata, lightmap, foliage };
+  return { root: gltf.scene, metadata, lightmap, foliage, loader };
 }
 
 function named(root, name) {
@@ -485,7 +485,10 @@ export function buildGalleryRoom({
     sun.intensity = level.sun;
     environmentLevel = level.environment;
     hall.furniture.forEach(updateEnvironment);
-    tables.forEach(table => updateModelEnvironment(table.model));
+    for (const table of tables) {
+      updateModelEnvironment(table.model);
+      if (table.approach) updateModelEnvironment(table.approach);
+    }
     for (const material of hall.baked) material.lightMapIntensity = day ? (metadata.lightmap.gain ?? 1) : 0;
     hall.goboStrength.value = day ? .10 : 0;
     if (!day) hall.time.value = 0;
@@ -521,6 +524,37 @@ export function buildGalleryRoom({
     table.contact.scale.set(table.scaledSize.x + .16, table.scaledSize.z + .16, 1);
   }
 
+  const siteJobs = new Map();
+  function loadSiteWorks(kind) {
+    if (siteJobs.has(kind)) return siteJobs.get(kind);
+    const quay = kind === 'quay';
+    const asset = quay ? 'bystrc-quay.glb' : 'streets.glb';
+    const ids = quay ? ['bystrc'] : ['hustopece', 'transped'];
+    // Source metres, centred on the building. Keep site works out of its orbit bounds.
+    const job = industrialAssets.loader.loadAsync(assetUrl('assets/v26/' + asset)).then(({ scene: site }) => {
+      const parts = ids.map(id => named(site, 'site_' + id));
+      ids.forEach((id, index) => {
+        const table = tables.find(item => item.group.userData.projectId === id);
+        const mount = new THREE.Group();
+        mount.position.y = capTop;
+        mount.scale.setScalar(EXHIBIT_SCALE);
+        mount.add(parts[index]);
+        mount.visible = !table.model.userData.loading;
+        mount.traverse(object => { object.raycast = () => {}; });
+        table.group.add(mount);
+        table.approach = mount;
+        updateModelEnvironment(mount);
+      });
+      requestRender();
+      return ids;
+    }).catch(error => {
+      siteJobs.delete(kind);
+      throw error;
+    });
+    siteJobs.set(kind, job);
+    return job;
+  }
+
   function loadPlinthContact() {
     if (contactMaterial) return;
     contactGeometry = new THREE.PlaneGeometry(1, 1);
@@ -545,6 +579,7 @@ export function buildGalleryRoom({
     releaseUplightInputs(model, inputs);
     updateModelEnvironment(model);
     updateContact(table);
+    if (table.approach) table.approach.visible = true;
     disposeModel(previous);
     requestRender();
     return true;
@@ -563,7 +598,7 @@ export function buildGalleryRoom({
   }
 
   setLighting();
-  return { scene, tables, benches, pickables, doors, replaceModel, setLighting, loadPlinthContact, updateAtmosphere, hasVisibleAtmosphere };
+  return { scene, tables, benches, pickables, doors, replaceModel, setLighting, loadPlinthContact, loadSiteWorks, updateAtmosphere, hasVisibleAtmosphere };
 }
 
 export function addIndustrialSalon({

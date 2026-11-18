@@ -47,7 +47,7 @@ async function run(job) {
  const {id,slot,tier,asset} = job;
  let failed = false;
  try {
-  slot[tier] = await loadAsset(id,asset.url);
+  slot[tier] = await loadAsset(id,asset);
   transferred += asset.bytes;
   errors.delete(id);
   detailErrors.delete(id);
@@ -160,7 +160,7 @@ export function loadClientModels(THREE,{onUpdate=()=>{}}={}) {
  async function start() {
   try {
    const [response,{GLTFLoader},{MeshoptDecoder}] = await Promise.all([
-    fetch(new URL('assets/v22/models/manifest.json',document.baseURI)),
+    fetch(new URL('assets/v22/models/manifest.json?v=26',document.baseURI)),
     import('./assets/vendor/GLTFLoader.js'),import('./assets/vendor/meshopt_decoder.module.js')
    ]);
    if (!response.ok) throw new Error('manifest unavailable');
@@ -168,7 +168,11 @@ export function loadClientModels(THREE,{onUpdate=()=>{}}={}) {
    if (manifest.revision !== 22 || !Array.isArray(manifest.models)) throw new Error('invalid model manifest');
    revision = manifest.revision;
    const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
-   loadAsset = async (id,url) => prepare((await loader.loadAsync(new URL(url,document.baseURI).href)).scene,THREE,id);
+   loadAsset = async (id,asset) => {
+    const url = new URL(asset.url,document.baseURI);
+    if (asset.updatedIn === 26) url.searchParams.set('v',asset.sha256.slice(0,12));
+    return prepare((await loader.loadAsync(url.href)).scene,THREE,id);
+   };
    for (const id of ids) {
     const entry = manifest.models.find(asset => asset.id === id);
     if (!validAsset(entry,id,'models')) { errors.set(id,'missing or invalid model entry'); notify(id); continue; }

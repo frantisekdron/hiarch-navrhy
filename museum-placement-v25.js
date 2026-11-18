@@ -27,14 +27,14 @@ export function placeExhibitModel(model,id,THREE,surfaceY=2.1){
   model.userData.displayPlacement={mode:'1:100',metresPerWorldUnit:.5,scaleDenominator:100,dimensionBasis:id==='koupelni'?'photo-estimate':'client-model-metres',fit,displaySize:scaledSize.toArray(),sourceSize:size.toArray(),metresPerUnit};
   return {fit,size,scaledSize,modelHeight:scaledSize.y,targetY:surfaceY+scaledSize.y*.48,focusRadius:scaledSize.length()*.5};
 }
-const streetBearing={koupelni:-30,hustopece:149,transped:30,wurmova:-30.72,bystrc:28,selska84:55,ivancice:38,nebovidy:34};
+const streetBearing={koupelni:-30,hustopece:-157,transped:29,wurmova:-30.72,bystrc:-31,selska84:55,ivancice:38,nebovidy:34};
 
-export function exhibitOrbitFitDistance(table,target,direction,projection,THREE,isMobile){
+export function exhibitOrbitFitDistance(table,target,direction,projection,THREE,isMobile,framing=isMobile?.80:.69){
   const size=table.scaledSize,base=table.targetY-size.y*.48;
   const right=new THREE.Vector3(0,1,0).cross(direction).normalize();
   const up=new THREE.Vector3().crossVectors(direction,right);
   const tanV=Math.tan(THREE.MathUtils.degToRad(projection.fov)*.5);
-  const tanH=tanV*projection.aspect*(isMobile?.80:.69);
+  const tanH=tanV*projection.aspect*framing;
   const corner=new THREE.Vector3();
   let distance=projection.near;
   for(const x of [-size.x/2,size.x/2])for(const y of [base,base+size.y])for(const z of [-size.z/2,size.z/2]){
@@ -50,6 +50,14 @@ export function exhibitView(table,camera,THREE,isMobile=false){
   const id=table.group.userData.projectId,angle=THREE.MathUtils.degToRad(id==='wurmova'&&isMobile?-29.66:(streetBearing[id]??30));
   const dx=Math.sin(angle),dz=Math.cos(angle),size=table.scaledSize;
   const target=new THREE.Vector3(table.x,table.targetY,table.z),base=table.targetY-size.y*.48;
+  // Tilt only where the approach or landing is part of the exhibit.
+  const approachPitch = {hustopece:25,transped:11,bystrc:22}[id];
+  if (approachPitch) {
+    const pitch=THREE.MathUtils.degToRad(approachPitch);
+    const direction=new THREE.Vector3(dx*Math.cos(pitch),Math.sin(pitch),dz*Math.cos(pitch));
+    const distance=exhibitOrbitFitDistance(table,target,direction,camera,THREE,isMobile,isMobile?.90:.82);
+    return {target,position:target.clone().addScaledVector(direction,distance)};
+  }
   const eyeHeight=base+Math.max(.028,size.y*.27);
   const tanV=Math.tan(THREE.MathUtils.degToRad(camera.fov)*.5),tanH=tanV*camera.aspect;
   let distance=Math.max(.5,table.focusRadius*1.4);

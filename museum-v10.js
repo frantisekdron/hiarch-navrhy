@@ -1,13 +1,13 @@
-import {exhibitView,exhibitOrbitFitDistance,KOUPLENI_MODEL_NOTE} from './museum-placement-v25.js?v=25.0';
-import {loadIndustrialAssets,addIndustrialSalon} from './museum-room-v25.js?v=25.0';
+import {exhibitView,exhibitOrbitFitDistance,KOUPLENI_MODEL_NOTE} from './museum-placement-v25.js?v=26.0';
+import {loadIndustrialAssets,addIndustrialSalon} from './museum-room-v25.js?v=26.0';
 import {PICK_LAYER,reachableHit,galleryPixelRatio,galleryFieldOfView} from './museum-performance-v25.js?v=25.0';
 import {isWalkableRegion,navigationBounds} from './museum-salon-navigation-v18.js?v=18.0';
 import {createWindowLife} from './museum-window-life-v16.js?v=21.0';
 
 import {createChessExhibit} from './museum-chess-v15.js?v=18.0';
 import * as THREE from './assets/vendor/three.module.min.js';
-import {makeProjectModel,loadClientModels,getModelState,prioritizeModel,setModelLoadingPaused} from './museum-models-v22.js?v=24.0';
-import {buildGalleryRoom} from './museum-room-v25.js?v=25.0';
+import {makeProjectModel,loadClientModels,getModelState,prioritizeModel,setModelLoadingPaused} from './museum-models-v22.js?v=26.0';
+import {buildGalleryRoom} from './museum-room-v25.js?v=26.0';
 import {addWallMap} from './museum-wallmap-v18.js?v=18.0';
 import {OrbitControls} from './assets/vendor/OrbitControls.js';
 import {bindGalleryTouch, roomOrbitDistance} from './museum-touch-v25.js?v=25.0';
@@ -139,10 +139,19 @@ function flyTo(position,target,duration=850,onComplete=null,resolveFinalView=nul
  finishFlight=()=>apply(1);
  const step=now=>{if(began===null)began=now;const t=Math.min(1,(now-began)/duration);if(t<1){apply(clockEase(t));cameraFrame=requestAnimationFrame(step)}else{cameraFrame=0;finishFlight=null;apply(1)}};cameraFrame=requestAnimationFrame(step);
 }
+function requestSiteWorks(kind){
+ const state=kind==='quay'?'quayStatus':'streetStatus';
+ if(!roomAtmosphere || ['loading','ready'].includes(shell.dataset[state]))return;
+ shell.dataset[state]='loading';
+ roomAtmosphere.loadSiteWorks(kind).then(()=>{
+   shell.dataset[state]='ready';
+ }).catch(()=>{shell.dataset[state]='unavailable'});
+}
 function startVisitAssets(){
  if(visitStarted||!camera||contextLost)return;
  visitStarted=true;
  loadPlinthContact?.();
+ requestSiteWorks('streets');
  const loader=new THREE.ImageLoader();
  for(const art of artworks){
    loader.load(art.preview||art.image,image=>{
@@ -155,6 +164,7 @@ function startVisitAssets(){
  syncModelLoading();
  shell.dataset.modelLoadStartMs=performance.now().toFixed(1);
  loadClientModels(THREE,{onUpdate:updateModelProgress}).then(()=>{
+   requestSiteWorks('quay');
    shell.dataset.modelsCompleteMs=performance.now().toFixed(1);
  });
 }
@@ -188,6 +198,8 @@ function focusProject(id,scroll=false,move=true,duration=900){
  if(camera&&(camera.position.x>9.6||salonTransit)){leaveSalon(()=>focusProject(id,scroll,move,duration));return}setSalonStage('none');
  const i=projects.findIndex(p=>p.id===id);if(i<0)return;
  if(!lightWasChosen&&lighting.preset!=='day'){lighting.preset='day';applyLighting()}
+ if(id==='bystrc')requestSiteWorks('quay');
+ if(shell.dataset.streetStatus==='unavailable')requestSiteWorks('streets');
  prioritizeModel(id,{retry:true});mapMode=false;seatMode=null;lastProject=id;activeNote=null;selected=i;shell.dataset.selectedProject=id;markEntered();setWalking(false);const p=projects[i],t=tables[i];
  $('selectedExhibit').hidden=false;$('selectedImage').src=thumb(p);$('selectedImage').alt=p.name;$('selectedLocation').textContent=[p.city,p.year].filter(Boolean).join(' · ');$('selectedName').textContent=p.name;$('selectedScale').textContent=p.id==='koupelni'?KOUPLENI_MODEL_NOTE:'Měřítko 1:100 · podle dodaného modelu';
  updateSelection();
@@ -527,7 +539,7 @@ async function init(){
        });
      }).catch(()=>{})
    ]);
-   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.domElement.setAttribute('aria-hidden','true');host.append(renderer.domElement);buildRoom();renderer.shadowMap.needsUpdate=true;shell.dataset.renderer='webgl';shell.dataset.exhibits=String(tables.length);shell.dataset.roomReady='true';host.setAttribute('aria-disabled','false');shell.dataset.revision='25.0';shell.dataset.reducedMotion=String(reduced.matches);shell.dataset.artworks=String(artworks.length);shell.dataset.facadeMode='geometric';say('Výstavní sál je připravený.');let lastWidth=0,lastHeight=0,lastMobile=mobile.matches;
+   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.domElement.setAttribute('aria-hidden','true');host.append(renderer.domElement);buildRoom();renderer.shadowMap.needsUpdate=true;shell.dataset.renderer='webgl';shell.dataset.exhibits=String(tables.length);shell.dataset.roomReady='true';host.setAttribute('aria-disabled','false');shell.dataset.revision='26.0';shell.dataset.reducedMotion=String(reduced.matches);shell.dataset.artworks=String(artworks.length);shell.dataset.facadeMode='geometric';say('Výstavní sál je připravený.');let lastWidth=0,lastHeight=0,lastMobile=mobile.matches;
  let lastOrientation=globalThis.screen?.orientation?.type;
  const resize=()=>{
    const w=host.clientWidth,h=host.clientHeight;
