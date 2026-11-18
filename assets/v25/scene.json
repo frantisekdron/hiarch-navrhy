@@ -1,0 +1,583 @@
+{
+  "revision": 25,
+  "metresPerWorldUnit": 0.5,
+  "hall": {
+    "url": "assets/v25/industrial-hall.glb",
+    "rootScale": 2,
+    "physicalMetres": {
+      "width": 9.6,
+      "depth": 18,
+      "eaves": 6.2,
+      "ridge": 8.1
+    },
+    "images": {
+      "european_walnut_veneer_04_nor_gl_1k.jpg": [
+        1024,
+        1024
+      ],
+      "honey-roof-boards.jpg": [
+        1024,
+        1024
+      ],
+      "HoneyTimber-material.jpg": [
+        1024,
+        1024
+      ],
+      "brick_wall_13_nor_gl_1k.jpg": [
+        1024,
+        1024
+      ],
+      "reclaimed-brick.jpg": [
+        1024,
+        1024
+      ],
+      "ReclaimedBrick-material.jpg": [
+        1024,
+        1024
+      ],
+      "concrete_floor_worn_001_nor_gl_1k.jpg": [
+        1024,
+        1024
+      ],
+      "limestone-concrete.jpg": [
+        1024,
+        1024
+      ],
+      "HonedConcrete-material.jpg": [
+        1024,
+        1024
+      ],
+      "park-day.jpg": [
+        2048,
+        1024
+      ],
+      "oiled-walnut.jpg": [
+        1024,
+        1024
+      ],
+      "OiledWalnut-material.jpg": [
+        1024,
+        1024
+      ]
+    },
+    "triangles": 75020,
+    "meshObjects": 79,
+    "constructionMeshes": 127
+  },
+  "lightmap": {
+    "desktop": "assets/v25/light-day.jpg",
+    "mobile": "assets/v25/light-day-mobile.jpg",
+    "uvChannel": 1,
+    "flipY": false,
+    "encoding": "srgb",
+    "gain": 1.642893397808075,
+    "size": 2048,
+    "texelsPerMetre": 76,
+    "p75": 0.27022576332092285,
+    "p99": 1.4935394525527954,
+    "samples": 128,
+    "bakeType": "Cycles diffuse direct and indirect irradiance without albedo",
+    "desktopSize": 2048,
+    "mobileSize": 1024,
+    "filtered": "Range-weighted bilateral and low-strength nonlocal chroma denoising; linear-light mobile downsample; JPEG 4:4:4 quality 93"
+  },
+  "foliage": {
+    "url": "assets/v25/foliage-shadow.png",
+    "domain": [
+      -9.6,
+      -18,
+      9.6,
+      18
+    ]
+  },
+  "tables": [
+    {
+      "id": "koupelni",
+      "x": -2.65,
+      "z": 7.8,
+      "width": 2.2882062911987306,
+      "depth": 1.4409865379333495,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_koupelni",
+      "displayScale": 0.01,
+      "measuredMetres": [
+        42.6457405090332,
+        28.04932689666748,
+        28.533632286460943
+      ],
+      "scaleEstimated": true
+    },
+    {
+      "id": "hustopece",
+      "x": -5.6,
+      "z": -2,
+      "width": 2.5235410156249998,
+      "depth": 1.6765625000000002,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_hustopece",
+      "displayScale": 0.01,
+      "measuredMetres": [
+        53.3427734375,
+        39.828125,
+        10.47216796875
+      ],
+      "scaleEstimated": false
+    },
+    {
+      "id": "transped",
+      "x": 5.6,
+      "z": -2,
+      "width": 2.0102578125,
+      "depth": 1.136796875,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_transped",
+      "displayScale": 0.01,
+      "measuredMetres": [
+        30.01171875,
+        12.83984375,
+        12.72900390625
+      ],
+      "scaleEstimated": false
+    },
+    {
+      "id": "wurmova",
+      "x": -5.6,
+      "z": -7,
+      "width": 1.655142578125,
+      "depth": 1.23689453125,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_wurmova",
+      "displayScale": 0.01,
+      "measuredMetres": [
+        13.8701171875,
+        17.8447265625,
+        11.14111328125
+      ],
+      "scaleEstimated": false
+    },
+    {
+      "id": "bystrc",
+      "x": 5.6,
+      "z": -7,
+      "width": 2.0277890625,
+      "depth": 1.4440625,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_bystrc",
+      "displayScale": 0.01,
+      "measuredMetres": [
+        30.80859375,
+        28.203125,
+        9.0732421875
+      ],
+      "scaleEstimated": false
+    },
+    {
+      "id": "selska84",
+      "x": -5.6,
+      "z": -12,
+      "width": 1.7493085937500001,
+      "depth": 1.32958984375,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_selska84",
+      "displayScale": 0.01,
+      "measuredMetres": [
+        18.150390625,
+        22.4794921875,
+        11.759796142578125
+      ],
+      "scaleEstimated": false
+    },
+    {
+      "id": "ivancice",
+      "x": 5.6,
+      "z": -12,
+      "width": 3.2864296875,
+      "depth": 1.284609375,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_ivancice",
+      "displayScale": 0.01,
+      "measuredMetres": [
+        88.01953125,
+        20.23046875,
+        12.5
+      ],
+      "scaleEstimated": false
+    },
+    {
+      "id": "nebovidy",
+      "x": 0,
+      "z": -12,
+      "width": 2.37544921875,
+      "depth": 1.3138671875,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_nebovidy",
+      "displayScale": 0.01,
+      "measuredMetres": [
+        46.611328125,
+        21.693359375,
+        11.7666015625
+      ],
+      "scaleEstimated": false
+    }
+  ],
+  "benches": [
+    {
+      "id": "bench-right-front",
+      "x": 8.35,
+      "z": 8.5,
+      "seat": [
+        8.2,
+        2.25,
+        8.5
+      ],
+      "lookAt": [
+        -1.8,
+        2.46,
+        5.35
+      ],
+      "approach": [
+        6.72,
+        3.2,
+        8.5
+      ],
+      "halfWidth": 0.69,
+      "halfDepth": 3.42,
+      "node": "Bench_1"
+    },
+    {
+      "id": "bench-right-back",
+      "x": 8.35,
+      "z": -2.5,
+      "seat": [
+        8.2,
+        2.25,
+        -2.5
+      ],
+      "lookAt": [
+        -1.8,
+        2.46,
+        -5.65
+      ],
+      "approach": [
+        6.72,
+        3.2,
+        -2.5
+      ],
+      "halfWidth": 0.69,
+      "halfDepth": 3.7,
+      "node": "Bench_2"
+    }
+  ],
+  "artworks": [
+    {
+      "id": "real-building",
+      "position": [
+        -9.16,
+        3.6,
+        8.4
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 3.466666666666667,
+      "height": 2.6,
+      "scope": "hall"
+    },
+    {
+      "id": "interior-living",
+      "position": [
+        -9.16,
+        3.6,
+        1.96
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 4.0,
+      "height": 2.25,
+      "scope": "hall"
+    },
+    {
+      "id": "interior-bedroom",
+      "position": [
+        -9.16,
+        3.6,
+        -4.47
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 4.0,
+      "height": 2.25,
+      "scope": "hall"
+    },
+    {
+      "id": "interior-room",
+      "position": [
+        -9.16,
+        3.6,
+        -10.9
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 4.0,
+      "height": 2.25,
+      "scope": "hall"
+    },
+    {
+      "id": "floor-5np",
+      "position": [
+        13.64,
+        3.72,
+        -10.755999999999998
+      ],
+      "rotationY": 3.141592653589793,
+      "width": 3.28,
+      "height": 2.319070109448796,
+      "scope": "salon"
+    },
+    {
+      "id": "axonometry",
+      "position": [
+        13.64,
+        3.72,
+        -18.844
+      ],
+      "rotationY": 0,
+      "width": 3.28,
+      "height": 2.4375743162901307,
+      "scope": "salon"
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "fixture-1",
+      "projectId": "koupelni",
+      "position": [
+        -5.04,
+        11.059999923706055,
+        8.56
+      ],
+      "target": [
+        -2.6500000953674316,
+        2.4139227867126465,
+        7.800000190734863
+      ]
+    },
+    {
+      "id": "fixture-2",
+      "projectId": "hustopece",
+      "position": [
+        -5.04,
+        11.059999923706055,
+        -1.2
+      ],
+      "target": [
+        -5.599999904632568,
+        2.240532875061035,
+        -2.0
+      ]
+    },
+    {
+      "id": "fixture-3",
+      "projectId": "transped",
+      "position": [
+        5.04,
+        11.059999923706055,
+        -1.24
+      ],
+      "target": [
+        5.599999904632568,
+        2.2621984481811523,
+        -2.0
+      ]
+    },
+    {
+      "id": "fixture-4",
+      "projectId": "wurmova",
+      "position": [
+        -5.04,
+        11.059999923706055,
+        -6.24
+      ],
+      "target": [
+        -5.599999904632568,
+        2.2469546794891357,
+        -7.0
+      ]
+    },
+    {
+      "id": "fixture-5",
+      "projectId": "bystrc",
+      "position": [
+        5.04,
+        11.059999923706055,
+        -6.34
+      ],
+      "target": [
+        5.599999904632568,
+        2.2271032333374023,
+        -7.0
+      ]
+    },
+    {
+      "id": "fixture-6",
+      "projectId": "selska84",
+      "position": [
+        -5.04,
+        11.059999923706055,
+        -11.54
+      ],
+      "target": [
+        -5.599999904632568,
+        2.2528939247131348,
+        -12.0
+      ]
+    },
+    {
+      "id": "fixture-7",
+      "projectId": "ivancice",
+      "position": [
+        5.04,
+        11.059999923706055,
+        -11.56
+      ],
+      "target": [
+        5.599999904632568,
+        2.259999990463257,
+        -12.0
+      ]
+    },
+    {
+      "id": "fixture-8",
+      "projectId": "nebovidy",
+      "position": [
+        0.34,
+        11.059999923706055,
+        -12.76
+      ],
+      "target": [
+        0.0,
+        2.2529594898223877,
+        -12.0
+      ]
+    }
+  ],
+  "doors": [
+    {
+      "name": "Door_Left",
+      "side": -1,
+      "travelMetres": 1.08
+    },
+    {
+      "name": "Door_Right",
+      "side": 1,
+      "travelMetres": 1.08
+    }
+  ],
+  "salon": {
+    "root": "Salon_Static",
+    "portal": "Salon_Portal",
+    "doors": [
+      {
+        "name": "Salon_Door_Left",
+        "hingeSign": 1,
+        "openRadians": 1.5707963267948966
+      },
+      {
+        "name": "Salon_Door_Right",
+        "hingeSign": -1,
+        "openRadians": -1.5707963267948966
+      }
+    ],
+    "bounds": {
+      "min": [
+        9.58,
+        0,
+        -19.2
+      ],
+      "max": [
+        19.08,
+        7.2,
+        -10.4
+      ]
+    },
+    "entrance": {
+      "outside": [
+        3.4,
+        3.2,
+        -14.8
+      ],
+      "lookAt": [
+        9.58,
+        2.8,
+        -14.8
+      ],
+      "inside": [
+        11.9,
+        3.2,
+        -14.8
+      ],
+      "insideLookAt": [
+        15.5,
+        1.9,
+        -14.8
+      ]
+    },
+    "label": {
+      "position": [
+        9.47,
+        5.4,
+        -14.8
+      ],
+      "rotationY": -1.5707963267948966,
+      "width": 2.88,
+      "height": 0.44
+    }
+  },
+  "brands": [
+    {
+      "id": "hiarch",
+      "position": [
+        -9.237,
+        6.55,
+        8.4
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 3.3,
+      "height": 0.68
+    },
+    {
+      "id": "hiplan",
+      "position": [
+        -9.237,
+        6.55,
+        1.96
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 3.3,
+      "height": 0.68
+    },
+    {
+      "id": "hireal",
+      "position": [
+        -9.237,
+        6.55,
+        -4.47
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 3.3,
+      "height": 0.68
+    },
+    {
+      "id": "entrance",
+      "position": [
+        0,
+        6.2,
+        18.037
+      ],
+      "rotationY": 0,
+      "width": 4.87,
+      "height": 0.75
+    }
+  ],
+  "sources": {
+    "park": "https://polyhaven.com/a/autumn_park",
+    "brick": "https://polyhaven.com/a/brick_wall_13",
+    "concrete": "https://polyhaven.com/a/concrete_floor_worn_001",
+    "walnut": "https://polyhaven.com/a/european_walnut_veneer_04"
+  }
+}

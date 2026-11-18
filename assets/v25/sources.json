@@ -1,0 +1,82 @@
+{
+  "assets": [
+    {
+      "id": "brick_wall_13",
+      "source": "https://polyhaven.com/a/brick_wall_13",
+      "license": "CC0-1.0",
+      "files": [
+        {
+          "name": "brick_wall_13_nor_gl_1k.jpg",
+          "sha256": "8db8d884278251411c5168d3c4624c306f4799643a4ee4b5d20f3aea01837009",
+          "bytes": 1046131
+        },
+        {
+          "name": "brick_wall_13_diff_1k.jpg",
+          "sha256": "8ea6dc05692e57f5601a14a192795cb5fb22f4547ec0fe7a0621b20591d06b1a",
+          "bytes": 729931
+        },
+        {
+          "name": "brick_wall_13_rough_1k.jpg",
+          "sha256": "80696114516e8b9b957d8549b7f5998bbaf1d5fad490c3b248c0dc00a1225110",
+          "bytes": 297231
+        }
+      ]
+    },
+    {
+      "id": "concrete_floor_worn_001",
+      "source": "https://polyhaven.com/a/concrete_floor_worn_001",
+      "license": "CC0-1.0",
+      "files": [
+        {
+          "name": "concrete_floor_worn_001_rough_1k.jpg",
+          "sha256": "069efe4ca018e0ef61fd8cc9964395ba8272284ae239da68d7f87988e2e9f488",
+          "bytes": 181942
+        },
+        {
+          "name": "concrete_floor_worn_001_nor_gl_1k.jpg",
+          "sha256": "523bd94a1be5dd2f11c2ae2b7d7c77445cf5bd9e41604db515a7c8364dcba067",
+          "bytes": 110906
+        },
+        {
+          "name": "concrete_floor_worn_001_diff_1k.jpg",
+          "sha256": "6e40c0fc908f4d66431836f5abe203f3a4eb064e88824378a91a46a26e2f464c",
+          "bytes": 118806
+        }
+      ]
+    },
+    {
+      "id": "european_walnut_veneer_04",
+      "source": "https://polyhaven.com/a/european_walnut_veneer_04",
+      "license": "CC0-1.0",
+      "files": [
+        {
+          "name": "european_walnut_veneer_04_diff_1k.jpg",
+          "sha256": "7550a170633834ca97776504b997031bcc4b0ac32f4729293fcc43c9b8c53fff",
+          "bytes": 534251
+        },
+        {
+          "name": "european_walnut_veneer_04_nor_gl_1k.jpg",
+          "sha256": "e90d54f9a1bbdc9ac1bd21342b778023f622bb274c96261a73e645d52c3be4ce",
+          "bytes": 379600
+        },
+        {
+          "name": "european_walnut_veneer_04_rough_1k.jpg",
+          "sha256": "557e3ac19c3a178963bee8ccd4a72bde6bb1ac09d877c1a42ed2154ef62b49e8",
+          "bytes": 722433
+        }
+      ]
+    },
+    {
+      "id": "autumn_park",
+      "source": "https://polyhaven.com/a/autumn_park",
+      "license": "CC0-1.0",
+      "files": [
+        {
+          "name": "park-environment.hdr",
+          "sha256": "4f310353f41cbb0530d4bd8bd38289549934244496329e21e0f90a761f2241c8",
+          "bytes": 6198039
+        }
+      ]
+    }
+  ]
+}

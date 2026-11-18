@@ -1,0 +1,214 @@
+:is(body[data-presentation=c], body[data-project]) {
+  --gallery-steel: #262723;
+  --gallery-forest: #293a2d;
+  --gallery-forest-hover: #3b4c37;
+  --gallery-ink: #302820;
+  --gallery-muted: #645448;
+  --gallery-brick: #864728;
+  --gallery-concrete: #e6dccd;
+  --gallery-paper: #f1e8d9;
+  --gallery-mount: #faf4e9;
+  --gallery-cream: #f9efdc;
+  --gallery-linen: #dfcbb0;
+  --gallery-ochre: #e4bb80;
+  --gallery-line: #c0ae96;
+  --gallery-control-line: #95806a;
+  --gallery-dark-line: #ab9373;
+  --gallery-shadow: 0 4px 14px #2419102b;
+
+  accent-color: var(--gallery-brick);
+}
+
+body[data-presentation=c] {
+  --charcoal: var(--gallery-steel);
+  --paper: var(--gallery-cream);
+  --sage: var(--gallery-linen);
+  --amber: var(--gallery-ochre);
+  --line: #947c605e;
+  --muted: var(--gallery-linen);
+  --ui-ink: var(--gallery-ink);
+  --ui-muted: var(--gallery-muted);
+  --ui-green: var(--gallery-forest);
+  --ui-light: var(--gallery-cream);
+
+  background: var(--gallery-steel);
+  color: var(--gallery-cream);
+}
+
+body[data-presentation=c] .museum-header {
+  background: var(--gallery-steel);
+  border-color: var(--gallery-dark-line);
+}
+
+body[data-presentation=c] .museum-header :is(a, .private-stamp) { color: var(--gallery-cream) }
+body[data-presentation=c] .museum-header .museum-brand svg { stroke: var(--gallery-ochre) }
+body[data-presentation=c] .museum-header .museum-brand i { color: var(--gallery-ochre) }
+body[data-presentation=c] .museum-header nav a[aria-current] {
+  background: var(--gallery-linen);
+  color: var(--gallery-ink);
+}
+
+body[data-presentation=c] :is(.museum-shell, .entrance-poster) { background: var(--gallery-steel) }
+body[data-presentation=c] .museum-shell[data-renderer=loading]::after {
+  background: var(--gallery-ochre);
+  box-shadow: none;
+}
+
+/* Keep the controls readable against the brightest windows and the night scene. */
+body[data-presentation=c] :is(
+  .tool-button, .lighting-control > summary, .leisure-menu > summary,
+  .project-picker > summary, .room-controls button, .info-dock-button,
+  .project-pager, .walk-pad:not([hidden]), .orbit-toolbar:not([hidden]),
+  .museum-fallback, .leisure-popover, .salon-panel:not([hidden]), .chess-panel:not([hidden])
+),
+body[data-presentation=c] .museum-shell[data-lighting] :is(.room-title, .walk-help, .lighting-panel) {
+  background: var(--gallery-forest);
+  color: var(--gallery-cream);
+  border-color: var(--gallery-dark-line);
+  box-shadow: var(--gallery-shadow);
+  backdrop-filter: none;
+}
+
+body[data-presentation=c] :is(.walk-pad .move-label, .mobile-projects-link) {
+  background: var(--gallery-forest);
+  color: var(--gallery-cream);
+}
+
+body[data-presentation=c] .museum-shell[data-lighting] .room-title b { color: var(--gallery-cream) }
+body[data-presentation=c] .museum-shell[data-lighting] .room-title > span:first-child,
+body[data-presentation=c] :is(.project-pager small, .salon-panel p, .chess-selection, .chess-levels legend) {
+  color: var(--gallery-linen);
+}
+
+body[data-presentation=c] .museum-shell[data-lighting] .room-title > .navigation-mode,
+body[data-presentation=c] :is(
+  .walk-pad button, .orbit-toolbar button, .chess-levels button, .chess-actions button,
+  .chess-promotion button, .lighting-panel .life-motion-toggle
+),
+body[data-presentation=c] .museum-shell[data-lighting] .light-presets button {
+  background: var(--gallery-forest-hover);
+  color: var(--gallery-cream);
+  border-color: var(--gallery-dark-line);
+}
+
+body[data-presentation=c] :is(
+  .tool-button, .lighting-control > summary, .leisure-menu > summary, .room-controls button,
+  .info-dock-button, .project-pager button, .walk-pad button, .orbit-toolbar button
+):hover {
+  background: var(--gallery-forest-hover);
+  color: var(--gallery-cream);
+}
+
+body[data-presentation=c] :is(
+  .tool-button[aria-pressed=true], .lighting-control[open] > summary, .leisure-menu[open] > summary,
+  .room-controls button[aria-pressed=true], .chess-levels button[aria-pressed=true], .salon-panel button
+),
+body[data-presentation=c] .museum-shell[data-lighting] .light-presets button[aria-pressed=true],
+body[data-presentation=c] #museum .leisure-popover button:hover {
+  background: var(--gallery-ochre);
+  color: var(--gallery-ink);
+  border-color: var(--gallery-ochre);
+}
+
+body[data-presentation=c] :is(.move-knob, .salon-panel button:hover) {
+  background: var(--gallery-linen);
+  color: var(--gallery-ink);
+  border-color: var(--gallery-linen);
+}
+
+body[data-presentation=c] .move-knob svg { stroke: var(--gallery-ink) }
+body[data-presentation=c] .project-pager #pagerDetail { border-color: var(--gallery-dark-line) }
+body[data-presentation=c] .salon-panel #salonExit { color: var(--gallery-cream) }
+body[data-presentation=c] .salon-panel #salonExit:hover { color: var(--gallery-ink); background: var(--gallery-linen) }
+body[data-presentation=c] .museum-shell[data-lighting] .lighting-panel :is(h3, .led-label, .lighting-level, p),
+body[data-presentation=c] .museum-shell[data-lighting] .museum-status { color: var(--gallery-cream) }
+body[data-presentation=c] .museum-shell[data-lighting] .led-colors button { border-color: var(--gallery-dark-line) }
+body[data-presentation=c] .museum-shell[data-lighting] .led-colors button[aria-pressed=true] { outline-color: var(--gallery-ochre) }
+body[data-presentation=c] .lighting-panel input[type=range] { accent-color: var(--gallery-ochre) }
+
+body[data-presentation=c] :is(.museum-header, .museum-shell, .museum-companies, footer)
+  :is(a:not(.entrance-poster), button, summary, input):focus-visible {
+  outline: 2px solid var(--gallery-ochre);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--gallery-steel);
+}
+
+body[data-presentation=c] .project-pager button:focus-visible { outline-offset: -4px }
+
+/* Warm image surrounds echo the gallery floor without changing project photos. */
+body[data-presentation=c] .exhibition-index {
+  background: var(--gallery-paper);
+  color: var(--gallery-ink);
+}
+
+body[data-presentation=c] .index-heading .eyebrow { color: var(--gallery-brick) }
+body[data-presentation=c] .project-card { border-color: var(--gallery-line) }
+body[data-presentation=c] .project-card.is-featured { background: var(--gallery-mount) }
+body[data-presentation=c] .card-photograph,
+body[data-presentation=c] .project-card-link .card-photograph img { background: var(--gallery-concrete) }
+body[data-presentation=c] .card-photograph > span {
+  background: var(--gallery-mount);
+  color: var(--gallery-ink);
+}
+
+body[data-presentation=c] .card-description .card-open { border-color: var(--gallery-line); color: var(--gallery-brick) }
+body[data-presentation=c] .card-actions button:hover { color: var(--gallery-brick); border-color: var(--gallery-brick) }
+body[data-presentation=c] :is(.exhibition-index, dialog) :is(a, button):focus-visible {
+  outline: 3px solid var(--gallery-brick);
+  outline-offset: 4px;
+}
+
+body[data-presentation=c] .museum-companies { background: var(--gallery-forest) }
+body[data-presentation=c] .museum-companies button { color: var(--gallery-cream); border-color: var(--gallery-dark-line) }
+body[data-presentation=c] .museum-companies > .eyebrow,
+body[data-presentation=c] .museum-companies button i { color: var(--gallery-ochre) }
+body[data-presentation=c] .museum-companies button span,
+body[data-presentation=c] footer :is(a, small, span) { color: var(--gallery-linen) }
+
+body[data-presentation=c] :is(.project-dialog, .company-dialog, .annotation-card) {
+  background: var(--gallery-mount);
+  color: var(--gallery-ink);
+  border-color: var(--gallery-line);
+}
+
+body[data-presentation=c] :is(.project-dialog, .company-dialog)::backdrop { background: #211a15d1; backdrop-filter: none }
+body[data-presentation=c] .dialog-close { background: var(--gallery-mount); color: var(--gallery-ink); border-color: var(--gallery-control-line) }
+body[data-presentation=c] .project-detail-grid > img { background: var(--gallery-concrete) }
+
+body[data-project] {
+  --ink: var(--gallery-ink);
+  --forest: var(--gallery-forest);
+  --paper: var(--gallery-paper);
+  --mount: var(--gallery-mount);
+  --bronze: var(--gallery-brick);
+  --muted: var(--gallery-muted);
+  --line: var(--gallery-line);
+  --accent: var(--gallery-ochre);
+}
+
+body[data-project] .mast { background: var(--gallery-steel); color: var(--gallery-cream) }
+body[data-project] .mast :is(.atelier svg, .back-link i) { color: var(--gallery-ochre) }
+body[data-project] .atelier span { color: var(--gallery-linen); border-color: var(--gallery-dark-line) }
+body[data-project] .skip-link:focus { background: var(--gallery-mount) }
+body[data-project] :is(.neighbours, .exposure) { border-color: var(--gallery-line) }
+body[data-project] .exposure { box-shadow: 0 3px 12px #30211212 }
+body[data-project] :is(.slide-surface, .feature-pair a, .film-frame img) { background: var(--gallery-concrete) }
+body[data-project] :is(.slide-surface, .light-surface)[data-kind=plan] { background: var(--gallery-mount) }
+body[data-project] .film-frame[data-kind=plan] img { background: #fff }
+body[data-project] :is(.enlarge, .feature-pair i, .film-frame span) { background: var(--gallery-steel); color: var(--gallery-cream) }
+body[data-project] :is(.enlarge, .light-head button) { border-color: var(--gallery-dark-line) }
+body[data-project] :is(.folio, .project-notes > p, .feature-pair figcaption) { color: var(--gallery-muted) }
+body[data-project] .filmstrip { scrollbar-color: var(--gallery-control-line) transparent }
+body[data-project] .film-frame:hover { border-color: var(--gallery-control-line) }
+body[data-project] .film-frame[aria-current=true] { border-color: var(--gallery-brick); box-shadow: inset 0 -2px var(--gallery-brick) }
+body[data-project] .image-arrows button { border-color: var(--gallery-control-line) }
+body[data-project] :is(.image-arrows button, .near-project):hover { background: var(--gallery-concrete) }
+body[data-project] .media-filters button[aria-pressed=true] { border-color: var(--gallery-brick) }
+body[data-project] .model-link { color: var(--gallery-cream) }
+body[data-project] .model-link:hover { background: var(--gallery-forest-hover) }
+body[data-project] .model-link svg:first-child { color: var(--gallery-ochre) }
+body[data-project] #lightbox,
+body[data-project] .light-surface { background: var(--gallery-steel); color: var(--gallery-cream) }
+body[data-project] #lightbox::backdrop { background: #211a15e8 }
+body[data-project] :is(a, button):focus-visible { outline-color: var(--gallery-brick) }
+body[data-project] :is(.mast a, .light-head button):focus-visible { outline-color: var(--gallery-ochre) }

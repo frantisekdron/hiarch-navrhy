@@ -1,16 +1,16 @@
-import {exhibitView} from './museum-placement-v19.js?v=23.0';
-import {addChessSalon} from './museum-chess-salon-v20.js?v=24.0';
-import {PICK_LAYER,reachableHit,galleryPixelRatio,galleryFieldOfView} from './museum-performance-v20.js';
+import {exhibitView,exhibitOrbitFitDistance,KOUPLENI_MODEL_NOTE} from './museum-placement-v25.js?v=25.0';
+import {loadIndustrialAssets,addIndustrialSalon} from './museum-room-v25.js?v=25.0';
+import {PICK_LAYER,reachableHit,galleryPixelRatio,galleryFieldOfView} from './museum-performance-v25.js?v=25.0';
 import {isWalkableRegion,navigationBounds} from './museum-salon-navigation-v18.js?v=18.0';
 import {createWindowLife} from './museum-window-life-v16.js?v=21.0';
-import {addGalleryLounge} from './museum-lounge-v19.js?v=19.0';
+
 import {createChessExhibit} from './museum-chess-v15.js?v=18.0';
 import * as THREE from './assets/vendor/three.module.min.js';
 import {makeProjectModel,loadClientModels,getModelState,prioritizeModel,setModelLoadingPaused} from './museum-models-v22.js?v=24.0';
-import {buildGalleryRoom} from './museum-room-v10.js?v=24.0';
+import {buildGalleryRoom} from './museum-room-v25.js?v=25.0';
 import {addWallMap} from './museum-wallmap-v18.js?v=18.0';
 import {OrbitControls} from './assets/vendor/OrbitControls.js';
-import {bindGalleryTouch, roomOrbitDistance} from './museum-touch-v11.js?v=11.0';
+import {bindGalleryTouch, roomOrbitDistance} from './museum-touch-v25.js?v=25.0';
 import {findPath} from './fd-pathfinding-v8.js';
 import {bindMovePad} from './museum-input-v8.js?v=11.0';
 
@@ -19,6 +19,7 @@ const shell=$('museum'),host=$('museumCanvas'),status=$('museumStatus');
 const reduced=matchMedia('(prefers-reduced-motion:reduce)'),mobile=matchMedia('(max-width:650px), (pointer:coarse) and (max-height:520px)');
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const companies={hiarch:{name:'HiARCH',role:'Architektura a povolení',copy:'Navrhujeme architekturu a připravujeme povolení. Od prvního záměru po potřebnou dokumentaci.'},hiplan:{name:'HiPLAN',role:'Vlastní developerské projekty',copy:'Realizujeme vlastní developerské projekty.'},hireal:{name:'HiREAL',role:'Realitní činnost',copy:'Věnujeme se realitní činnosti a nabývání nemovitostí.'}};
+let industrialAssets=null,roomAtmosphere=null;
 let projects=[],renderer=null,scene=null,camera=null,selected=-1,entered=false,walking=false,visible=true;
 let cameraTarget=new THREE.Vector3(),cameraFrame=0,movementFrame=0,renderFrame=0,frameCount=0;
 let yaw=0,pitch=-.05,gesture=null,lastMove=0;
@@ -34,13 +35,13 @@ let pendingEntry=false;
 let galleryRoot=null,salonVisible=false,visitStarted=false,pendingProject=null,contextLost=false,pausedByBlur=false;
 const limitedDevice=(navigator.deviceMemory>0&&navigator.deviceMemory<=4)||(navigator.hardwareConcurrency>0&&navigator.hardwareConcurrency<=4)||!!navigator.connection?.saveData;
 let lightWasChosen=false;
-const lighting={preset:'evening',color:'#a9dcc6',intensity:1};
+const lighting={preset:'day',color:'#a9dcc6',intensity:1};
 const noteContent={facade:{title:'Průčelí a členění',copy:'Světlou hlavní hmotu člení tmavé svislé pásy a pravidelný rytmus oken. Podobu modelu porovnáte se skutečnými fotografiemi v detailu.'},conversion:{title:'Nové využití objektu',copy:'Rekonstrukce bývalé administrativní budovy na polyfunkční dům. Projekt propojuje bydlení s kancelářskými prostory a službami v přízemí.'},hiarch:{title:'HiARCH',copy:'Projekt je součástí portfolia ateliéru HiARCH.'}};
 const keys=new Set(),tables=[],pickables=[];
 let touchController=null, touchMode='select', touchRadius=0, pinchRadius=0;
 const desktopOffset=new THREE.Vector3();
 const orbitDirection=new THREE.Vector3(), orbitUp=new THREE.Vector3(0,1,0);
-let finishFlight=null;
+let finishFlight=null,canonicalOrbitView=null;
 let padController=null,navSide=0,navForward=0,route=null;
 let hitRoots=[],hoverRoots=[];
 const tableBounds=new WeakMap();
@@ -87,10 +88,13 @@ function render(){
  updateRoomVisibility();
  updateExhibitDetail();
  const movingWindows=lifePlay&&!pausedByBlur&&hasVisibleWindows();
+ const movingFoliage=lifePlay&&!pausedByBlur&&entered&&lighting.preset==='day'&&!!roomAtmosphere?.hasVisibleAtmosphere?.(camera);
+ const movingAtmosphere=movingWindows||movingFoliage;
  const now=performance.now()/1000;
- if(movingWindows&&lifeLast)lifeTime+=Math.min(.4,Math.max(0,now-lifeLast));
- lifeLast=movingWindows?now:0;
+ if(movingAtmosphere&&lifeLast)lifeTime+=Math.min(.4,Math.max(0,now-lifeLast));
+ lifeLast=movingAtmosphere?now:0;
  windowLife?.update(lifeTime,{animate:movingWindows});
+ roomAtmosphere?.updateAtmosphere?.(lifeTime,{animate:movingFoliage,camera});
  renderer.render(scene,camera);
  if(!frameCount)shell.dataset.firstFrameMs=performance.now().toFixed(1);
  shell.dataset.frames=String(++frameCount);
@@ -107,11 +111,11 @@ function render(){
    if(camera.position.x>9.75&&salonStage!=='inside')setSalonStage('inside');
    else if(camera.position.x<8.5&&salonStage==='inside')setSalonStage('none');
  }
- if(movingWindows)startAmbientMotion();else stopAmbientMotion();
+ if(movingAtmosphere)startAmbientMotion();else stopAmbientMotion();
 }
 function scheduleRender(){if(!renderer||renderFrame)return;renderFrame=requestAnimationFrame(()=>{renderFrame=0;render()})}
 function stopFrames(){salonTransit=false;cancelAnimationFrame(cameraFrame);cancelAnimationFrame(movementFrame);cameraFrame=0;movementFrame=0;keys.clear();route=null;finishFlight=null;touchController?.reset();padController?.reset();lastMove=0;if(completeEntry){const finish=completeEntry;completeEntry=null;finish()}}
-function doorPose(){doors.forEach(d=>{const side=d.userData.doorSide==='left'?-1:1;d.rotation.y=0;d.position.x=(d.userData.closedX??side*3.75)+side*doorProgress*3.6})}
+function doorPose(){doors.forEach(d=>{const side=d.userData.doorSide==='left'?-1:1;d.rotation.y=0;d.position.x=(d.userData.closedX??side*3.75)+side*doorProgress*(d.userData.slideDistance??3.6)})}
 function syncControls(){
  if(!controls)return;
  controls.target.copy(cameraTarget);
@@ -120,13 +124,17 @@ function syncControls(){
  controls.minPolarAngle=orbiting?.22:0;
  controls.maxPolarAngle=orbiting?1.77:Math.PI;
  const freeView=mapMode||walking||seatMode||chessMode;
- controls.minDistance=freeView?.5:2.3;
- controls.maxDistance=freeView?40:9;
+ controls.minDistance=freeView?.5:Math.max(.22,(tables[selected]?.focusRadius||.3)+.045);
+ controls.maxDistance=freeView?40:Math.max(3,(tables[selected]?.focusRadius||.5)*7);
  controls.update();
 }
-function flyTo(position,target,duration=850,onComplete=null){
+function flyTo(position,target,duration=850,onComplete=null,resolveFinalView=null){
  if(!camera)return;stopFrames();touchRadius=0;if(controls)controls.enabled=false;const startP=camera.position.clone(),startT=cameraTarget.clone(),endP=new THREE.Vector3(...position),endT=new THREE.Vector3(...target),doorStart=doorProgress;let began=null,completed=false;
- const apply=t=>{camera.position.lerpVectors(startP,endP,t);cameraTarget.lerpVectors(startT,endT,t);camera.lookAt(cameraTarget);if(entered){doorProgress=doorStart+(1-doorStart)*t;doorPose()}render();if(t===1){if(walking||seatMode){const direction=cameraTarget.clone().sub(camera.position).normalize();yaw=Math.atan2(-direction.x,-direction.z);pitch=Math.asin(THREE.MathUtils.clamp(direction.y,-1,1))}syncControls();if(!completed){completed=true;onComplete?.()}}};
+ const apply=t=>{
+   const finalView=t===1?resolveFinalView?.():null;
+   if(finalView){endP.copy(finalView.position);endT.copy(finalView.target)}
+   camera.position.lerpVectors(startP,endP,t);cameraTarget.lerpVectors(startT,endT,t);camera.lookAt(cameraTarget);if(entered){doorProgress=doorStart+(1-doorStart)*t;doorPose()}render();if(t===1){if(walking||seatMode){const direction=cameraTarget.clone().sub(camera.position).normalize();yaw=Math.atan2(-direction.x,-direction.z);pitch=Math.asin(THREE.MathUtils.clamp(direction.y,-1,1))}syncControls();if(!completed){completed=true;onComplete?.()}}
+ };
  if(reduced.matches||duration===0){apply(1);return}
  finishFlight=()=>apply(1);
  const step=now=>{if(began===null)began=now;const t=Math.min(1,(now-began)/duration);if(t<1){apply(clockEase(t));cameraFrame=requestAnimationFrame(step)}else{cameraFrame=0;finishFlight=null;apply(1)}};cameraFrame=requestAnimationFrame(step);
@@ -164,12 +172,12 @@ function enterGallery(){
  if(!lightWasChosen&&lighting.preset!=='day'){lighting.preset='day';applyLighting()}
  updateSelection();$('selectedExhibit').hidden=true;$('navigationMode').textContent='Vstup do galerie';say('Dveře se otevírají. Vstupujete do výstavního sálu.');
  // Stop just inside the entrance, within the walkable floor. No exhibit is selected.
- const end=new THREE.Vector3(0,2.35,14.6),target=new THREE.Vector3(0,2.35-Math.sin(.05)*8,14.6-Math.cos(.05)*8);
- const curve=new THREE.CatmullRomCurve3([from,new THREE.Vector3(0,2.9,22),new THREE.Vector3(0,2.5,18.2),end],false,'centripetal');
+ const end=new THREE.Vector3(0,3.2,14.6),target=new THREE.Vector3(0,3.2+Math.sin(.025)*8,14.6-Math.cos(.025)*8);
+ const curve=new THREE.CatmullRomCurve3([from,new THREE.Vector3(0,3.5,22),new THREE.Vector3(0,3.25,18.2),end],false,'centripetal');
  completeEntry=()=>{doorProgress=1;doorPose();camera.position.copy(end);cameraTarget.copy(target);camera.lookAt(cameraTarget);renderer.shadowMap.needsUpdate=true;setWalking(true,true);shell.dataset.entryComplete='true';markEntered();say($('walkHelp').textContent);scheduleRender()};
  // Opening the doors is an explicit visitor action, including in reduced-motion mode.
- shell.dataset.entryComplete='false';const duration=2400;let began=null;
- const step=now=>{if(began===null)began=now;const t=Math.min(1,(now-began)/duration),open=clockEase(Math.min(1,t/.47)),move=clockEase(Math.max(0,Math.min(1,(t-.12)/.88)));doorProgress=open;doorPose();camera.position.copy(curve.getPoint(move));cameraTarget.lerpVectors(fromTarget,target,clockEase(t));camera.lookAt(cameraTarget);render();if(t<1)cameraFrame=requestAnimationFrame(step);else{cameraFrame=0;const finish=completeEntry;completeEntry=null;finish?.()}};
+ shell.dataset.entryComplete='false';const duration=2400,entryFov=camera.fov,walkFov=galleryFieldOfView(host.clientWidth,host.clientHeight,'none',false,true);let began=null;
+ const step=now=>{if(began===null)began=now;const t=Math.min(1,(now-began)/duration),open=clockEase(Math.min(1,t/.47)),move=clockEase(Math.max(0,Math.min(1,(t-.12)/.88)));doorProgress=open;doorPose();camera.fov=THREE.MathUtils.lerp(entryFov,walkFov,move);camera.updateProjectionMatrix();camera.position.copy(curve.getPoint(move));cameraTarget.lerpVectors(fromTarget,target,clockEase(t));camera.lookAt(cameraTarget);render();if(t<1)cameraFrame=requestAnimationFrame(step);else{cameraFrame=0;const finish=completeEntry;completeEntry=null;finish?.()}};
  cameraFrame=requestAnimationFrame(step);
 }
 function focusProject(id,scroll=false,move=true,duration=900){
@@ -181,8 +189,16 @@ function focusProject(id,scroll=false,move=true,duration=900){
  const i=projects.findIndex(p=>p.id===id);if(i<0)return;
  if(!lightWasChosen&&lighting.preset!=='day'){lighting.preset='day';applyLighting()}
  prioritizeModel(id,{retry:true});mapMode=false;seatMode=null;lastProject=id;activeNote=null;selected=i;shell.dataset.selectedProject=id;markEntered();setWalking(false);const p=projects[i],t=tables[i];
- $('selectedExhibit').hidden=false;$('selectedImage').src=thumb(p);$('selectedImage').alt=p.name;$('selectedLocation').textContent=[p.city,p.year].filter(Boolean).join(' · ');$('selectedName').textContent=p.name;$('selectedScale').textContent='';
- updateSelection();if(t&&move){const view=exhibitView(t,camera,THREE,mobile.matches);flyTo(view.position.toArray(),view.target.toArray(),duration)}
+ $('selectedExhibit').hidden=false;$('selectedImage').src=thumb(p);$('selectedImage').alt=p.name;$('selectedLocation').textContent=[p.city,p.year].filter(Boolean).join(' · ');$('selectedName').textContent=p.name;$('selectedScale').textContent=p.id==='koupelni'?KOUPLENI_MODEL_NOTE:'Měřítko 1:100 · podle dodaného modelu';
+ updateSelection();
+ if(t&&move){
+   const fov=galleryFieldOfView(host.clientWidth,host.clientHeight,'none',false,false);
+   if(camera.fov!==fov){camera.fov=fov;camera.updateProjectionMatrix();shell.dataset.fov=String(fov)}
+   const aspect=camera.aspect,isMobile=mobile.matches,view=exhibitView(t,camera,THREE,isMobile);
+   flyTo(view.position.toArray(),view.target.toArray(),duration,()=>{
+     canonicalOrbitView={table:t,position:camera.position.clone(),target:cameraTarget.clone()};
+   },()=>camera.aspect!==aspect||camera.fov!==fov||mobile.matches!==isMobile?exhibitView(t,camera,THREE,mobile.matches):null);
+ }
  if(scroll||(move&&shell.getBoundingClientRect().top < -host.clientHeight*.17)){
    shell.scrollIntoView({block:'start',behavior:reduced.matches?'instant':'smooth'});
  }
@@ -201,7 +217,7 @@ function walkPosition(x,z){const b=navigationBounds(salonDoor>=.999);x=THREE.Mat
 function setWalking(value,keepPosition=false){
  if(chessMode){chessMode=false;shell.classList.remove('playing-chess');$('chessPanel').hidden=true;chessSelected=null;promotionMove=null;if(chessSession)chessExhibit.setBoard(chessSession.state().board,{lastMove:chessSession.state().lastMove});}walking=value;seatMode=null;mapMode=false;activeNote=null;shell.classList.toggle('walking',value);$('walkPad').hidden=!entered||!value;$('walkToggle').setAttribute('aria-pressed',String(value));$('walkToggle').innerHTML=value?'Prohlédnout model <span>↗</span>':'Procházet sál <span>↗</span>';if(controls)controls.enabled=!value&&selected>=0;
  keys.clear();cancelAnimationFrame(movementFrame);movementFrame=0;lastMove=0;
- if(value){markEntered();$('selectedExhibit').hidden=true;let pos=keepPosition?walkPosition(camera.position.x,camera.position.z):null;const direction=cameraTarget.clone().sub(camera.position);yaw=keepPosition?Math.atan2(-direction.x,-direction.z):0;pitch=keepPosition?Math.asin(THREE.MathUtils.clamp(direction.clone().normalize().y,-.7,.7)):-.05;const x=pos?pos[0]:0,z=pos?pos[1]:12.4;flyTo([x,2.35,z],[x-Math.sin(yaw)*Math.cos(pitch)*8,2.35+Math.sin(pitch)*8,z-Math.cos(yaw)*Math.cos(pitch)*8],keepPosition?0:600);say('Pohyb: šipky nebo palcový ovladač. Rozhlížení: tažením. Klikněte na model, obraz nebo volnou podlahu.');host.focus({preventScroll:true})}
+ if(value){markEntered();$('selectedExhibit').hidden=true;let pos=keepPosition?walkPosition(camera.position.x,camera.position.z):null;const direction=cameraTarget.clone().sub(camera.position);yaw=keepPosition?Math.atan2(-direction.x,-direction.z):0;pitch=keepPosition?Math.asin(THREE.MathUtils.clamp(direction.clone().normalize().y,-.7,.7)):-.05;const x=pos?pos[0]:0,z=pos?pos[1]:12.4;flyTo([x,3.2,z],[x-Math.sin(yaw)*Math.cos(pitch)*8,3.2+Math.sin(pitch)*8,z-Math.cos(yaw)*Math.cos(pitch)*8],keepPosition?0:600);say('Pohyb: šipky nebo palcový ovladač. Rozhlížení: tažením. Klikněte na model, obraz nebo volnou podlahu.');host.focus({preventScroll:true})}
  updateSelection();
 }
 function orbitAction(action){
@@ -225,7 +241,7 @@ function moveLoop(now){
  let f=navForward+(keys.has('forward')?1:0)-(keys.has('back')?1:0),side=navSide+(keys.has('right')?1:0)-(keys.has('left')?1:0);
  if(f||side){route=null;cancelAnimationFrame(cameraFrame);cameraFrame=0;finishFlight=null;const norm=Math.max(1,Math.hypot(f,side)),speed=2.7*dt/norm;const b=navigationBounds(salonDoor>=.999),nx=THREE.MathUtils.clamp(camera.position.x+(-Math.sin(yaw)*f+Math.cos(yaw)*side)*speed,b[0],b[2]),nz=THREE.MathUtils.clamp(camera.position.z+(-Math.cos(yaw)*f-Math.sin(yaw)*side)*speed,b[1],b[3]);if(clearFloor(nx,camera.position.z))camera.position.x=nx;if(clearFloor(camera.position.x,nz))camera.position.z=nz;}
  if(route){let distance=3.5*dt;while(route&&distance>0){const target=route[0],dx=target[0]-camera.position.x,dz=target[1]-camera.position.z,length=Math.hypot(dx,dz);if(length<=distance){camera.position.x=target[0];camera.position.z=target[1];distance-=length;route.shift();if(!route.length)route=null}else{camera.position.x+=dx/length*distance;camera.position.z+=dz/length*distance;distance=0}}}
- camera.position.y=2.35;lookFromWalk();render();
+ camera.position.y=3.2;lookFromWalk();render();
  if(keys.size||navForward||navSide||route)ensureMovement();else lastMove=0;
 }
 function floorReach(ax,az,bx,bz){const steps=Math.max(1,Math.ceil(Math.hypot(bx-ax,bz-az)/.08));for(let i=0;i<=steps;i++){const x=ax+(bx-ax)*i/steps,z=az+(bz-az)*i/steps;if(!clearFloor(x,z))return false}return true}
@@ -264,17 +280,17 @@ function glowPlane(w,h,x,y,z,text,color='#dceccc'){
  const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:textureText([text],{glow:true,color}),transparent:true,depthWrite:false,toneMapped:false}));m.position.set(x,y,z);scene.add(m);return m;
 }
 function buildRoom(){
- const room=buildGalleryRoom({THREE,renderer,projects,makeProjectModel:(id,T)=>makeProjectModel(id,T,facadeTextures),labelTexture:textureText,artworks,requestRender:scheduleRender});scene=room.scene;benches=room.benches||[];windowLife=createWindowLife({THREE,scene,layouts:windowLayouts});tables.length=0;shell.dataset.floorReflections='room-probe';shell.dataset.floorMirrorPasses='0';shell.dataset.architectureBatches=String(scene.userData.staticArchitecture?.batches||0);shell.dataset.entranceDesign=scene.userData.entranceDesign||'';shell.dataset.modelWindows=String(room.tables.find(t=>t.featured)?.model?.userData.windowCount||0);tables.push(...room.tables);tables.forEach(addLifeTable);shell.dataset.modelSizing='fit-to-plinth';shell.dataset.modelPlacement=JSON.stringify(tables.map(t=>({id:t.group.userData.projectId,...t.model.userData.displayPlacement})));shell.dataset.koupelniBatches=JSON.stringify(tables[0].model.userData.staticBatches);syncLifeButton();pickables.push(...room.pickables);doors=room.doors;doors.forEach(d=>d.userData.closedX=d.position.x);installModel=room.replaceModel;loadPlinthContact=room.loadPlinthContact;lightRig=room.setLighting;wallMap=addWallMap({THREE,scene,geo:czGeo,projects,pickables,labelTexture:textureText});const mapLight=galleryMapLight=new THREE.PointLight(0xf4f4dd,5,7,2);mapLight.position.set(8.3,5.1,12);scene.add(mapLight);lounge=addGalleryLounge({THREE,scene,pickables,requestRender:scheduleRender});benches.push(...lounge.benches);// All opaque room contents can be skipped behind the salon wall.
+ const room=buildGalleryRoom({THREE,renderer,projects,makeProjectModel:(id,T)=>makeProjectModel(id,T,facadeTextures),labelTexture:textureText,artworks,requestRender:scheduleRender,industrialAssets});roomAtmosphere=room;scene=room.scene;benches=room.benches||[];windowLife=createWindowLife({THREE,scene,layouts:windowLayouts});tables.length=0;shell.dataset.floorReflections='room-probe';shell.dataset.floorMirrorPasses='0';shell.dataset.architectureBatches=String(scene.userData.staticArchitecture?.batches||0);shell.dataset.entranceDesign=scene.userData.entranceDesign||'';shell.dataset.modelWindows=String(room.tables.find(t=>t.featured)?.model?.userData.windowCount||0);tables.push(...room.tables);tables.forEach(addLifeTable);shell.dataset.modelSizing='1:100';shell.dataset.hallAuthoring='Blender';shell.dataset.hallPhysicalMetres='9.6 × 18';shell.dataset.modelPlacement=JSON.stringify(tables.map(t=>({id:t.group.userData.projectId,...t.model.userData.displayPlacement})));shell.dataset.koupelniBatches=JSON.stringify(tables[0].model.userData.staticBatches);syncLifeButton();pickables.push(...room.pickables);doors=room.doors;doors.forEach(d=>d.userData.closedX=d.position.x);installModel=room.replaceModel;loadPlinthContact=room.loadPlinthContact;lightRig=room.setLighting;wallMap=addWallMap({THREE,scene,geo:czGeo,projects,pickables,labelTexture:textureText});const mapLight=galleryMapLight=new THREE.PointLight(0xf4f4dd,5,7,2);wallMap.group.position.set(-9.22,3.3,14.65);wallMap.group.rotation.y=Math.PI/2;wallMap.group.scale.setScalar(.74);wallMap.lookFrom=[-2.4,3.45,14.0];wallMap.lookAt=[-9.22,3.3,14.65];wallMap.group.updateMatrixWorld(true);mapLight.position.set(-8.3,5.1,14.65);scene.add(mapLight);lounge=null;// All opaque room contents can be skipped behind the salon wall.
  galleryRoot=new THREE.Group();
  galleryRoot.name='Main gallery';
  for(const object of [...scene.children])if(object.isMesh||object.isGroup||object.isLine)galleryRoot.add(object);
  scene.add(galleryRoot);
  pickables.push(wallMap.group);
- chessSalon=addChessSalon({THREE,scene,pickables,labelTexture:textureText,artworks,requestRender:scheduleRender});
+ chessSalon=addIndustrialSalon({THREE,scene,pickables,industrialAssets,artworks,labelTexture:textureText,requestRender:scheduleRender});
  chessSalon.setInteriorVisible(false);
  updatePickRoots();
  shell.dataset.aquarium='removed';shell.dataset.lifeCars='0';shell.dataset.lifePedestrians='0';shell.dataset.darts='removed';applyLighting();
- camera=new THREE.PerspectiveCamera(mobile.matches?84:52,1,.1,120);camera.position.set(mobile.matches?0:1.85,3.65,mobile.matches?29.4:31.0);cameraTarget.set(0,mobile.matches?3.4:3.1,17.5);camera.lookAt(cameraTarget);doorPose();
+ camera=new THREE.PerspectiveCamera(mobile.matches?84:52,1,.035,220);camera.position.set(mobile.matches?0:1.85,3.65,mobile.matches?29.4:31.0);cameraTarget.set(0,mobile.matches?3.4:3.1,17.5);camera.lookAt(cameraTarget);doorPose();
  controls=new OrbitControls(camera,renderer.domElement);syncTouchPolicy();controls.enabled=false;controls.enableDamping=false;controls.enablePan=false;controls.minPolarAngle=0;controls.maxPolarAngle=Math.PI;controls.rotateSpeed=.65;controls.zoomSpeed=.8;controls.target.copy(cameraTarget);controls.update();controls.addEventListener('change',()=>{
    cameraTarget.copy(controls.target);
    if(controls.enabled&&selected>=0){
@@ -289,6 +305,12 @@ function buildRoom(){
 function prepareChessTable(){
  if(chessExhibit)return;
  chessExhibit=createChessExhibit({THREE,scene,pickables,requestRender:scheduleRender,position:[15.5,0,-14.8]});
+ // Legacy game geometry uses metres; match the Blender hall's two units/metre.
+ const chessCenter=new THREE.Vector3(15.5,0,-14.8);
+ chessExhibit.group.scale.setScalar(2);
+ for(const key of ['lookAt','lookFrom','mobileLookFrom']){const point=new THREE.Vector3(...chessExhibit[key]);point.sub(chessCenter).multiplyScalar(2).add(chessCenter);chessExhibit[key]=point.toArray()}
+ for(const obstacle of chessExhibit.obstacles){obstacle.x=15.5+(obstacle.x-15.5)*2;obstacle.z=-14.8+(obstacle.z+14.8)*2;obstacle.halfWidth*=2;obstacle.halfDepth*=2}
+ chessExhibit.group.updateMatrixWorld(true);
  chessExhibit.setLighting(lighting);
  chessExhibit.group.visible=salonVisible;
  sceneObstacles=chessExhibit.obstacles;
@@ -300,8 +322,8 @@ function updateHotspots(){
  const card=$('annotationCard');card.hidden=!activeNote;if(activeNote){card.style.left=mobile.matches?'5vw':'3.5vw';card.style.top='auto';card.style.bottom=mobile.matches?'225px':'160px'}
 }
 function syncMapLighting(){if(galleryMapLight)galleryMapLight.intensity=lighting.preset==='day'||mapMode?5:.3;if(!wallMap)return;wallMap.group.traverse(o=>{for(const m of Array.isArray(o.material)?o.material:[o.material]){if(!m?.isMeshBasicMaterial&&!m?.isLineBasicMaterial)continue;if(!mapColors.has(m))mapColors.set(m,m.color.clone());m.color.copy(mapColors.get(m)).multiplyScalar(lighting.preset==='day'||mapMode?1:.27)}})}
-function applyLighting(){if(!lightRig)return;lightRig(lighting);chessSalon?.setLighting(lighting);lounge?.setLighting(lighting);chessExhibit?.setLighting(lighting);windowLife?.setLighting(lighting);shell.dataset.litExhibits=String(scene.userData.fixedExhibitLights?.length||0);shell.dataset.neonModels=String(scene.userData.allExhibitLighting?.count||0);shell.dataset.fixturePositions=JSON.stringify(scene.userData.fixedExhibitLights||[]);shell.dataset.exhibitLightStrength=String(scene.userData.allExhibitLighting?.strength||0);shell.dataset.roomFinish=scene.userData.roomFinish||'';syncMapLighting();renderer.toneMappingExposure=lighting.preset==='day'?1.05:lighting.preset==='neon'?.84:.89;shell.dataset.lightingProfile='permanent-fixtures-v14';shell.dataset.lighting=lighting.preset;shell.dataset.ledColor=lighting.color;$('lightingValue').textContent=Math.round(lighting.intensity*100)+' %';document.querySelectorAll('.light-presets button[data-light-preset]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lightPreset===lighting.preset)));document.querySelectorAll('.led-colors button[data-led-color]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ledColor===lighting.color)));scheduleRender()}
-function showWallMap(){if(camera?.position.x>9.6||salonTransit){leaveSalon(showWallMap);return}setSalonStage('none');seatMode=null;if(mapMode){focusProject(lastProject);return}setWalking(false);mapMode=true;activeNote=null;selected=-1;$('selectedExhibit').hidden=true;markEntered();$('walkToggle').innerHTML='Ke vitríně <span>↗</span>';updateSelection();$('wallMapButton').setAttribute('aria-pressed','true');if(wallMap)flyTo(mobile.matches?[-3.8,3.3,12]:wallMap.lookFrom,wallMap.lookAt,850);say('Vyberte projekt na nástěnné mapě. Přesunete se přímo k jeho vitríně.')}
+function applyLighting(){if(!lightRig)return;lightRig(lighting);chessSalon?.setLighting(lighting);lounge?.setLighting(lighting);chessExhibit?.setLighting(lighting);windowLife?.setLighting(lighting);shell.dataset.litExhibits=String(scene.userData.fixedExhibitLights?.length||0);shell.dataset.neonModels=String(scene.userData.allExhibitLighting?.count||0);shell.dataset.fixturePositions=JSON.stringify(scene.userData.fixedExhibitLights||[]);shell.dataset.exhibitLightStrength=String(scene.userData.allExhibitLighting?.strength||0);shell.dataset.roomFinish=scene.userData.roomFinish||'';syncMapLighting();renderer.toneMappingExposure=lighting.preset==='day'?1.05:lighting.preset==='neon'?.84:.89;shell.dataset.lightingProfile='blender-bake-and-eight-fixtures-v25';shell.dataset.lighting=lighting.preset;shell.dataset.ledColor=lighting.color;$('lightingValue').textContent=Math.round(lighting.intensity*100)+' %';document.querySelectorAll('.light-presets button[data-light-preset]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lightPreset===lighting.preset)));document.querySelectorAll('.led-colors button[data-led-color]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ledColor===lighting.color)));scheduleRender()}
+function showWallMap(){if(camera?.position.x>9.6||salonTransit){leaveSalon(showWallMap);return}setSalonStage('none');seatMode=null;if(mapMode){focusProject(lastProject);return}setWalking(false);mapMode=true;activeNote=null;selected=-1;$('selectedExhibit').hidden=true;markEntered();$('walkToggle').innerHTML='Ke vitríně <span>↗</span>';updateSelection();$('wallMapButton').setAttribute('aria-pressed','true');if(wallMap)flyTo(mobile.matches?[-.6,3.3,14]:wallMap.lookFrom,wallMap.lookAt,850);say('Vyberte projekt na nástěnné mapě. Přesunete se přímo k jeho vitríně.')}
 function updateWallMap(){
  const layer=$('wallMapLayer');if(!layer||!camera||!wallMap)return;layer.hidden=!mapMode;$('wallMapButton').setAttribute('aria-pressed',String(mapMode));if(!mapMode)return;
  if(!layer.children.length)layer.innerHTML='<h2>Mapa projektů</h2>'+projects.map(p=>`<button class="map-project-hit" data-focus="${esc(p.id)}" aria-label="Přejít k vitríně ${esc(p.name)}"><b>${esc(p.name)}</b><small>${esc(p.city)}</small><i>↗</i></button>`).join('');
@@ -363,7 +385,7 @@ function syncSalonUI(){
  $('salonEnter').hidden=salonStage!=='door';$('salonPlay').hidden=salonStage!=='inside';$('salonEnter').disabled=salonTransit;$('salonPlay').disabled=salonTransit;$('salonExit').disabled=salonTransit;
  $('salonStatus').textContent=salonTransit?'Procházíte dveřmi…':salonStage==='door'?'Vstup do samostatného šachového salonku.':'Projděte se, nebo usedněte k šachům.';
  if(active){$('projectPager').hidden=true;if(salonStage==='door'||salonStage==='transit')$('walkPad').hidden=true;if(!chessMode)$('navigationMode').textContent='Šachový salonek'}
- if(camera){const next=galleryFieldOfView(host.clientWidth,host.clientHeight,salonStage,chessMode);if(camera.fov!==next){camera.fov=next;camera.updateProjectionMatrix();shell.dataset.fov=String(next)}}
+ if(camera){const next=galleryFieldOfView(host.clientWidth,host.clientHeight,salonStage,chessMode,walking);if(camera.fov!==next){camera.fov=next;camera.updateProjectionMatrix();shell.dataset.fov=String(next)}}
 }
 function focusSalonDoor(){
  if(!chessSalon)return;if(camera.position.x>9.75){returnToSalon();return}
@@ -379,9 +401,9 @@ function salonPassage(enter,after){
  if(!chessSalon||!camera)return;
  if(enter&&shell.getBoundingClientRect().top< -20)shell.scrollIntoView({block:'start',behavior:'instant'});
  prepareChessTable();stopFrames();setWalking(false);selected=-1;activeNote=null;markEntered();$('selectedExhibit').hidden=true;salonTransit=true;setSalonStage('transit');syncControls();
- const start=camera.position.clone(),startTarget=cameraTarget.clone(),outside=new THREE.Vector3(7.9,2.35,-14.8),inside=new THREE.Vector3(10.1,2.35,-14.8),end=enter?inside:outside;
+ const start=camera.position.clone(),startTarget=cameraTarget.clone(),outside=new THREE.Vector3(7.9,3.2,-14.8),inside=new THREE.Vector3(10.1,3.2,-14.8),end=enter?inside:outside;
  const target=new THREE.Vector3(...(enter?[15.5,2.6,-14.8]:[0,1.8,-8])),doorStart=salonDoor;
- const points=enter?[start,outside,new THREE.Vector3(9.58,3.1,-14.8),inside]:[start,new THREE.Vector3(10.65,2.5,-14.8),new THREE.Vector3(9.58,2.35,-14.8),outside];
+ const points=enter?[start,outside,new THREE.Vector3(9.58,3.1,-14.8),inside]:[start,new THREE.Vector3(10.65,2.5,-14.8),new THREE.Vector3(9.58,3.2,-14.8),outside];
  const curve=new THREE.CatmullRomCurve3(points,false,'centripetal');let done=false,began=null;
  const apply=t=>{if(done)return;salonDoor=doorStart+(1-doorStart)*clockEase(Math.min(1,t/.42));chessSalon.setDoorOpen(salonDoor,false);const move=clockEase(Math.max(0,(t-.14)/.86));camera.position.copy(curve.getPoint(move));cameraTarget.lerpVectors(startTarget,target,clockEase(t));camera.lookAt(cameraTarget);shell.dataset.salonDoor=salonDoor.toFixed(3);render();if(t===1){done=true;salonTransit=false;salonDoor=1;chessSalon.setDoorOpen(1);camera.position.copy(end);cameraTarget.copy(target);camera.lookAt(cameraTarget);renderer.shadowMap.needsUpdate=true;if(enter){beginSalonWalk();say('Šachový salonek. Můžete se projít nebo usednout ke stolu.')}else{setSalonStage('none');updateSelection();syncControls();after?.()}}};
  if(reduced.matches){apply(1);return}
@@ -390,13 +412,13 @@ function salonPassage(enter,after){
 function enterSalon(){salonPassage(true)}
 function leaveSalon(after){salonPassage(false,typeof after==='function'?after:()=>focusProject(lastProject))}
 function returnToSalon(){
- if(!chessSalon)return;setWalking(false);selected=-1;setSalonStage('inside');flyTo([10.1,2.35,-14.8],[15.5,2.6,-14.8],650,beginSalonWalk);say('Jste zpět v šachovém salonku.');
+ if(!chessSalon)return;setWalking(false);selected=-1;setSalonStage('inside');flyTo([10.1,3.2,-14.8],[15.5,2.6,-14.8],650,beginSalonWalk);say('Jste zpět v šachovém salonku.');
 }
 function hasVisibleWindows(){
  if(!entered||mapMode||seatMode||chessMode||salonStage!=='none')return false;
  for(const table of tables){
    if(table.model.userData.loading)continue;
-   windowBounds.center.set(table.x,1.8,table.z);
+   windowBounds.center.set(table.x,table.targetY,table.z);
    if(camera.position.distanceToSquared(windowBounds.center)<225 && viewFrustum.intersectsSphere(windowBounds))return true;
  }
  return false;
@@ -414,7 +436,7 @@ function addLifeTable(table){
  if(!table||table.model.userData.loading)return;windowLife?.addTable(table);
  const windows=windowLife?.stats();if(windows){shell.dataset.lifeWindows=String(windows.windows);shell.dataset.lifeProjects=JSON.stringify(windows.projects)}
 }
-function syncLifeButton(){const b=$('lifeMotion');if(b){b.textContent=lifePlay?'Pozastavit život v oknech':'Rozpohybovat okna';b.setAttribute('aria-pressed',String(lifePlay))}shell.dataset.lifeMotion=String(lifePlay)}
+function syncLifeButton(){const b=$('lifeMotion');if(b){b.textContent=lifePlay?'Pozastavit drobné animace':'Spustit drobné animace';b.setAttribute('aria-pressed',String(lifePlay))}shell.dataset.lifeMotion=String(lifePlay)}
 const chessNames={p:'pěšec',n:'jezdec',b:'střelec',r:'věž',q:'dáma',k:'král'};
 function buildChessGrid(){
  if($('chessGrid').children.length)return;
@@ -482,6 +504,7 @@ async function init(){
  try{
    renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'low-power'});
    await Promise.all([
+     loadIndustrialAssets({THREE,requestRender:scheduleRender,mobile:mobile.matches||limitedDevice}).then(assets=>industrialAssets=assets),
      document.fonts.load('500 20px "Space Grotesk"','Výstavní sál · Koupelní 2').catch(()=>{}),
      fetch('assets/v21/window-layouts.json').then(r=>r.json()).then(d=>windowLayouts=d.layouts||{}).catch(()=>{shell.dataset.lifeError='window-layout'}),
      fetch('assets/v2/czech-detailed.geojson').then(r=>r.json()).then(g=>czGeo=g).catch(()=>{}),
@@ -504,21 +527,41 @@ async function init(){
        });
      }).catch(()=>{})
    ]);
-   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.domElement.setAttribute('aria-hidden','true');host.append(renderer.domElement);buildRoom();renderer.shadowMap.needsUpdate=true;shell.dataset.renderer='webgl';shell.dataset.exhibits=String(tables.length);shell.dataset.roomReady='true';host.setAttribute('aria-disabled','false');shell.dataset.revision='24.1';shell.dataset.reducedMotion=String(reduced.matches);shell.dataset.artworks=String(artworks.length);shell.dataset.facadeMode='geometric';say('Výstavní sál je připravený.');let lastWidth=0,lastHeight=0,lastMobile=mobile.matches;
+   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.domElement.setAttribute('aria-hidden','true');host.append(renderer.domElement);buildRoom();renderer.shadowMap.needsUpdate=true;shell.dataset.renderer='webgl';shell.dataset.exhibits=String(tables.length);shell.dataset.roomReady='true';host.setAttribute('aria-disabled','false');shell.dataset.revision='25.0';shell.dataset.reducedMotion=String(reduced.matches);shell.dataset.artworks=String(artworks.length);shell.dataset.facadeMode='geometric';say('Výstavní sál je připravený.');let lastWidth=0,lastHeight=0,lastMobile=mobile.matches;
+ let lastOrientation=globalThis.screen?.orientation?.type;
  const resize=()=>{
    const w=host.clientWidth,h=host.clientHeight;
    if(!w||!h||(w===lastWidth&&h===lastHeight))return;
-   const table=selected>=0&&shell.dataset.mode==='orbit'&&!cameraFrame?tables[selected]:null;
-   const previousView=table&&lastWidth?exhibitView(table,camera,THREE,lastMobile):null;
-   const atStartView=previousView&&camera.position.distanceToSquared(previousView.position)<.0025;
-   lastWidth=w;lastHeight=h;lastMobile=mobile.matches;
-   const ratio=galleryPixelRatio(devicePixelRatio,w,h,mobile.matches,limitedDevice);
+   const isMobile=mobile.matches,orientation=globalThis.screen?.orientation?.type;
+   // Mobile browser chrome changes height while scrolling. Keep orbit distance stable then.
+   const reframe=lastWidth&&(w!==lastWidth||orientation!==lastOrientation||(!isMobile&&!lastMobile));
+   const table=reframe&&selected>=0&&shell.dataset.mode==='orbit'&&!cameraFrame?tables[selected]:null;
+   const previousProjection=table?{
+     aspect:lastWidth/lastHeight,fov:galleryFieldOfView(lastWidth,lastHeight,'none',false,false),near:camera.near
+   }:null;
+   const previousMobile=lastMobile;
+   lastWidth=w;lastHeight=h;lastMobile=isMobile;lastOrientation=orientation;
+   const ratio=galleryPixelRatio(devicePixelRatio,w,h,isMobile,limitedDevice);
    renderer.setDrawingBufferSize(w,h,ratio);
-   camera.aspect=w/h;camera.fov=galleryFieldOfView(w,h,salonStage,chessMode);
+   camera.aspect=w/h;camera.fov=galleryFieldOfView(w,h,salonStage,chessMode,walking);
    camera.updateProjectionMatrix();shell.dataset.fov=String(camera.fov);
-   if(atStartView){
-     const view=exhibitView(table,camera,THREE,mobile.matches);
-     camera.position.copy(view.position);cameraTarget.copy(view.target);camera.lookAt(cameraTarget);syncControls();
+   if(table){
+     const start=canonicalOrbitView;
+     const atStartView=start?.table===table&&camera.position.distanceToSquared(start.position)<.0025&&
+       cameraTarget.distanceToSquared(start.target)<.0025;
+     if(atStartView){
+       const view=exhibitView(table,camera,THREE,isMobile);
+       camera.position.copy(view.position);cameraTarget.copy(view.target);
+     }else{
+       const direction=camera.position.clone().sub(cameraTarget),distance=direction.length();
+       direction.normalize();
+       const oldFit=exhibitOrbitFitDistance(table,cameraTarget,direction,previousProjection,THREE,previousMobile);
+       const newFit=exhibitOrbitFitDistance(table,cameraTarget,direction,camera,THREE,isMobile);
+       const limit=THREE.MathUtils.clamp(distance*newFit/oldFit,controls.minDistance,controls.maxDistance);
+       camera.position.copy(cameraTarget).addScaledVector(direction,roomOrbitDistance(cameraTarget,direction,limit));
+     }
+     touchRadius=0;touchController?.reset();camera.lookAt(cameraTarget);syncControls();
+     if(atStartView)canonicalOrbitView={table,position:camera.position.clone(),target:cameraTarget.clone()};
    }
    // Resizing resets the WebGL drawing buffer. Refill it in this same layout
    // callback so the compositor never sees a resized, undrawn, visible canvas.
@@ -570,7 +613,7 @@ $('entrancePoster').addEventListener('click',event=>{
 document.addEventListener('click',event=>{const b=event.target.closest('button');if(!b)return;if(b.dataset.lightPreset){lighting.preset=b.dataset.lightPreset;lightWasChosen=true;applyLighting();syncProjectLinks();return}if(b.dataset.ledColor){lighting.color=b.dataset.ledColor;applyLighting();return}if(b.hasAttribute('data-note-close')){activeNote=null;updateHotspots();return}if(b.dataset.note){showNote(b.dataset.note);return}if(b.dataset.company){openCompany(b.dataset.company);return}if(b.dataset.focus){focusProject(b.dataset.focus,b.hasAttribute('data-scroll'));return}if(b.dataset.open){openProject(b.dataset.open);return}if(b.hasAttribute('data-close'))b.closest('dialog')?.close()});
 host.addEventListener('keydown',event=>{
  if(!entered&&(event.key==='Enter'||event.key===' ')){event.preventDefault();enterGallery();return}
-});$('overviewButton').addEventListener('click',overview);$('walkToggle').addEventListener('click',()=>{if(seatMode){const b=benches.find(b=>b.id===seatMode);seatMode=null;setWalking(true);if(b)flyTo([b.seat[0]+(b.seat[0]<0?1.85:-1.85),2.35,b.approach[2]],[0,1.9,3.5],650);return}if(mapMode){focusProject(lastProject);return}if(walking)focusProject(lastProject);else setWalking(true,true)});$('nextExhibit').addEventListener('click',()=>focusProject(projects[(selected+1+projects.length)%projects.length]?.id));$('previousExhibit').addEventListener('click',()=>focusProject(projects[selected<0?projects.length-1:(selected-1+projects.length)%projects.length]?.id));$('openProject').addEventListener('click',()=>{if(selected>=0)openProject(projects[selected].id)});
+});$('overviewButton').addEventListener('click',overview);$('walkToggle').addEventListener('click',()=>{if(seatMode){const b=benches.find(b=>b.id===seatMode);seatMode=null;setWalking(true);if(b)flyTo([b.seat[0]+(b.seat[0]<0?1.85:-1.85),3.2,b.approach[2]],[0,1.9,3.5],650);return}if(mapMode){focusProject(lastProject);return}if(walking)focusProject(lastProject);else setWalking(true,true)});$('nextExhibit').addEventListener('click',()=>focusProject(projects[(selected+1+projects.length)%projects.length]?.id));$('previousExhibit').addEventListener('click',()=>focusProject(projects[selected<0?projects.length-1:(selected-1+projects.length)%projects.length]?.id));$('openProject').addEventListener('click',()=>{if(selected>=0)openProject(projects[selected].id)});
 $('orbitToolbar').addEventListener('click',event=>{const action=event.target.closest('button[data-orbit]')?.dataset.orbit;if(action)orbitAction(action)});
 for(const dialog of document.querySelectorAll('dialog')){dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});dialog.addEventListener('close',scheduleRender)}
 // FD Prohlidka bindings: W/S forward/back, A/D strafe, left/right arrows turn.
