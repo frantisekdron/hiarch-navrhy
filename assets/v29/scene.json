@@ -1,0 +1,1057 @@
+{
+  "revision": 29,
+  "metresPerWorldUnit": 0.5,
+  "hall": {
+    "url": "assets/v29/industrial-hall.glb",
+    "rootScale": 2,
+    "physicalMetres": {
+      "width": 16,
+      "depth": 30,
+      "eaves": 7.4399999999999995,
+      "ridge": 9.719999999999999
+    },
+    "images": {
+      "european_walnut_veneer_04_nor_gl_1k.jpg": [
+        1024,
+        1024
+      ],
+      "honey-roof-boards.jpg": [
+        1024,
+        1024
+      ],
+      "HoneyTimber-material.jpg": [
+        1024,
+        1024
+      ],
+      "brick_wall_13_nor_gl_1k.jpg": [
+        1024,
+        1024
+      ],
+      "reclaimed-brick.jpg": [
+        1024,
+        1024
+      ],
+      "ReclaimedBrick-material.jpg": [
+        1024,
+        1024
+      ],
+      "concrete_floor_worn_001_nor_gl_1k.jpg": [
+        1024,
+        1024
+      ],
+      "limestone-concrete.jpg": [
+        1024,
+        1024
+      ],
+      "HonedConcrete-material.jpg": [
+        1024,
+        1024
+      ],
+      "park-day.jpg": [
+        2048,
+        1024
+      ],
+      "oiled-walnut.jpg": [
+        1024,
+        1024
+      ],
+      "OiledWalnut-material.jpg": [
+        1024,
+        1024
+      ]
+    },
+    "triangles": 75020,
+    "meshObjects": 79,
+    "constructionMeshes": 127
+  },
+  "lightmap": {
+    "desktop": "assets/v29/light-day.jpg",
+    "mobile": "assets/v29/light-day-mobile.jpg",
+    "uvChannel": 1,
+    "flipY": false,
+    "encoding": "srgb",
+    "gain": 2.266635918617249,
+    "size": 2048,
+    "texelsPerMetre": 76,
+    "p75": 0.2423090636730194,
+    "p99": 2.0605781078338623,
+    "samples": 256,
+    "bakeType": "Cycles diffuse direct and indirect irradiance without albedo",
+    "desktopSize": 2048,
+    "mobileSize": 1024,
+    "filtered": "Range-weighted bilateral and low-strength nonlocal chroma denoising; linear-light mobile downsample; JPEG 4:4:4 quality 93"
+  },
+  "foliage": {
+    "url": "assets/v25/foliage-shadow.png",
+    "domain": [
+      -16.0,
+      -30.0,
+      16.0,
+      30.0
+    ]
+  },
+  "tables": [
+    {
+      "id": "wurmova",
+      "x": -3.8,
+      "z": 22.4,
+      "width": 2.9492466517857148,
+      "depth": 2.381445312500001,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_wurmova",
+      "displayScale": 0.07142857142857142,
+      "measuredMetres": [
+        13.8701171875,
+        17.8447265625,
+        11.14111328125
+      ],
+      "scaleEstimated": false,
+      "dx": -0.0,
+      "dz": 0.0,
+      "rotationY": 1.5707963267948966,
+      "yaw": 1.5707963267948966,
+      "sourceMetresXYZ": [
+        13.8701171875,
+        11.14111328125,
+        17.8447265625
+      ],
+      "plaqueY": 1.945,
+      "ordinal": 1
+    },
+    {
+      "id": "selska84",
+      "x": 2,
+      "z": 16.8,
+      "width": 3.6113560267857148,
+      "depth": 2.992912946428572,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_selska84",
+      "displayScale": 0.07142857142857142,
+      "measuredMetres": [
+        18.150390625,
+        22.4794921875,
+        11.759796142578125
+      ],
+      "scaleEstimated": false,
+      "dx": -0.0,
+      "dz": 0.0,
+      "rotationY": 1.5707963267948966,
+      "yaw": 1.5707963267948966,
+      "sourceMetresXYZ": [
+        18.150390625,
+        11.759796142578125,
+        22.4794921875
+      ],
+      "plaqueY": 1.945,
+      "ordinal": 2
+    },
+    {
+      "id": "transped",
+      "x": -5,
+      "z": 11,
+      "width": 6.543694196428572,
+      "depth": 4.0285714285714285,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_transped",
+      "displayScale": 0.07142857142857142,
+      "measuredMetres": [
+        30.01171875,
+        12.83984375,
+        12.72900390625
+      ],
+      "scaleEstimated": false,
+      "dx": 0.9281529017857143,
+      "dz": -0.4714285714285715,
+      "rotationY": 0.0,
+      "yaw": 0.0,
+      "sourceMetresXYZ": [
+        30.01171875,
+        12.72900390625,
+        12.83984375
+      ],
+      "plaqueY": 1.945,
+      "ordinal": 3
+    },
+    {
+      "id": "bystrc",
+      "x": 1.6,
+      "z": 5,
+      "width": 4.971428571428572,
+      "depth": 4.585714285714286,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_bystrc",
+      "displayScale": 0.07142857142857142,
+      "measuredMetres": [
+        30.80859375,
+        28.203125,
+        9.0732421875
+      ],
+      "scaleEstimated": false,
+      "dx": 0.0,
+      "dz": -0.0,
+      "rotationY": 0.0,
+      "yaw": 0.0,
+      "sourceMetresXYZ": [
+        30.80859375,
+        9.0732421875,
+        28.203125
+      ],
+      "plaqueY": 1.945,
+      "ordinal": 4
+    },
+    {
+      "id": "nebovidy",
+      "x": -5,
+      "z": -1,
+      "width": 7.058761160714286,
+      "depth": 3.4990513392857148,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_nebovidy",
+      "displayScale": 0.07142857142857142,
+      "measuredMetres": [
+        46.611328125,
+        21.693359375,
+        11.7666015625
+      ],
+      "scaleEstimated": false,
+      "dx": -0.0,
+      "dz": -0.0,
+      "rotationY": 0.0,
+      "yaw": 0.0,
+      "sourceMetresXYZ": [
+        46.611328125,
+        11.7666015625,
+        21.693359375
+      ],
+      "plaqueY": 1.945,
+      "ordinal": 5
+    },
+    {
+      "id": "ivancice",
+      "x": -5.3,
+      "z": -7,
+      "width": 12.97421875,
+      "depth": 3.2900669642857148,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_ivancice",
+      "displayScale": 0.07142857142857142,
+      "measuredMetres": [
+        88.01953125,
+        20.23046875,
+        12.5
+      ],
+      "scaleEstimated": false,
+      "dx": -0.0,
+      "dz": 0.0,
+      "rotationY": 0,
+      "yaw": 0,
+      "sourceMetresXYZ": [
+        88.01953125,
+        12.5,
+        20.23046875
+      ],
+      "plaqueY": 1.945,
+      "ordinal": 6
+    },
+    {
+      "id": "hustopece",
+      "x": 6.4,
+      "z": -14.25,
+      "width": 8.828571428571427,
+      "depth": 7.530580357142859,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_hustopece",
+      "displayScale": 0.07142857142857142,
+      "measuredMetres": [
+        53.3427734375,
+        39.828125,
+        10.47216796875
+      ],
+      "scaleEstimated": false,
+      "dx": 0.07142857142857144,
+      "dz": 0.7204241071428572,
+      "rotationY": 0.0,
+      "yaw": 0.0,
+      "sourceMetresXYZ": [
+        53.3427734375,
+        10.47216796875,
+        39.828125
+      ],
+      "plaqueY": 1.945,
+      "ordinal": 7
+    },
+    {
+      "id": "koupelni",
+      "x": -2.2,
+      "z": -22.05,
+      "width": 6.492248644147601,
+      "depth": 4.407046699523926,
+      "surfaceY": 2.1,
+      "glow": "Glow_Plinth_koupelni",
+      "displayScale": 0.07142857142857142,
+      "measuredMetres": [
+        42.6457405090332,
+        28.04932689666748,
+        28.533632286460943
+      ],
+      "scaleEstimated": true,
+      "dx": -0.0,
+      "dz": -0.0,
+      "rotationY": 0.0,
+      "yaw": 0.0,
+      "sourceMetresXYZ": [
+        42.6457405090332,
+        28.533632286460943,
+        28.04932689666748
+      ],
+      "plaqueY": 1.945,
+      "ordinal": 8
+    }
+  ],
+  "benches": [
+    {
+      "id": "bench-right-front",
+      "x": -7.166666666666667,
+      "z": -28.350000000000005,
+      "seat": [
+        -7.166666666666667,
+        2.25,
+        -28.200000000000006
+      ],
+      "lookAt": [
+        -5.375,
+        4.2,
+        -18.350000000000005
+      ],
+      "approach": [
+        -7.166666666666667,
+        3.2,
+        -26.500000000000004
+      ],
+      "halfWidth": 3.42,
+      "halfDepth": 0.69,
+      "node": "Bench_1",
+      "original": [
+        8.35,
+        8.5
+      ],
+      "rotationY": 1.5707963267948966
+    },
+    {
+      "id": "bench-right-back",
+      "x": 7.283333333333334,
+      "z": -28.350000000000005,
+      "seat": [
+        7.283333333333334,
+        2.25,
+        -28.200000000000006
+      ],
+      "lookAt": [
+        5.4625,
+        4.2,
+        -18.350000000000005
+      ],
+      "approach": [
+        7.283333333333334,
+        3.2,
+        -26.500000000000004
+      ],
+      "halfWidth": 3.7,
+      "halfDepth": 0.69,
+      "node": "Bench_2",
+      "original": [
+        8.35,
+        -2.5
+      ],
+      "rotationY": 1.5707963267948966
+    }
+  ],
+  "artworks": [
+    {
+      "id": "real-building",
+      "position": [
+        -15.266666666666667,
+        4.32,
+        14.000000000000002
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 5.777777777777779,
+      "height": 3.12,
+      "scope": "hall"
+    },
+    {
+      "id": "interior-living",
+      "position": [
+        -15.266666666666667,
+        4.32,
+        3.2666666666666666
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 6.666666666666667,
+      "height": 2.6999999999999997,
+      "scope": "hall"
+    },
+    {
+      "id": "interior-bedroom",
+      "position": [
+        -15.266666666666667,
+        4.32,
+        -7.45
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 6.666666666666667,
+      "height": 2.6999999999999997,
+      "scope": "hall"
+    },
+    {
+      "id": "interior-room",
+      "position": [
+        -15.266666666666667,
+        4.32,
+        -18.166666666666668
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 6.666666666666667,
+      "height": 2.6999999999999997,
+      "scope": "hall"
+    },
+    {
+      "id": "floor-5np",
+      "position": [
+        22.733333333333334,
+        4.464,
+        -17.926666666666666
+      ],
+      "rotationY": 3.141592653589793,
+      "width": 5.466666666666667,
+      "height": 2.7828841313385553,
+      "scope": "salon"
+    },
+    {
+      "id": "axonometry",
+      "position": [
+        22.733333333333334,
+        4.464,
+        -31.40666666666667
+      ],
+      "rotationY": 0,
+      "width": 5.466666666666667,
+      "height": 2.9250891795481566,
+      "scope": "salon"
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "fixture-1",
+      "projectId": "wurmova",
+      "position": [
+        -8.385501861572266,
+        13.263121604919434,
+        23.097793579101562
+      ],
+      "target": [
+        -3.799999952316284,
+        2.863961935043335,
+        22.399999618530273
+      ],
+      "mouth": [
+        -8.4,
+        13.296,
+        23.099999999999998
+      ]
+    },
+    {
+      "id": "fixture-2",
+      "projectId": "selska84",
+      "position": [
+        8.381149291992188,
+        13.265398979187012,
+        17.49793815612793
+      ],
+      "target": [
+        2.0,
+        2.906385898590088,
+        16.799999237060547
+      ],
+      "mouth": [
+        8.4,
+        13.296,
+        17.5
+      ]
+    },
+    {
+      "id": "fixture-3",
+      "projectId": "transped",
+      "position": [
+        -8.386155128479004,
+        13.262979507446289,
+        11.696252822875977
+      ],
+      "target": [
+        -4.071846961975098,
+        2.972846031188965,
+        10.528571128845215
+      ],
+      "mouth": [
+        -8.4,
+        13.296,
+        11.7
+      ]
+    },
+    {
+      "id": "fixture-4",
+      "projectId": "bystrc",
+      "position": [
+        8.3805570602417,
+        13.265767097473145,
+        5.697998523712158
+      ],
+      "target": [
+        1.600000023841858,
+        2.722165107727051,
+        5.0
+      ],
+      "mouth": [
+        8.4,
+        13.296,
+        5.7
+      ]
+    },
+    {
+      "id": "fixture-5",
+      "projectId": "nebovidy",
+      "position": [
+        -8.388825416564941,
+        13.261855125427246,
+        -0.3023006021976471
+      ],
+      "target": [
+        -5.0,
+        2.9068527221679688,
+        -1.0
+      ],
+      "mouth": [
+        -8.4,
+        13.296,
+        -0.30000000000000004
+      ]
+    },
+    {
+      "id": "fixture-6",
+      "projectId": "ivancice",
+      "position": [
+        -8.389681816101074,
+        13.261588096618652,
+        -6.302330017089844
+      ],
+      "target": [
+        -5.300000190734863,
+        2.9571428298950195,
+        -7.0
+      ],
+      "mouth": [
+        -8.4,
+        13.296,
+        -6.3
+      ]
+    },
+    {
+      "id": "fixture-7",
+      "projectId": "hustopece",
+      "position": [
+        8.39348316192627,
+        13.260594367980957,
+        -13.549931526184082
+      ],
+      "target": [
+        6.471428871154785,
+        2.81809139251709,
+        -13.529576301574707
+      ],
+      "mouth": [
+        8.4,
+        13.296,
+        -13.55
+      ]
+    },
+    {
+      "id": "fixture-8",
+      "projectId": "koupelni",
+      "position": [
+        -8.379979133605957,
+        13.266164779663086,
+        -21.35226058959961
+      ],
+      "target": [
+        -2.200000047683716,
+        4.056591987609863,
+        -22.049999237060547
+      ],
+      "mouth": [
+        -8.4,
+        13.296,
+        -21.35
+      ]
+    }
+  ],
+  "doors": [
+    {
+      "name": "Door_Left",
+      "side": -1,
+      "travelMetres": 1.8000000000000003
+    },
+    {
+      "name": "Door_Right",
+      "side": 1,
+      "travelMetres": 1.8000000000000003
+    }
+  ],
+  "salon": {
+    "root": "Salon_Static",
+    "portal": "Salon_Portal",
+    "doors": [
+      {
+        "name": "Salon_Door_Left",
+        "hingeSign": 1,
+        "openRadians": 1.5707963267948966
+      },
+      {
+        "name": "Salon_Door_Right",
+        "hingeSign": -1,
+        "openRadians": -1.5707963267948966
+      }
+    ],
+    "bounds": {
+      "min": [
+        15.966666666666667,
+        0.0,
+        -32.0
+      ],
+      "max": [
+        31.799999999999997,
+        8.64,
+        -17.333333333333336
+      ]
+    },
+    "entrance": {
+      "outside": [
+        5.666666666666667,
+        3.2,
+        -24.666666666666668
+      ],
+      "lookAt": [
+        15.966666666666667,
+        3.36,
+        -24.666666666666668
+      ],
+      "inside": [
+        19.833333333333336,
+        3.2,
+        -24.666666666666668
+      ],
+      "insideLookAt": [
+        25.833333333333336,
+        2.28,
+        -24.666666666666668
+      ]
+    },
+    "label": {
+      "position": [
+        15.783333333333335,
+        6.48,
+        -24.666666666666668
+      ],
+      "rotationY": -1.5707963267948966,
+      "width": 4.8,
+      "height": 0.528
+    }
+  },
+  "brands": [
+    {
+      "id": "hiarch",
+      "position": [
+        -15.395000000000001,
+        7.859999999999999,
+        14.000000000000002
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 5.5,
+      "height": 0.8160000000000001
+    },
+    {
+      "id": "hiplan",
+      "position": [
+        -15.395000000000001,
+        7.859999999999999,
+        3.2666666666666666
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 5.5,
+      "height": 0.8160000000000001
+    },
+    {
+      "id": "hireal",
+      "position": [
+        -15.395000000000001,
+        7.859999999999999,
+        -7.45
+      ],
+      "rotationY": 1.5707963267948966,
+      "width": 5.5,
+      "height": 0.8160000000000001
+    },
+    {
+      "id": "entrance",
+      "position": [
+        0.0,
+        7.4399999999999995,
+        30.061666666666667
+      ],
+      "rotationY": 0,
+      "width": 8.116666666666667,
+      "height": 0.8999999999999999
+    }
+  ],
+  "sources": {
+    "park": "https://polyhaven.com/a/autumn_park",
+    "brick": "https://polyhaven.com/a/brick_wall_13",
+    "concrete": "https://polyhaven.com/a/concrete_floor_worn_001",
+    "walnut": "https://polyhaven.com/a/european_walnut_veneer_04"
+  },
+  "shellHorizontalScale": 1.6666666666666667,
+  "shellVerticalScale": 1.2,
+  "entrance": {
+    "doorPlaneZ": 29.250000000000004,
+    "openingHalfWidth": 3.55,
+    "openingHeight": 6.24
+  },
+  "displayRatio": 14,
+  "entryCamera": [
+    6.5,
+    3.2,
+    25.5
+  ],
+  "entryLookAt": [
+    -2.0,
+    3.1,
+    17.0
+  ],
+  "atlasCamera": [
+    -10.05,
+    3.45,
+    24.8
+  ],
+  "atlasCameraMobile": [
+    -4.25,
+    3.3,
+    26.05
+  ],
+  "atlasCenter": [
+    -15.366666666666669,
+    3.3,
+    24.416666666666668
+  ],
+  "routes": {
+    "worldUnitsPerMetre": 2,
+    "connectedVisitorDiameterMetres": 0.9,
+    "verifiedApproaches": {
+      "entry": [
+        6.5,
+        25.5
+      ],
+      "salonOutside": [
+        5.666666666666667,
+        -24.666666666666668
+      ],
+      "salonDoor": [
+        14.133333333333335,
+        -25.383333333333336
+      ],
+      "atlas": [
+        -10.05,
+        24.8
+      ],
+      "bench-right-front": [
+        -7.166666666666667,
+        -26.500000000000004
+      ],
+      "bench-right-back": [
+        7.283333333333334,
+        -26.500000000000004
+      ],
+      "art1": [
+        -13.566666666666668,
+        14.000000000000002
+      ],
+      "art2": [
+        -13.566666666666668,
+        3.2666666666666666
+      ],
+      "art3": [
+        -13.566666666666668,
+        -7.45
+      ],
+      "art4": [
+        -13.566666666666668,
+        -18.166666666666668
+      ],
+      "koupelni": [
+        -5.490232035222105,
+        -18.948643523235553
+      ],
+      "hustopece": [
+        10.858393427434017,
+        -18.913123305573915
+      ],
+      "transped": [
+        -1.4253172524569213,
+        13.860654654995288
+      ],
+      "wurmova": [
+        -5.318731039041162,
+        24.488555783252483
+      ],
+      "bystrc": [
+        4.388549935043079,
+        8.139226083566717
+      ],
+      "selska84": [
+        0.15021427345883837,
+        19.194289600216774
+      ],
+      "ivancice": [
+        2.0334783157095724,
+        -5.052130868528343
+      ],
+      "nebovidy": [
+        -9.40135710761809,
+        0.9679444193146263
+      ]
+    },
+    "minimumClearMainAisleMetres": 2.2011904761904777,
+    "artLaneMetres": 1.7147786458333343,
+    "suggestedWalkBounds": [
+      -14.166666666666668,
+      -27.2,
+      14.166666666666668,
+      28.9
+    ],
+    "minimumDeckGapMetres": 0.9454454146023968,
+    "closestDeckPair": [
+      "transped",
+      "bystrc"
+    ],
+    "rearCrossAisleMetres": 1.7032383251190193
+  },
+  "sideTables": [
+    {
+      "original": [
+        8.34,
+        12.84
+      ],
+      "x": -14.2,
+      "z": -28.350000000000005
+    },
+    {
+      "original": [
+        8.34,
+        4.1
+      ],
+      "x": 0.0,
+      "z": -28.350000000000005
+    },
+    {
+      "original": [
+        8.34,
+        -7.08
+      ],
+      "x": 14.583333333333334,
+      "z": -28.350000000000005
+    }
+  ],
+  "planters": [
+    {
+      "original": [
+        -7.4,
+        -15.26
+      ],
+      "x": -12.333333333333334,
+      "z": -25.433333333333334
+    },
+    {
+      "original": [
+        8,
+        -9.24
+      ],
+      "x": 5.833333333333334,
+      "z": 27.75
+    }
+  ],
+  "heightReview": {
+    "tallestExhibit": "koupelni",
+    "topMetres": 3.088116591890067,
+    "conservativeEaveMetres": 7.319999999999999,
+    "metadataEaveMetres": 7.44,
+    "metadataRidgeMetres": 9.72
+  },
+  "entryVerticalFov": 62,
+  "entryCameraMobile": [
+    1.1,
+    3.2,
+    28.65
+  ],
+  "entryLookAtMobile": [
+    -2.6,
+    3.0,
+    19.4
+  ],
+  "entryMobileHorizontalFov": 70,
+  "sourceRatio": 35,
+  "scaleMultiplier": 0.5,
+  "displayScale": 0.07142857142857142,
+  "worldUnitsPerMetre": 2,
+  "physicalHallMetres": [
+    16,
+    30
+  ],
+  "surfaceY": 2.1,
+  "exhibitOrder": [
+    "wurmova",
+    "selska84",
+    "transped",
+    "bystrc",
+    "nebovidy",
+    "ivancice",
+    "hustopece",
+    "koupelni"
+  ],
+  "finaleView": {
+    "id": "koupelni",
+    "bearingDegrees": -30,
+    "target": [
+      -2.2,
+      3.0,
+      -22.05
+    ],
+    "desktopEye": [
+      -8.58,
+      5.9,
+      -11.0
+    ],
+    "mobileEye": [
+      -8.95,
+      6.75,
+      -10.35
+    ]
+  },
+  "focusViews": {
+    "koupelni": {
+      "desktop": {
+        "position": [
+          -8.58,
+          5.9,
+          -11.0
+        ],
+        "target": [
+          -2.2,
+          3.0,
+          -22.05
+        ]
+      },
+      "mobile": {
+        "position": [
+          -8.95,
+          6.75,
+          -10.35
+        ],
+        "target": [
+          -2.2,
+          3.0,
+          -22.05
+        ]
+      }
+    },
+    "wurmova": {
+      "desktop": {
+        "position": [
+          1.0,
+          3.55,
+          22.65
+        ],
+        "target": [
+          -3.8,
+          2.8,
+          22.4
+        ]
+      },
+      "mobile": {
+        "position": [
+          1.85,
+          3.55,
+          22.71
+        ],
+        "target": [
+          -3.8,
+          2.8,
+          22.4
+        ]
+      }
+    },
+    "ivancice": {
+      "mobile": {
+        "position": [
+          8.0,
+          10.5,
+          4.7
+        ],
+        "target": [
+          -5.3,
+          2.4,
+          -7
+        ]
+      }
+    }
+  },
+  "entryGeometryEvidence": {
+    "desktop": {
+      "wurmova": [
+        0.2085,
+        0.0604,
+        0.4588,
+        0.5773
+      ],
+      "koupelni": [
+        0.5993,
+        0.4499,
+        0.6669,
+        0.5624
+      ],
+      "focusKoupelni": [
+        0.3218,
+        0.1312,
+        0.6864,
+        0.7655
+      ]
+    },
+    "mobile": {
+      "wurmova": [
+        0.091,
+        0.3316,
+        0.4639,
+        0.5339
+      ],
+      "koupelni": [
+        0.6793,
+        0.4832,
+        0.7852,
+        0.5285
+      ],
+      "focusKoupelni": [
+        0.1503,
+        0.3135,
+        0.8647,
+        0.6342
+      ]
+    }
+  }
+}

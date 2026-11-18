@@ -1,17 +1,16 @@
 import {
   loadMaterialFinishes, hasHallFinish, refineHallMaterial, bakedReliefStrength,
   createRoomProbe, applyFloorReflection, applyHallGlassFresnel, refineExhibitMaterials, calibrateExhibitFixture
-} from './museum-materials-v28.js?v=28.0';
+} from './museum-materials-v29.js?v=29.0';
 import { PICK_LAYER } from './museum-performance-v25.js?v=25.0';
 import { RectAreaLightUniformsLib } from './assets/vendor/RectAreaLightUniformsLib.js';
 import { addExhibitUplighting } from './museum-exhibit-lighting-v28.js?v=28.0';
 import {
-  DISPLAY_DENOMINATOR, EXHIBIT_SCALE, MODEL_METRIC_SIZES, WORLD_UNITS_PER_METRE,
+  DISPLAY_DENOMINATOR, EXHIBIT_SCALE, WORLD_UNITS_PER_METRE,
   placeExhibitModel
-} from './museum-placement-v28.js?v=28.0';
+} from './museum-placement-v29.js?v=29.0';
 
 const assetDirectory = new URL('./assets/v25/', import.meta.url);
-const exhibitIds = Object.keys(MODEL_METRIC_SIZES);
 const capTop = 2.1;
 let areaLightLibraryReady = false;
 const studioNames = { hiarch: 'HiARCH', hiplan: 'HiPLAN', hireal: 'HiREAL', entrance: 'HiARCH  ·  HiPLAN  ·  HiREAL' };
@@ -27,13 +26,13 @@ function assetUrl(name) {
 
 export async function loadIndustrialAssets({ THREE, mobile = false }) {
   const [response, { GLTFLoader }, { MeshoptDecoder }] = await Promise.all([
-    fetch(assetUrl('assets/v28/scene.json')),
+    fetch(assetUrl('assets/v29/scene.json')),
     import('./assets/vendor/GLTFLoader.js'),
     import('./assets/vendor/meshopt_decoder.module.js')
   ]);
   if (!response.ok) throw new Error(`Industrial gallery manifest: HTTP ${response.status}`);
   const metadata = await response.json();
-  if (metadata.revision !== 28 || metadata.hall?.rootScale !== WORLD_UNITS_PER_METRE) {
+  if (metadata.revision !== 29 || metadata.hall?.rootScale !== WORLD_UNITS_PER_METRE) {
     throw new Error('Industrial gallery manifest has an unsupported scale or revision.');
   }
   const textures = new THREE.TextureLoader();
@@ -225,7 +224,7 @@ function prepareHall(THREE, root, lightmap, foliage, domain, finishes) {
   function finish(source, kind) {
     const key = `${source.id}/${kind}`;
     if (variants.has(key)) return variants.get(key);
-    const material = refineHallMaterial(THREE, source, finishes);
+    const material = refineHallMaterial(THREE, source, finishes, kind);
     variants.set(key, material);
     const usesDayBake = Boolean((kind === 'baked' || kind === 'floor') && lightmap && material.isMeshStandardMaterial);
     if (usesDayBake) {
@@ -380,10 +379,10 @@ export function buildGalleryRoom({
   });
   const pickables = [], plinthGlows = [];
   const proxyMaterial = new THREE.MeshBasicMaterial();
-  const tables = exhibitIds.map((id, index) => {
-    const project = projects.find(item => item.id === id);
+  const tables = projects.map(project => {
+    const id=project.id;
     const authored = metadata.tables.find(item => item.id === id);
-    if (!project || !authored || !(authored.width>0 && authored.depth>0) ||
+    if (!authored || !(authored.width>0 && authored.depth>0) ||
         Math.abs(authored.displayScale - 1/DISPLAY_DENOMINATOR)>1e-7) {
       throw new Error('Invalid exhibition placement: '+id);
     }
