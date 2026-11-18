@@ -894,7 +894,7 @@
     "metadataEaveMetres": 7.44,
     "metadataRidgeMetres": 9.72
   },
-  "entryVerticalFov": 62,
+  "entryVerticalFov": 68,
   "entryCameraMobile": [
     1.1,
     3.2,
@@ -905,7 +905,7 @@
     3.0,
     19.4
   ],
-  "entryMobileHorizontalFov": 70,
+  "entryMobileHorizontalFov": 62,
   "sourceRatio": 35,
   "scaleMultiplier": 0.5,
   "displayScale": 0.07142857142857142,
@@ -1015,16 +1015,16 @@
   "entryGeometryEvidence": {
     "desktop": {
       "wurmova": [
-        0.2085,
-        0.0604,
-        0.4588,
-        0.5773
+        0.1992,
+        0.1947,
+        0.3562,
+        0.5542
       ],
       "koupelni": [
-        0.5993,
-        0.4499,
-        0.6669,
-        0.5624
+        0.7429,
+        0.4402,
+        0.8348,
+        0.5676
       ],
       "focusKoupelni": [
         0.3218,
@@ -1035,16 +1035,16 @@
     },
     "mobile": {
       "wurmova": [
-        0.091,
-        0.3316,
-        0.4639,
-        0.5339
+        0.0234,
+        0.3037,
+        0.4579,
+        0.5394
       ],
       "koupelni": [
-        0.6793,
-        0.4832,
-        0.7852,
-        0.5285
+        0.709,
+        0.4804,
+        0.8323,
+        0.5332
       ],
       "focusKoupelni": [
         0.1503,
