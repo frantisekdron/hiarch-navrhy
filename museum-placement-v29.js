@@ -1,4 +1,4 @@
-import { roomOrbitDistance } from './museum-space-v29.js?v=29.0';
+import { roomOrbitDistance } from './museum-space-v29.js?v=31.0';
 // The Blender hall is in metres, displayed at two world units per metre.
 // All buildings and their site works share one display scale in the authored hall.
 export const WORLD_UNITS_PER_METRE=2;
@@ -124,9 +124,27 @@ function fitCorners(corners, target, direction, projection, THREE, horizontalMar
   return distance;
 }
 
+// Include the outward-facing enamel plate in the opening composition. Wide
+// landscaped sites can put it well in front of the building's bounding box.
+function fitExhibitAndPlate(corners, table, target, direction, projection, THREE, horizontal, top, bottom) {
+  const building = fitCorners(corners, target, direction, projection, THREE, horizontal, top, bottom);
+  const plate = table.nameplate?.userData;
+  if (!plate?.plaqueWidth) return building;
+  const side = Math.abs(direction.x) > Math.abs(direction.z);
+  const nx = side ? Math.sign(direction.x) : 0;
+  const nz = side ? 0 : Math.sign(direction.z);
+  const offset = (side ? table.width : table.depth) / 2 + .02;
+  const y = table.surfaceY - .039 - plate.plaqueHeight;
+  const centre = new THREE.Vector3(table.x + nx * offset, y, table.z + nz * offset);
+  const half = new THREE.Vector3(nz, 0, -nx).multiplyScalar(plate.plaqueWidth / 2);
+  const endpoints = [centre.clone().sub(half), centre.add(half)];
+  return Math.max(building, fitCorners(endpoints, target, direction, projection, THREE,
+    Math.min(horizontal, .85), top, Math.min(bottom, .65)));
+}
+
 export function exhibitOrbitFitDistance(table, target, direction, projection, THREE, isMobile) {
   const [horizontal, top, bottom] = framingLimits(projection, isMobile);
-  return fitCorners(exhibitCorners(table, THREE), target, direction, projection, THREE, horizontal, top, bottom);
+  return fitExhibitAndPlate(exhibitCorners(table, THREE), table, target, direction, projection, THREE, horizontal, top, bottom);
 }
 
 export function exhibitView(table, camera, THREE, isMobile = false, neighbours = []) {
@@ -167,11 +185,11 @@ export function exhibitView(table, camera, THREE, isMobile = false, neighbours =
     const passes = angleUp ? 1 : 4;
     for (let pass = 0; pass < passes; pass++) {
       direction.set(x * Math.cos(pitch), Math.sin(pitch), z * Math.cos(pitch));
-      fit = Math.max(minDistance, fitCorners(corners, target, direction, camera, THREE, horizontal, top, bottom));
+      fit = Math.max(minDistance, fitExhibitAndPlate(corners, table, target, direction, camera, THREE, horizontal, top, bottom));
       if (!angleUp) pitch = Math.asin(THREE.MathUtils.clamp(eyeOffset / fit, -.19, .19));
     }
     const distance = roomOrbitDistance(target, direction, fit, table.orbitBounds);
-    const fullViewDistance = fitCorners(corners, target, direction, camera, THREE, .97, top, bottom);
+    const fullViewDistance = fitExhibitAndPlate(corners, table, target, direction, camera, THREE, .97, top, bottom);
     const position = target.clone().addScaledVector(direction, distance);
     const obscured = obscuredPoints(position, visibilityPoints, obstacles, THREE);
     return { position, obscured, fits: distance + .0001 >= Math.max(minDistance, fullViewDistance),

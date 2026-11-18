@@ -1,0 +1,167 @@
+{
+  "revision": 31,
+  "date": "2026-11-18",
+  "models": [
+    {
+      "id": "hustopece",
+      "url": "assets/v30/models/hustopece.glb",
+      "bytes": 4054196,
+      "sha256": "1385dd6dbd918cc328fd3105ac0b3164e7549193a82431d8c3c86d5af8c4c473",
+      "triangles": 108431,
+      "dimensions_m": [
+        53.36110305786133,
+        39.82758331298828,
+        10.591453552246094
+      ],
+      "material_batches": 112,
+      "images": 42,
+      "source": "SketchUp model supplied by HiARCH, November 2026",
+      "format": "glTF 2.0 / EXT_meshopt_compression",
+      "restoredMaps": 13,
+      "occlusionResolution": 512,
+      "preview": {
+        "url": "assets/v31/preview/hustopece.glb",
+        "bytes": 384656,
+        "sha256": "133269558e63a83d2787a00a526298c2f1ffbf0c233fe835a7b60b824cb6726c",
+        "triangles": 16677,
+        "images": 13,
+        "material_batches": 31,
+        "vertices": 35301,
+        "sourceVertices": 35301
+      },
+      "vertices": 273460,
+      "sourceVertices": 290925
+    },
+    {
+      "id": "transped",
+      "url": "assets/v30/models/transped.glb",
+      "bytes": 392936,
+      "sha256": "3f98dd2d0882d60736fa3bc45255d82b836e6a2a3b75a3f17f67356a439b5713",
+      "triangles": 16683,
+      "dimensions_m": [
+        30.011695861816406,
+        12.840001106262207,
+        12.729194641113281
+      ],
+      "material_batches": 19,
+      "images": 2,
+      "source": "SketchUp model supplied by HiARCH, November 2026",
+      "format": "glTF 2.0 / EXT_meshopt_compression",
+      "refinement": "1.2 cm, one segment bevel on major opaque structural edges over 1 m; original PBR values and embedded images retained",
+      "occlusionResolution": 512,
+      "vertices": 34919,
+      "sourceVertices": 40871
+    },
+    {
+      "id": "wurmova",
+      "url": "assets/v30/models/wurmova.glb",
+      "bytes": 123532,
+      "sha256": "92b9b1c0cec1f48ae15664582d4089c7aac49e3458cb8ae965f6d7c95639c90b",
+      "triangles": 4001,
+      "dimensions_m": [
+        13.8701171875,
+        17.8447265625,
+        11.141207695007324
+      ],
+      "material_batches": 10,
+      "images": 2,
+      "source": "SketchUp model supplied by HiARCH, November 2026",
+      "format": "glTF 2.0 / EXT_meshopt_compression / EXT_texture_webp",
+      "refinement": "Original hip geometry and roof windows. Tile courses sampled from the built house. Raised hip caps and two roof vents placed from street photographs; small fitting dimensions estimated from the roof span.",
+      "occlusionResolution": 512,
+      "vertices": 5785,
+      "sourceVertices": 10425
+    },
+    {
+      "id": "bystrc",
+      "url": "assets/v30/models/bystrc.glb",
+      "bytes": 1635072,
+      "sha256": "113ebdc597d21c87d592fb3596f6f1e910902e1b96a7b9629f4dde6e95ee753e",
+      "triangles": 57122,
+      "dimensions_m": [
+        30.808334350585938,
+        28.203407287597656,
+        9.073063850402832
+      ],
+      "material_batches": 39,
+      "images": 11,
+      "source": "SketchUp model supplied by HiARCH, November 2026",
+      "format": "glTF 2.0 / EXT_meshopt_compression",
+      "refinement": "1.2 cm, one segment bevel on major opaque structural edges over 1 m; original PBR values and embedded images retained",
+      "restoredMaps": 2,
+      "occlusionResolution": 512,
+      "preview": {
+        "triangles": 23306,
+        "vertices": 66505,
+        "sourceVertices": 66507,
+        "url": "assets/v31/preview/bystrc.glb",
+        "bytes": 463340,
+        "sha256": "435a0bfbdfde8599e7ddc5007d219e5abb3de5230833da2d087239d333411f48",
+        "images": 10,
+        "material_batches": 27
+      },
+      "vertices": 162555,
+      "sourceVertices": 182170
+    },
+    {
+      "id": "selska84",
+      "url": "assets/v30/models/selska84.glb",
+      "bytes": 420444,
+      "sha256": "b3c2ab7b168ff8162c38609c16dae05266f3248e8807d26139ffaf22b33f3c4f",
+      "triangles": 15474,
+      "dimensions_m": [
+        18.150863647460938,
+        22.479507446289062,
+        11.760000228881836
+      ],
+      "material_batches": 18,
+      "images": 4,
+      "source": "SketchUp model supplied by HiARCH, November 2026",
+      "format": "glTF 2.0 / EXT_meshopt_compression",
+      "refinement": "1.2 cm, one segment bevel on major opaque structural edges over 1 m; original PBR values and embedded images retained",
+      "restoredMaps": 3,
+      "occlusionResolution": 512,
+      "vertices": 33097,
+      "sourceVertices": 53025
+    },
+    {
+      "id": "ivancice",
+      "url": "assets/v30/models/ivancice.glb",
+      "bytes": 270196,
+      "sha256": "16bd8e78ffee3b6294b77d426b54582c58b28910109f14806097793e3e539ae6",
+      "triangles": 12692,
+      "dimensions_m": [
+        88.02000427246094,
+        20.230003356933594,
+        12.5
+      ],
+      "material_batches": 10,
+      "images": 2,
+      "source": "SketchUp model supplied by HiARCH, November 2026",
+      "format": "glTF 2.0 / EXT_meshopt_compression",
+      "occlusionResolution": 512,
+      "vertices": 19933,
+      "sourceVertices": 24772
+    },
+    {
+      "id": "nebovidy",
+      "url": "assets/v30/models/nebovidy.glb",
+      "bytes": 310808,
+      "sha256": "0e01d4b465d213ef9aa6081d24cfa574a3fbbe46905a2a370342d139b851c917",
+      "triangles": 10280,
+      "dimensions_m": [
+        46.6114616394043,
+        21.692893981933594,
+        11.76658821105957
+      ],
+      "material_batches": 16,
+      "images": 1,
+      "source": "SketchUp model supplied by HiARCH, November 2026",
+      "format": "glTF 2.0 / EXT_meshopt_compression",
+      "refinement": "1.2 cm bevel on major opaque structural edges, original glazing retained",
+      "occlusionResolution": 512,
+      "vertices": 24318,
+      "sourceVertices": 31999
+    }
+  ]
+}

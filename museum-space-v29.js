@@ -31,6 +31,39 @@ export function roomOrbitDistance(target, direction, desired, bounds) {
   return Math.max(.04,limit);
 }
 
+// Slab intersection measured from the orbit target towards the eye.
+function firstBoxEntry(origin, ray, half, limit) {
+  let enter = 0, exit = limit;
+  for (let axis = 0; axis < 3; axis++) {
+    if (Math.abs(ray[axis]) < 1e-7) {
+      if (Math.abs(origin[axis]) > half[axis]) return limit;
+      continue;
+    }
+    const a = (-half[axis] - origin[axis]) / ray[axis];
+    const b = (half[axis] - origin[axis]) / ray[axis];
+    enter = Math.max(enter, Math.min(a, b));
+    exit = Math.min(exit, Math.max(a, b));
+    if (enter > exit) return limit;
+  }
+  return Math.max(.04, enter - .10);
+}
+
+function avoidOtherExhibits(table, target, direction, limit) {
+  const ray = [direction.x, direction.y, direction.z];
+  for (const other of table.neighbours || []) {
+    if (other === table) continue;
+    const halfY = other.surfaceY / 2;
+    limit = firstBoxEntry([target.x-other.x,target.y-halfY,target.z-other.z], ray,
+      [other.width/2+.05,halfY+.05,other.depth/2+.05], limit);
+    const dx=target.x-other.centerX, dz=target.z-other.centerZ;
+    const sin=Math.sin(other.yaw), cos=Math.cos(other.yaw), size=other.scaledSize;
+    limit = firstBoxEntry([dx*cos-dz*sin, target.y-other.targetY-size.y*.02, dx*sin+dz*cos],
+      [ray[0]*cos-ray[2]*sin,ray[1],ray[0]*sin+ray[2]*cos],
+      [size.x/2+.04,size.y/2+.04,size.z/2+.04], limit);
+  }
+  return limit;
+}
+
 // Limit zoom using the visible facade along this bearing, including a small near-plane margin.
 export function orbitDistance(table,target,direction,desired){
   const c=Math.cos(table.yaw),s=Math.sin(table.yaw),size=table.scaledSize;
@@ -40,5 +73,6 @@ export function orbitDistance(table,target,direction,desired){
   const half=[size.x/2,size.y/2,size.z/2];
   let exit=Infinity;
   for(let i=0;i<3;i++)if(Math.abs(ray[i])>1e-6)exit=Math.min(exit,((ray[i]>0?half[i]:-half[i])-origin[i])/ray[i]);
-  return roomOrbitDistance(target,direction,Math.max(desired,Number.isFinite(exit)?exit+.12:.22),table.orbitBounds);
+  const withinHall = roomOrbitDistance(target,direction,Math.max(desired,Number.isFinite(exit)?exit+.12:.22),table.orbitBounds);
+  return avoidOtherExhibits(table, target, direction, withinHall);
 }

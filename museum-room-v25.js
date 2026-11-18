@@ -7,10 +7,12 @@ import { addExhibitUplighting } from './museum-exhibit-lighting-v28.js?v=28.0';
 import {
   DISPLAY_DENOMINATOR, EXHIBIT_SCALE, WORLD_UNITS_PER_METRE,
   placeExhibitModel
-} from './museum-placement-v29.js?v=29.0';
+} from './museum-placement-v29.js?v=31.0';
 
 const assetDirectory = new URL('./assets/v25/', import.meta.url);
 const capTop = 2.1;
+// Height from the base of the cut terrain to the SketchUp survey origin.
+const hustopeceDatumLift = .42 * EXHIBIT_SCALE;
 const studioNames = { hiarch: 'HiARCH', hiplan: 'HiPLAN', hireal: 'HiREAL', entrance: 'HiARCH  ·  HiPLAN  ·  HiREAL' };
 const lightLevels = {
   day: { sky: 0xC5B6A0, hemisphere: .78, sun: .62, spots: 15, environment: .68, park: 1, print: 1, fixture: .58 },
@@ -37,17 +39,18 @@ export async function loadIndustrialAssets({ THREE, mobile = false, onHallProgre
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   const mobileAtlas = typeof mobile === 'boolean' ? mobile : mobile.matches;
   const atlas = mobileAtlas ? metadata.lightmap.mobile : metadata.lightmap.desktop;
-  const [gltf, lightmap, foliage, finishes] = await Promise.all([
+  const [gltf, lightmap, foliage, finishes, catalogue] = await Promise.all([
     loader.loadAsync(assetUrl(metadata.hall.url), onHallProgress),
     textures.loadAsync(assetUrl(atlas)),
     textures.loadAsync(assetUrl(metadata.foliage.url)),
-    loadMaterialFinishes(THREE, mobileAtlas, metadata.hall.physicalMetres)
+    loadMaterialFinishes(THREE, mobileAtlas, metadata.hall.physicalMetres),
+    loader.loadAsync(assetUrl('assets/v31/nameplates.glb'))
   ]);
   lightmap.channel = metadata.lightmap.uvChannel;
   lightmap.flipY = metadata.lightmap.flipY;
   lightmap.colorSpace = THREE.SRGBColorSpace;
   foliage.colorSpace = THREE.NoColorSpace;
-  return { root: gltf.scene, metadata, lightmap, foliage, loader, finishes };
+  return { root: gltf.scene, catalogue: catalogue.scene, metadata, lightmap, foliage, loader, finishes };
 }
 
 function named(root, name) {
@@ -150,7 +153,9 @@ function pickProxy(THREE, parent, material, width, height, depth, y, data) {
 }
 
 function placeModel(THREE, model, id, surfaceY) {
-  const placement = placeExhibitModel(model, id, THREE, surfaceY);
+  // The cut edge of the surveyed Hustopeče terrain extends 0.42 source metres below zero.
+  const datumY = id === 'hustopece' ? surfaceY + hustopeceDatumLift : surfaceY;
+  const placement = placeExhibitModel(model, id, THREE, datumY);
   model.traverse(node => {
     node.userData.projectId = id;
     if(node.isMesh){
@@ -354,7 +359,7 @@ export function buildGalleryRoom({
   THREE, renderer, projects, makeProjectModel, labelTexture, artworks = [],
   requestRender = () => {}, industrialAssets
 }) {
-  const { root, metadata, lightmap, foliage, finishes } = industrialAssets;
+  const { root, catalogue, metadata, lightmap, foliage, finishes } = industrialAssets;
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(lightLevels.day.sky);
   scene.fog = new THREE.Fog(lightLevels.day.sky, 47, 110);
@@ -384,7 +389,7 @@ export function buildGalleryRoom({
         Math.abs(authored.displayScale - 1/DISPLAY_DENOMINATOR)>1e-7) {
       throw new Error('Invalid exhibition placement: '+id);
     }
-    const {x,z,width,depth,dx=0,dz=0,yaw=0,surfaceY=capTop,plaqueY=surfaceY-.15}=authored;
+    const {x,z,width,depth,dx=0,dz=0,yaw=0,surfaceY=capTop}=authored;
     const frame=new THREE.Group();
     frame.position.set(dx,0,dz);
     frame.rotation.y=yaw;
@@ -396,17 +401,14 @@ export function buildGalleryRoom({
     scene.add(group);
     pickProxy(THREE, group, proxyMaterial, width, surfaceY, depth, surfaceY / 2, { projectId: id });
     const linked = /^https?:\/\/(?:[^/]+\.)?hiarch\.cz(?:\/|$)/i.test(project.source || '');
-    const plaqueWidth = Math.min(width - .075, .97), plaqueX = linked ? -plaqueWidth * .115 : 0;
-    const plaque = textPlane(THREE, labelTexture, [project.name], plaqueWidth * (linked ? .72 : 1), .12);
-    plaque.position.set(plaqueX, plaqueY, depth / 2 + .007);
-    plaque.userData.projectId = id;
-    group.add(plaque);
-    if (linked) {
-      const label = textPlane(THREE, labelTexture, ['HiARCH'], plaqueWidth * .23, .12, '#e8bb82');
-      label.position.set(plaqueWidth * .37, plaqueY, plaque.position.z);
-      label.userData.companyId = 'hiarch';
-      group.add(label);
-    }
+    const nameplate = named(catalogue, 'Nameplate_' + id);
+    // Geometry is authored in metres around the plinth centre. Its four faces
+    // share one atlas and one draw call, including the engraved studio link.
+    nameplate.position.set(0, 0, 0);
+    nameplate.scale.setScalar(WORLD_UNITS_PER_METRE);
+    if (linked) nameplate.userData.linkedStudio = 'hiarch';
+    nameplate.material.map.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+    group.add(nameplate);
 
     const model = makeProjectModel(id, THREE);
     refineExhibitMaterials(model, id, finishes);
@@ -414,7 +416,7 @@ export function buildGalleryRoom({
     frame.add(model);
     pickables.push(group);
     plinthGlows.push(glowMaterials(THREE, named(root, authored.glow || `Glow_Plinth_${id}`)));
-    return { x, z, centerX:x+dx, centerZ:z+dz, surfaceY, yaw, frame, group, model, featured: id === 'koupelni', hotspots: [], width, depth, ...placement };
+    return { x, z, centerX:x+dx, centerZ:z+dz, surfaceY, yaw, frame, group, model, nameplate, featured: id === 'koupelni', hotspots: [], width, depth, ...placement };
   });
 
   const benches = metadata.benches.map(record => {
@@ -456,7 +458,7 @@ export function buildGalleryRoom({
   sun.shadow.mapSize.set(side,side);
   Object.assign(sun.shadow.camera,{left:-34,right:34,top:28,bottom:-28,near:12,far:110});
   sun.shadow.camera.updateProjectionMatrix();
-  sun.shadow.normalBias=.025;sun.shadow.bias=-.00016;sun.shadow.autoUpdate=false;sun.shadow.needsUpdate=true;
+  sun.shadow.normalBias=.045;sun.shadow.bias=-.00031;sun.shadow.autoUpdate=false;sun.shadow.needsUpdate=true;
   for(const name of ['Hall_IronBlack','Hall_SteelEdge','Hall_BrushedNickel']){
     root.getObjectByName(name)?.traverse(node=>{if(node.isMesh){node.castShadow=name!=='Hall_BrushedNickel';node.receiveShadow=true}});
   }
@@ -569,19 +571,25 @@ export function buildGalleryRoom({
   function loadSiteWorks(kind) {
     if (siteJobs.has(kind)) return siteJobs.get(kind);
     const quay = kind === 'quay';
-    const asset = quay ? 'bystrc-quay.glb' : 'streets.glb';
+    const asset = quay ? 'assets/v31/bystrc-quay.glb' : 'assets/v31/streets.glb';
     const ids = quay ? ['bystrc'] : ['hustopece', 'transped'];
     // Source metres, centred on the building. Keep site works out of its orbit bounds.
-    const job = industrialAssets.loader.loadAsync(assetUrl('assets/v26/' + asset)).then(({ scene: site }) => {
+    const job = industrialAssets.loader.loadAsync(assetUrl(asset)).then(({ scene: site }) => {
       const parts = ids.map(id => named(site, 'site_' + id));
       ids.forEach((id, index) => {
         const table = tables.find(item => item.group.userData.projectId === id);
         const mount = new THREE.Group();
         mount.position.y = table.surfaceY;
+        if (id === 'hustopece') {
+          mount.position.set(table.model.position.x, table.surfaceY + hustopeceDatumLift, table.model.position.z);
+        }
         mount.scale.setScalar(EXHIBIT_SCALE);
         mount.add(parts[index]);
         mount.visible = !table.model.userData.loading;
-        mount.traverse(object => { object.raycast = () => {}; });
+        mount.traverse(object => {
+          object.raycast = () => {};
+          if ((id === 'hustopece' || quay) && object.isMesh) object.receiveShadow = true;
+        });
         table.frame.add(mount);
         table.approach = mount;
         updateModelEnvironment(mount);
@@ -622,7 +630,13 @@ export function buildGalleryRoom({
     updateModelEnvironment(model);
     updateContact(table);
     refreshDayShadows();
-    if (table.approach) table.approach.visible = true;
+    if (table.approach) {
+      table.approach.visible = true;
+      if (id === 'hustopece') {
+        table.approach.position.x = model.position.x;
+        table.approach.position.z = model.position.z;
+      }
+    }
     disposeModel(previous, finishes.textures);
     requestRender();
     return true;

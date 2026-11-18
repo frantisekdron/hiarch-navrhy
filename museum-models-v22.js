@@ -1,4 +1,4 @@
-import {applyExhibitSurfaceDetail} from './museum-exhibit-surfaces-v30.js?v=30.0';
+import {applyExhibitSurfaceDetail} from './museum-exhibit-surfaces-v31.js?v=31.0';
 import {addKoupelniShades} from './museum-koupelni-shades-v30.js';
 import {makeProjectModel as makeKoupelni} from './museum-koupelni-v18.js?v=18.0';
 
@@ -152,7 +152,8 @@ export function makeProjectModel(id,THREE,anisotropy=4) {
 }
 
 function validAsset(asset,id,folder) {
- return asset?.url === 'assets/v30/'+folder+'/'+id+'.glb' && Number.isSafeInteger(asset.bytes) && asset.bytes > 0;
+ const version = folder === 'preview' && (id === 'bystrc' || id === 'hustopece') ? 'v31' : 'v30';
+ return asset?.url === `assets/${version}/${folder}/${id}.glb` && Number.isSafeInteger(asset.bytes) && asset.bytes > 0;
 }
 
 export function loadClientModels(THREE,{onUpdate=()=>{}}={}) {
@@ -162,12 +163,12 @@ export function loadClientModels(THREE,{onUpdate=()=>{}}={}) {
  async function start() {
   try {
    const [response,{GLTFLoader},{MeshoptDecoder}] = await Promise.all([
-    fetch(new URL('assets/v30/models/manifest.json',document.baseURI)),
+    fetch(new URL('assets/v31/models/manifest.json',document.baseURI)),
     import('./assets/vendor/GLTFLoader.js'),import('./assets/vendor/meshopt_decoder.module.js')
    ]);
    if (!response.ok) throw new Error('manifest unavailable');
    const manifest = await response.json();
-   if (manifest.revision !== 30 || !Array.isArray(manifest.models)) throw new Error('invalid model manifest');
+   if (manifest.revision !== 31 || !Array.isArray(manifest.models)) throw new Error('invalid model manifest');
    revision = manifest.revision;
    const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
    loadAsset = async (id,asset) => {

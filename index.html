@@ -1,14 +1,14 @@
-<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#1b211d"><link rel="icon" href="assets/spolecny-symbol.svg" type="image/svg+xml"><title>Galerie projektů | HiARCH · HiPLAN · HiREAL</title><link rel="canonical" href="https://frantisekdron.github.io/hiarch-navrhy/"><meta name="description" content="Osm staveb v prostorové galerii HiARCH. Prohlédněte si jejich 3D modely, fotografie a výkresy."><link rel="stylesheet" href="assets/fonts.css"><link rel="stylesheet" href="assets/fonts-v3.css"><link rel="stylesheet" href="museum-v4.css?v=4.5"><link rel="stylesheet" href="museum-v5.css?v=6.2"><link rel="stylesheet" href="museum-v6.css?v=6.2"><link rel="modulepreload" href="museum-v10.js?v=30.2">
+<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#1b211d"><link rel="icon" href="assets/spolecny-symbol.svg" type="image/svg+xml"><title>Galerie projektů | HiARCH · HiPLAN · HiREAL</title><link rel="canonical" href="https://frantisekdron.github.io/hiarch-navrhy/"><meta name="description" content="Osm staveb v prostorové galerii HiARCH. Prohlédněte si jejich 3D modely, fotografie a výkresy."><link rel="stylesheet" href="assets/fonts.css"><link rel="stylesheet" href="assets/fonts-v3.css"><link rel="stylesheet" href="museum-v4.css?v=4.5"><link rel="stylesheet" href="museum-v5.css?v=6.2"><link rel="stylesheet" href="museum-v6.css?v=6.2"><link rel="modulepreload" href="museum-v10.js?v=31.0">
 <link rel="preload" as="fetch" crossorigin href="assets/v30/industrial-hall.glb">
 <link rel="preload" as="fetch" crossorigin href="assets/v30/scene.json">
-<link rel="preload" as="fetch" crossorigin href="assets/v30/models/manifest.json">
+<link rel="preload" as="fetch" crossorigin href="assets/v31/models/manifest.json">
 <link rel="modulepreload" href="assets/vendor/GLTFLoader.js">
 <link rel="modulepreload" href="assets/vendor/meshopt_decoder.module.js"><link rel="stylesheet" href="museum-v7.css?v=7.6"><link rel="stylesheet" href="museum-v8.css?v=8.1"><link rel="stylesheet" href="presentation-v9.css?v=9.1"><link rel="stylesheet" href="museum-v10.css?v=24.1"><meta name="robots" content="noindex,nofollow,noarchive"><link rel="stylesheet" href="museum-v15.css?v=20.0"><link rel="modulepreload" href="assets/vendor/three.module.min.js">
 <link rel="preload" as="fetch" crossorigin href="assets/v29/projects.json"><link rel="preload" as="fetch" crossorigin href="assets/v7/art/artworks.json?v=20.1"><link rel="preload" as="fetch" crossorigin href="assets/v21/window-layouts.json"><link rel="preload" as="fetch" crossorigin href="assets/v2/czech-detailed.geojson"><link rel="stylesheet" href="museum-salon-v18.css?v=20.0"><link rel="stylesheet" href="museum-portfolio-v23.css"><link rel="stylesheet" href="industrial-theme-v25.css?v=25.0"><link rel="stylesheet" href="museum-loading-v30.css?v=30.1"></head><body data-presentation="c" class="gallery-at-entry">
 <header class="museum-header"><a class="museum-brand" href="./" aria-label="Galerie projektů HiARCH, HiPLAN a HiREAL"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M4 20V4H20M12 28V12H28M20 36V20H36"/></svg><span>HiARCH <i>·</i> HiPLAN <i>·</i> HiREAL</span></a><nav aria-label="Navigace galerie"><a href="#projekty">Projekty</a><a href="#kontakt">Kontakt</a></nav></header>
 <main>
 <section class="museum-shell" id="museum" data-renderer="loading" data-room-ready="false" aria-busy="true" aria-label="Prostorová galerie projektů">
- <div class="entrance-poster" id="entrancePoster" aria-hidden="true"><picture><source media="(max-width:650px) and (orientation:portrait)" srcset="assets/v30/doors-portrait.webp"><img src="assets/v30/doors-wide.webp" width="1366" height="840" alt="" fetchpriority="high"></picture></div>
+ <div class="entrance-poster" id="entrancePoster" aria-hidden="true"><picture><source media="(max-width:650px) and (orientation:portrait)" srcset="assets/v31/doors-portrait.webp"><img src="assets/v31/doors-wide.webp" width="1366" height="840" alt="" fetchpriority="high"></picture></div>
  <div class="gallery-loading" id="galleryLoading">
   <div class="gallery-loading-center">
    <svg class="gallery-loading-mark" viewBox="0 0 40 40" width="104" height="104" aria-hidden="true" focusable="false">
@@ -76,7 +76,7 @@ setTimeout(() => {
 },10000);
 const retry = document.getElementById('retryGallery');
 retry.addEventListener('click', () => location.reload());
-import('./museum-v10.js?v=30.2').catch(() => {
+import('./museum-v10.js?v=31.0').catch(() => {
   const room = document.getElementById('museum');
   room.dataset.renderer = 'html';
   room.setAttribute('aria-busy', 'false');
