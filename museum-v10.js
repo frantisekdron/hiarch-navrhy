@@ -38,7 +38,9 @@ function loadProgress(part, fraction) {
  completed[part]=Math.max(completed[part],Math.min(1,fraction));
  const amount=Math.floor(42*completed.hall+32*completed.models+7*completed.sources+
    9*completed.interior+6*completed.surroundings+4*completed.frame);
+ if ($('galleryProgress').hasAttribute('value') && $('galleryProgress').value===amount) return;
  $('galleryProgress').value=amount;
+ $('galleryLoading').style.setProperty('--gallery-loaded',amount+'%');
  $('galleryLoadingValue').textContent=amount+' %';
  const label=completed.interior?'Připravuji první pohled':completed.hall===1&&completed.models<1?'Načítám modely staveb':'Načítám galerii';
  if ($('galleryLoadingStep').textContent!==label) $('galleryLoadingStep').textContent=label;
@@ -601,7 +603,7 @@ async function init(){
    loadProgress('interior',1);
    await Promise.all(['streets','quay'].map(kind=>requestSiteWorks(kind,true)));
    loadProgress('surroundings',1);
-   renderer.shadowMap.needsUpdate=true;shell.dataset.exhibits=String(tables.length);shell.dataset.revision='30.0';shell.dataset.reducedMotion=String(reduced.matches);shell.dataset.artworks=String(artworks.length);shell.dataset.facadeMode='geometric';let lastWidth=0,lastHeight=0,lastMobile=mobile.matches;
+   renderer.shadowMap.needsUpdate=true;shell.dataset.exhibits=String(tables.length);shell.dataset.revision='30.1';shell.dataset.reducedMotion=String(reduced.matches);shell.dataset.artworks=String(artworks.length);shell.dataset.facadeMode='geometric';let lastWidth=0,lastHeight=0,lastMobile=mobile.matches;
  let lastOrientation=globalThis.screen?.orientation?.type;
  const resize=()=>{
    const w=host.clientWidth,h=host.clientHeight;
