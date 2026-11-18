@@ -1,7 +1,10 @@
+import { roomOrbitDistance } from './museum-touch-v25.js?v=25.0';
 // The Blender hall is in metres, displayed at two world units per metre.
-// Client buildings are in metres: .02 world/m gives a physical scale of 1:100.
+// All buildings and their site works share one display scale in the authored hall.
 export const WORLD_UNITS_PER_METRE=2;
-export const EXHIBIT_SCALE=WORLD_UNITS_PER_METRE/100;
+export const DISPLAY_DENOMINATOR=35;
+export const EXHIBIT_SCALE=WORLD_UNITS_PER_METRE/DISPLAY_DENOMINATOR;
+export const DISPLAY_SCALE_LABEL=`1:${DISPLAY_DENOMINATOR}`;
 export const MODEL_METRIC_SIZES=Object.freeze({
   koupelni:[42.64574,28.53363,28.04933],
   hustopece:[53.3427734,10.472168,39.828125],transped:[30.0117,12.7292,12.84],
@@ -9,9 +12,18 @@ export const MODEL_METRIC_SIZES=Object.freeze({
   selska84:[18.1509,11.76,22.4795],ivancice:[88.0200,12.5,20.23],
   nebovidy:[46.6115,11.7666,21.6929]
 });
-export const EXHIBIT_POSITIONS=[[-2.65,7.8],[-5.6,-2],[5.6,-2],[-5.6,-7],[5.6,-7],[-5.6,-12],[5.6,-12],[0,-12]];
-export const KOUPLENI_MODEL_NOTE='Měřítko 1:100 · rozměry Koupelní jsou odhadnuté podle fotografií.';
-export function plinthSize(id){const s=MODEL_METRIC_SIZES[id];return {width:Math.max(1.45,1.35+s[0]*.022),depth:Math.max(1.08,.88+s[2]*.020)}}
+export const EXHIBIT_POSITIONS=[[-2.65,7.8],[-5.6,-2],[4.0,-2],[-5.6,-7],[5.6,-7],[-5.6,-12],[5.6,-12],[0,-12]];
+export const KOUPLENI_MODEL_NOTE=`Měřítko ${DISPLAY_SCALE_LABEL} · rozměry Koupelní jsou odhadnuté podle fotografií.`;
+// The street and quay pieces share the exhibit origin, including asymmetric approaches.
+const SITE_HALF_EXTENTS={hustopece:[30,30],transped:[28,16],bystrc:[16,14.65]};
+export function plinthSize(id){
+  const [width,,depth]=MODEL_METRIC_SIZES[id];
+  const [siteX,siteZ]=SITE_HALF_EXTENTS[id] || [0,0];
+  return {
+    width:Math.max(1.45,1.35+width*.022,Math.max(width,2*siteX)*EXHIBIT_SCALE+.24),
+    depth:Math.max(1.08,.88+depth*.020,Math.max(depth,2*siteZ)*EXHIBIT_SCALE+.24)
+  };
+}
 export function placeExhibitModel(model,id,THREE,surfaceY=2.1){
   model.scale.setScalar(1);model.position.set(0,0,0);model.updateWorldMatrix(true,true);
   const bounds=new THREE.Box3().setFromObject(model);
@@ -24,49 +36,147 @@ export function placeExhibitModel(model,id,THREE,surfaceY=2.1){
   const fit=EXHIBIT_SCALE*metresPerUnit;
   model.scale.setScalar(fit);model.position.set(-center.x*fit,surfaceY-bounds.min.y*fit,-center.z*fit);
   const scaledSize=size.clone().multiplyScalar(fit);
-  model.userData.displayPlacement={mode:'1:100',metresPerWorldUnit:.5,scaleDenominator:100,dimensionBasis:id==='koupelni'?'photo-estimate':'client-model-metres',fit,displaySize:scaledSize.toArray(),sourceSize:size.toArray(),metresPerUnit};
+  model.userData.displayPlacement={mode:DISPLAY_SCALE_LABEL,metresPerWorldUnit:.5,scaleDenominator:DISPLAY_DENOMINATOR,dimensionBasis:id==='koupelni'?'photo-estimate':'client-model-metres',fit,displaySize:scaledSize.toArray(),sourceSize:size.toArray(),metresPerUnit};
   return {fit,size,scaledSize,modelHeight:scaledSize.y,targetY:surfaceY+scaledSize.y*.48,focusRadius:scaledSize.length()*.5};
 }
-const streetBearing={koupelni:-30,hustopece:-157,transped:29,wurmova:-30.72,bystrc:-31,selska84:55,ivancice:38,nebovidy:34};
+const streetBearing = {
+  koupelni: -30, hustopece: -157, transped: 29, wurmova: -30.72,
+  bystrc: -31, selska84: 55, ivancice: -25, nebovidy: 34
+};
+const approachPitch = { hustopece: 25, transped: 11, bystrc: 22 };
 
-export function exhibitOrbitFitDistance(table,target,direction,projection,THREE,isMobile,framing=isMobile?.80:.69){
-  const size=table.scaledSize,base=table.targetY-size.y*.48;
-  const right=new THREE.Vector3(0,1,0).cross(direction).normalize();
-  const up=new THREE.Vector3().crossVectors(direction,right);
-  const tanV=Math.tan(THREE.MathUtils.degToRad(projection.fov)*.5);
-  const tanH=tanV*projection.aspect*framing;
-  const corner=new THREE.Vector3();
-  let distance=projection.near;
-  for(const x of [-size.x/2,size.x/2])for(const y of [base,base+size.y])for(const z of [-size.z/2,size.z/2]){
-    corner.set(table.x+x-target.x,y-target.y,table.z+z-target.z);
-    const depth=corner.dot(direction),horizontal=Math.abs(corner.dot(right))/tanH;
-    const vertical=Math.abs(corner.dot(up))/(tanV*.77);
-    distance=Math.max(distance,depth+Math.max(horizontal,vertical,projection.near));
+// Trunk and planter envelopes inside the hall. Blender maps (x, y) in metres to
+// (2x, -2y) in the horizontal plane of the gallery.
+const indoorPlanters = [[-7.4, -15.26, 3.55], [8, -9.24, 3]];
+
+function framingLimits(projection, isMobile) {
+  const portrait = projection.aspect < .8;
+  // The pager and the gallery tools reserve more vertical space on short screens.
+  const short = (isMobile && !portrait) || projection.aspect > 2;
+  return [portrait ? .91 : .88, short ? .49 : portrait ? .69 : .82, short ? .49 : portrait ? .69 : .74];
+}
+
+function exhibitCorners(table, THREE) {
+  const { x, z, scaledSize: size } = table;
+  const base = table.targetY - size.y * .48;
+  const corners = [];
+  for (const dx of [-size.x / 2, size.x / 2]) {
+    for (const dy of [0, size.y]) {
+      for (const dz of [-size.z / 2, size.z / 2]) {
+        corners.push(new THREE.Vector3(x + dx, base + dy, z + dz));
+      }
+    }
+  }
+  return corners;
+}
+
+function viewObstacles(table, neighbours, THREE) {
+  const box = (x, z, halfWidth, halfDepth, base, top) => new THREE.Box3(
+    new THREE.Vector3(x - halfWidth, base, z - halfDepth),
+    new THREE.Vector3(x + halfWidth, top, z + halfDepth)
+  );
+  const obstacles = indoorPlanters.flatMap(([x, z, top]) => [
+    box(x, z, .52, .52, 0, .94),
+    box(x, z, .23, .23, .92, top)
+  ]);
+  for (const other of neighbours) {
+    if (other === table) continue;
+    const { x, z, width, depth, scaledSize: size } = other;
+    const base = other.targetY - size.y * .48;
+    obstacles.push(new THREE.Box3().setFromPoints(exhibitCorners(other, THREE)));
+    if (width && depth) obstacles.push(box(x, z, width / 2, depth / 2, 0, base));
+  }
+  return obstacles;
+}
+
+function obscuredPoints(position, points, obstacles, THREE) {
+  const ray = new THREE.Ray(position);
+  const hit = new THREE.Vector3();
+  let obscured = 0;
+  for (const point of points) {
+    const distance = ray.direction.subVectors(point, position).length();
+    ray.direction.multiplyScalar(1 / distance);
+    if (obstacles.some(box => box.containsPoint(position) ||
+      (ray.intersectBox(box, hit) && hit.distanceTo(position) < distance))) obscured++;
+  }
+  return obscured;
+}
+
+function fitCorners(corners, target, direction, projection, THREE, horizontalMargin, topMargin, bottomMargin) {
+  const right = new THREE.Vector3(0, 1, 0).cross(direction).normalize();
+  const up = new THREE.Vector3().crossVectors(direction, right);
+  const tanV = Math.tan(THREE.MathUtils.degToRad(projection.fov) / 2);
+  const tanH = tanV * projection.aspect;
+  const delta = new THREE.Vector3();
+  let distance = projection.near;
+  for (const corner of corners) {
+    delta.subVectors(corner, target);
+    const depth = delta.dot(direction);
+    const horizontal = Math.abs(delta.dot(right)) / (tanH * horizontalMargin);
+    const height = delta.dot(up);
+    const vertical = Math.abs(height) / (tanV * (height > 0 ? topMargin : bottomMargin));
+    distance = Math.max(distance, depth + Math.max(horizontal, vertical, projection.near));
   }
   return distance;
 }
 
-export function exhibitView(table,camera,THREE,isMobile=false){
-  const id=table.group.userData.projectId,angle=THREE.MathUtils.degToRad(id==='wurmova'&&isMobile?-29.66:(streetBearing[id]??30));
-  const dx=Math.sin(angle),dz=Math.cos(angle),size=table.scaledSize;
-  const target=new THREE.Vector3(table.x,table.targetY,table.z),base=table.targetY-size.y*.48;
-  // Tilt only where the approach or landing is part of the exhibit.
-  const approachPitch = {hustopece:25,transped:11,bystrc:22}[id];
-  if (approachPitch) {
-    const pitch=THREE.MathUtils.degToRad(approachPitch);
-    const direction=new THREE.Vector3(dx*Math.cos(pitch),Math.sin(pitch),dz*Math.cos(pitch));
-    const distance=exhibitOrbitFitDistance(table,target,direction,camera,THREE,isMobile,isMobile?.90:.82);
-    return {target,position:target.clone().addScaledVector(direction,distance)};
+export function exhibitOrbitFitDistance(table, target, direction, projection, THREE, isMobile) {
+  const [horizontal, top, bottom] = framingLimits(projection, isMobile);
+  return fitCorners(exhibitCorners(table, THREE), target, direction, projection, THREE, horizontal, top, bottom);
+}
+
+export function exhibitView(table, camera, THREE, isMobile = false, neighbours = []) {
+  const id = table.group.userData.projectId;
+  const bearing = id === 'wurmova' && isMobile ? -29.66 : (streetBearing[id] ?? 30);
+  const target = new THREE.Vector3(table.x, table.targetY, table.z);
+  target.y += table.scaledSize.y * (approachPitch[id] ? -.17 : .07);
+  const corners = exhibitCorners(table, THREE);
+  const obstacles = viewObstacles(table, neighbours, THREE);
+  const visibilityPoints = [target, ...corners];
+  const [horizontal, top, bottom] = framingLimits(camera, isMobile);
+  const fixedPitch = approachPitch[id];
+  const eyeY = table.targetY + Math.max(.028, table.scaledSize.y * .27) - table.scaledSize.y * .48;
+  const eyeOffset = eyeY - target.y;
+  const minDistance = table.focusRadius + .045;
+
+  function tryBearing(degrees) {
+    const angle = THREE.MathUtils.degToRad(degrees);
+    const x = Math.sin(angle), z = Math.cos(angle);
+    const direction = new THREE.Vector3(x, 0, z);
+    let pitch = fixedPitch ? THREE.MathUtils.degToRad(fixedPitch) : 0;
+    let fit;
+    // Solve for street-level eye height after the perspective distance is known.
+    const passes = fixedPitch ? 1 : 4;
+    for (let pass = 0; pass < passes; pass++) {
+      direction.set(x * Math.cos(pitch), Math.sin(pitch), z * Math.cos(pitch));
+      fit = Math.max(minDistance, fitCorners(corners, target, direction, camera, THREE, horizontal, top, bottom));
+      if (!fixedPitch) pitch = Math.asin(THREE.MathUtils.clamp(eyeOffset / fit, -.19, .19));
+    }
+    const distance = roomOrbitDistance(target, direction, fit);
+    const fullViewDistance = fitCorners(corners, target, direction, camera, THREE, .97, top, bottom);
+    const position = target.clone().addScaledVector(direction, distance);
+    const obscured = obscuredPoints(position, visibilityPoints, obstacles, THREE);
+    return { position, obscured, fits: distance + .0001 >= Math.max(minDistance, fullViewDistance),
+      coverage: distance / fit };
   }
-  const eyeHeight=base+Math.max(.028,size.y*.27);
-  const tanV=Math.tan(THREE.MathUtils.degToRad(camera.fov)*.5),tanH=tanV*camera.aspect;
-  let distance=Math.max(.5,table.focusRadius*1.4);
-  for(const x of [-size.x/2,size.x/2])for(const z of [-size.z/2,size.z/2]){
-    const depth=x*dx+z*dz,horizontal=Math.abs(x*dz-z*dx)/(tanH*(isMobile?.80:.69)),vertical=size.y*.54/(tanV*.77);
-    distance=Math.max(distance,depth+Math.max(horizontal,vertical));
+
+  let view = tryBearing(bearing);
+  // Preserve the street angle when its framing and sightlines are clear.
+  // Search the nearest alternatives first, preferring the central aisle on a tie.
+  if (!view.fits || view.obscured) {
+    const aisleAngle = table.x === 0 ? 0 : -Math.sign(table.x) * 90;
+    const towardAisle = ((aisleAngle - bearing + 540) % 360) - 180;
+    const sign = Math.sign(towardAisle) || 1;
+    for (let step = 4; step <= 180; step += 4) {
+      for (const turn of [sign, -sign]) {
+        const candidate = tryBearing(bearing + turn * step);
+        if (candidate.fits && !candidate.obscured) return { target, position: candidate.position };
+        if (candidate.fits && !view.fits || candidate.fits === view.fits &&
+          (candidate.obscured < view.obscured || candidate.obscured === view.obscured && candidate.coverage > view.coverage)) {
+          view = candidate;
+        }
+      }
+    }
   }
-  const wallX=(dx>0?8.9:-8.9)-table.x,wallZ=(dz>0?17.05:-17.05)-table.z;
-  if(Math.abs(dx)>.001)distance=Math.min(distance,wallX/dx);
-  if(Math.abs(dz)>.001)distance=Math.min(distance,wallZ/dz);
-  return {target,position:new THREE.Vector3(table.x+dx*distance,eyeHeight,table.z+dz*distance)};
+  return { target, position: view.position };
 }

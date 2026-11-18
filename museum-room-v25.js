@@ -4,7 +4,7 @@ import { addExhibitUplighting } from './museum-exhibit-lighting-v16.js?v=21.0';
 import {
   EXHIBIT_POSITIONS, EXHIBIT_SCALE, MODEL_METRIC_SIZES, WORLD_UNITS_PER_METRE,
   placeExhibitModel, plinthSize
-} from './museum-placement-v25.js?v=26.0';
+} from './museum-placement-v25.js?v=27.0';
 
 const assetDirectory = new URL('./assets/v25/', import.meta.url);
 const exhibitIds = Object.keys(MODEL_METRIC_SIZES);
@@ -23,13 +23,13 @@ function assetUrl(name) {
 
 export async function loadIndustrialAssets({ THREE, mobile = false }) {
   const [response, { GLTFLoader }, { MeshoptDecoder }] = await Promise.all([
-    fetch(new URL('scene.json', assetDirectory)),
+    fetch(assetUrl('assets/v27/scene.json')),
     import('./assets/vendor/GLTFLoader.js'),
     import('./assets/vendor/meshopt_decoder.module.js')
   ]);
   if (!response.ok) throw new Error(`Industrial gallery manifest: HTTP ${response.status}`);
   const metadata = await response.json();
-  if (metadata.revision !== 25 || metadata.hall?.rootScale !== WORLD_UNITS_PER_METRE) {
+  if (metadata.revision !== 27 || metadata.hall?.rootScale !== WORLD_UNITS_PER_METRE) {
     throw new Error('Industrial gallery manifest has an unsupported scale or revision.');
   }
   const textures = new THREE.TextureLoader();
@@ -369,7 +369,7 @@ export function buildGalleryRoom({
     if (!project || !authored || Object.entries(expected).some(([key, value]) =>
       !Number.isFinite(authored[key]) || Math.abs(authored[key] - value) > .002
     )) {
-      throw new Error(`Industrial gallery plinth geometry does not match the 1:100 placement for ${id}.`);
+      throw new Error(`Industrial gallery plinth geometry does not match the exhibit placement for ${id}.`);
     }
 
     const group = new THREE.Group();
