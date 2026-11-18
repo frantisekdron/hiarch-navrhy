@@ -4,7 +4,7 @@ import { addExhibitUplighting } from './museum-exhibit-lighting-v16.js?v=21.0';
 import {
   EXHIBIT_POSITIONS, EXHIBIT_SCALE, MODEL_METRIC_SIZES, WORLD_UNITS_PER_METRE,
   placeExhibitModel, plinthSize
-} from './museum-placement-v25.js?v=27.0';
+} from './museum-placement-v25.js?v=27.1';
 
 const assetDirectory = new URL('./assets/v25/', import.meta.url);
 const exhibitIds = Object.keys(MODEL_METRIC_SIZES);

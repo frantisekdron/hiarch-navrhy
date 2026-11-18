@@ -56,9 +56,21 @@ function framingLimits(projection, isMobile) {
   return [portrait ? .91 : .88, short ? .49 : portrait ? .69 : .82, short ? .49 : portrait ? .69 : .74];
 }
 
+// A conservative polygon enclosing the plan of both Hustopeče model tiers.
+// The rectangle includes wide empty corners around the rotating wings.
+const hustopeceOutline = [
+  [.4502, -.0366], [.5021, .1058], [.4789, .2370], [.2568, .5017],
+  [.2558, .5021], [-.4218, .3826], [-.5015, .3157], [-.5103, .2915],
+  [-.3965, -.3542], [-.2887, -.4827], [-.2248, -.5059], [-.0783, -.4801]
+];
+
 function exhibitCorners(table, THREE) {
   const { x, z, scaledSize: size } = table;
   const base = table.targetY - size.y * .48;
+  if (table.group.userData.projectId === 'hustopece') {
+    return hustopeceOutline.flatMap(([dx, dz]) => [base, base + size.y].map(y =>
+      new THREE.Vector3(x + dx * size.x, y, z + dz * size.z)));
+  }
   const corners = [];
   for (const dx of [-size.x / 2, size.x / 2]) {
     for (const dy of [0, size.y]) {
