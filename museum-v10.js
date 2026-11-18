@@ -51,6 +51,9 @@ let lightWasChosen=false;
 const lighting={preset:'day',color:'#a9dcc6',intensity:1};
 const noteContent={facade:{title:'Průčelí a členění',copy:'Světlou hlavní hmotu člení tmavé svislé pásy a pravidelný rytmus oken. Podobu modelu porovnáte se skutečnými fotografiemi v detailu.'},conversion:{title:'Nové využití objektu',copy:'Rekonstrukce bývalé administrativní budovy na polyfunkční dům. Projekt propojuje bydlení s kancelářskými prostory a službami v přízemí.'},hiarch:{title:'HiARCH',copy:'Projekt je součástí portfolia ateliéru HiARCH.'}};
 const keys=new Set(),tables=[],pickables=[];
+const walkSpeed=2.7, runMultiplier=2;
+let shiftHeld=false;
+function clearMovementKeys(){keys.clear();shiftHeld=false}
 let touchController=null, touchMode='select', touchRadius=0, pinchRadius=0;
 const desktopOffset=new THREE.Vector3();
 const orbitDirection=new THREE.Vector3(), orbitUp=new THREE.Vector3(0,1,0);
@@ -127,7 +130,7 @@ function render(force=false){
  if(movingAtmosphere)startAmbientMotion();else stopAmbientMotion();
 }
 function scheduleRender(){if(!renderer||renderFrame)return;renderFrame=requestAnimationFrame(()=>{renderFrame=0;render()})}
-function stopFrames(){salonTransit=false;cancelAnimationFrame(cameraFrame);cancelAnimationFrame(movementFrame);cameraFrame=0;movementFrame=0;keys.clear();route=null;finishFlight=null;touchController?.reset();padController?.reset();lastMove=0;if(completeEntry){const finish=completeEntry;completeEntry=null;finish()}}
+function stopFrames(){salonTransit=false;cancelAnimationFrame(cameraFrame);cancelAnimationFrame(movementFrame);cameraFrame=0;movementFrame=0;clearMovementKeys();route=null;finishFlight=null;touchController?.reset();padController?.reset();lastMove=0;if(completeEntry){const finish=completeEntry;completeEntry=null;finish()}}
 function doorPose(){doors.forEach(d=>{const side=d.userData.doorSide===-1||d.userData.doorSide==='left'?-1:1;d.rotation.y=0;d.position.x=(d.userData.closedX??side*3.75)+side*doorProgress*(d.userData.slideDistance??3.6)})}
 function syncControls(){
  if(!controls)return;
@@ -221,8 +224,8 @@ function focusProject(id,scroll=false,move=true,duration=900){
  document.querySelector('.project-picker').open=false;say(`Vitrína ${i+1} z ${projects.length}: ${p.name}. Tahem do stran můžete vitrínu obejít.`);
 }
 function updateSelection(){syncMapLighting();$('walkPad').hidden=!entered||(!walking&&!mobile.matches)||mapMode||!!seatMode||chessMode;$('orbitToolbar').hidden=mobile.matches||!entered||walking||mapMode||!!seatMode||chessMode||selected<0;$('projectPager').hidden=!entered||selected<0||mapMode||chessMode||!!seatMode;$('walkToggle').hidden=walking&&selected<0;$('pagerName').textContent=selected>=0?projects[selected]?.name:'Vybrat projekt';$('pagerDetail').disabled=selected<0;$('pagerScale').textContent='Fotografie a detail ↗';shell.dataset.mode=chessMode?'chess':mapMode?'map':seatMode?'seated':walking?'walk':selected>=0?'orbit':'entry';shell.dataset.selectedProject=selected>=0?(projects[selected]?.id||''):'';
- $('walkHelp').textContent=walking&&selected<0?(mobile.matches?'Projděte si galerii. Šipkami se pohybujte, tahem do stran se rozhlížejte. Klepnutím vyberte stavbu.':'Projděte si galerii. Šipky nebo WASD: pohyb · tažení myší: rozhlížení · kliknutí na stavbu: prohlídka modelu.'):
- mobile.matches?(seatMode?'Tahem do stran se rozhlédněte. Svisle posouváte stránku.':walking?'Šipkou uděláte krok. Tahem do stran se rozhlédnete.':'Svisle posouváte stránku · do stran otáčíte model · dvěma prsty přibližujete.'):(seatMode?'Tažením nebo šipkami se rozhlédněte · tlačítkem Vstát pokračujete':walking?'Šipky / WASD: chůze · tažení myší: rozhlížení · klik: výběr':selected>=0&&!mapMode&&!seatMode?'Tažením otáčejte model. Šipky ← → otáčejí, + / − přibližují.':'Klikněte na projekt a prohlédněte si model.');
+ $('walkHelp').textContent=walking&&selected<0?(mobile.matches?'Projděte si galerii. Šipkami se pohybujte, tahem do stran se rozhlížejte. Klepnutím vyberte stavbu.':'Projděte si galerii. Šipky nebo WASD pro chůzi · podržte Shift pro běh · tažením se rozhlédnete.'):
+ mobile.matches?(seatMode?'Tahem do stran se rozhlédněte. Svisle posouváte stránku.':walking?'Šipkou uděláte krok. Tahem do stran se rozhlédnete.':'Svisle posouváte stránku · do stran otáčíte model · dvěma prsty přibližujete.'):(seatMode?'Tažením nebo šipkami se rozhlédněte · tlačítkem Vstát pokračujete':walking?'Šipky / WASD pro chůzi · Shift pro běh · tažením se rozhlédnete.':selected>=0&&!mapMode&&!seatMode?'Tažením otáčejte model. Šipky ← → otáčejí, + / − přibližují.':'Klikněte na projekt a prohlédněte si model.');
  if($('navigationMode'))$('navigationMode').textContent=chessMode?'Šachy':mapMode?'Mapa projektů':seatMode?'Pohled z lavičky':walking?'Chůze galerií':selected>=0?'Obcházení vitríny':'Vstup do galerie';
  $('tourPosition').textContent=selected<0?'PŘEHLED SÁLU':`STŮL ${selected+1} / ${projects.length}`;
  document.querySelectorAll('[data-focus]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.focus===projects[selected]?.id)));
@@ -232,7 +235,7 @@ function clearFloor(x,z){return space.walkable(x,z,salonDoor>=.999)&&benches.eve
 function walkPosition(x,z){const b=space.navigationBounds(salonDoor>=.999);x=THREE.MathUtils.clamp(x,b[0],b[2]);z=THREE.MathUtils.clamp(z,b[1],b[3]);return clearFloor(x,z)?[x,z]:null}
 function setWalking(value,keepPosition=false){
  if(chessMode){chessMode=false;shell.classList.remove('playing-chess');$('chessPanel').hidden=true;chessSelected=null;promotionMove=null;if(chessSession)chessExhibit.setBoard(chessSession.state().board,{lastMove:chessSession.state().lastMove});}walking=value;seatMode=null;mapMode=false;activeNote=null;shell.classList.toggle('walking',value);$('walkPad').hidden=!entered||!value;$('walkToggle').setAttribute('aria-pressed',String(value));$('walkToggle').innerHTML=value?'Prohlédnout model <span>↗</span>':'Procházet sál <span>↗</span>';if(controls)controls.enabled=!value&&selected>=0;
- keys.clear();cancelAnimationFrame(movementFrame);movementFrame=0;lastMove=0;
+ clearMovementKeys();cancelAnimationFrame(movementFrame);movementFrame=0;lastMove=0;
  if(value){markEntered();$('selectedExhibit').hidden=true;let pos=keepPosition?walkPosition(camera.position.x,camera.position.z):null;const direction=cameraTarget.clone().sub(camera.position);yaw=keepPosition?Math.atan2(-direction.x,-direction.z):0;pitch=keepPosition?Math.asin(THREE.MathUtils.clamp(direction.clone().normalize().y,-.7,.7)):-.05;const x=pos?pos[0]:entryPoint()[0],z=pos?pos[1]:entryPoint()[2];flyTo([x,3.2,z],[x-Math.sin(yaw)*Math.cos(pitch)*8,3.2+Math.sin(pitch)*8,z-Math.cos(yaw)*Math.cos(pitch)*8],keepPosition?0:600);say('Pohyb: šipky nebo palcový ovladač. Rozhlížení: tažením. Klikněte na model, obraz nebo volnou podlahu.');host.focus({preventScroll:true})}
  updateSelection();
 }
@@ -254,8 +257,19 @@ function moveLoop(now){
  if(!walking||!visible||document.hidden||document.querySelector('dialog[open]')){lastMove=0;return}
  const dt=lastMove?Math.min(.035,(now-lastMove)/1000):.016;lastMove=now;
  if(keys.has('turnLeft'))yaw+=dt*1.35;if(keys.has('turnRight'))yaw-=dt*1.35;
- let f=navForward+(keys.has('forward')?1:0)-(keys.has('back')?1:0),side=navSide+(keys.has('right')?1:0)-(keys.has('left')?1:0);
- if(f||side){route=null;cancelAnimationFrame(cameraFrame);cameraFrame=0;finishFlight=null;const norm=Math.max(1,Math.hypot(f,side)),speed=2.7*dt/norm;const b=space.navigationBounds(salonDoor>=.999),nx=THREE.MathUtils.clamp(camera.position.x+(-Math.sin(yaw)*f+Math.cos(yaw)*side)*speed,b[0],b[2]),nz=THREE.MathUtils.clamp(camera.position.z+(-Math.cos(yaw)*f-Math.sin(yaw)*side)*speed,b[1],b[3]);if(clearFloor(nx,camera.position.z))camera.position.x=nx;if(clearFloor(camera.position.x,nz))camera.position.z=nz;}
+ const forward=Number(keys.has('forward'))-Number(keys.has('back'));
+ const strafe=Number(keys.has('right'))-Number(keys.has('left'));
+ const stride=shiftHeld && (forward||strafe) ? runMultiplier : 1;
+ const f=navForward+forward*stride, side=navSide+strafe*stride;
+ if(f||side){
+   route=null;cancelAnimationFrame(cameraFrame);cameraFrame=0;finishFlight=null;
+   const step=walkSpeed*dt/Math.max(1,Math.hypot(f,side)/stride);
+   const b=space.navigationBounds(salonDoor>=.999),pos=camera.position;
+   const nx=THREE.MathUtils.clamp(pos.x+(-Math.sin(yaw)*f+Math.cos(yaw)*side)*step,b[0],b[2]);
+   const nz=THREE.MathUtils.clamp(pos.z+(-Math.cos(yaw)*f-Math.sin(yaw)*side)*step,b[1],b[3]);
+   if(nx!==pos.x && floorReach(pos.x,pos.z,nx,pos.z))pos.x=nx;
+   if(nz!==pos.z && floorReach(pos.x,pos.z,pos.x,nz))pos.z=nz;
+ }
  if(route){let distance=3.5*dt;while(route&&distance>0){const target=route[0],dx=target[0]-camera.position.x,dz=target[1]-camera.position.z,length=Math.hypot(dx,dz);if(length<=distance){camera.position.x=target[0];camera.position.z=target[1];distance-=length;route.shift();if(!route.length)route=null}else{camera.position.x+=dx/length*distance;camera.position.z+=dz/length*distance;distance=0}}}
  camera.position.y=3.2;lookFromWalk();render();
  if(keys.size||navForward||navSide||route)ensureMovement();else lastMove=0;
@@ -424,7 +438,7 @@ function focusSalonDoor(){
  flyTo(chessSalon.entrance.outside,chessSalon.entrance.lookAt,850);say('Šachový salonek. Klikněte na dveře nebo na Vstoupit do salonku.');
 }
 function beginSalonWalk(){
- walking=true;keys.clear();navSide=navForward=0;lastMove=0;shell.classList.add('walking');$('walkToggle').setAttribute('aria-pressed','true');
+ walking=true;clearMovementKeys();navSide=navForward=0;lastMove=0;shell.classList.add('walking');$('walkToggle').setAttribute('aria-pressed','true');
  const direction=cameraTarget.clone().sub(camera.position).normalize();yaw=Math.atan2(-direction.x,-direction.z);pitch=Math.asin(THREE.MathUtils.clamp(direction.y,-.7,.7));
  setSalonStage('inside');updateSelection();syncControls();host.focus({preventScroll:true});
 }
@@ -603,7 +617,7 @@ async function init(){
    loadProgress('interior',1);
    await Promise.all(['streets','quay'].map(kind=>requestSiteWorks(kind,true)));
    loadProgress('surroundings',1);
-   renderer.shadowMap.needsUpdate=true;shell.dataset.exhibits=String(tables.length);shell.dataset.revision='30.1';shell.dataset.reducedMotion=String(reduced.matches);shell.dataset.artworks=String(artworks.length);shell.dataset.facadeMode='geometric';let lastWidth=0,lastHeight=0,lastMobile=mobile.matches;
+   renderer.shadowMap.needsUpdate=true;shell.dataset.exhibits=String(tables.length);shell.dataset.revision='30.2';shell.dataset.reducedMotion=String(reduced.matches);shell.dataset.artworks=String(artworks.length);shell.dataset.facadeMode='geometric';let lastWidth=0,lastHeight=0,lastMobile=mobile.matches;
  let lastOrientation=globalThis.screen?.orientation?.type;
  const resize=()=>{
    const w=host.clientWidth,h=host.clientHeight;
@@ -691,8 +705,20 @@ $('orbitToolbar').addEventListener('click',event=>{const action=event.target.clo
 for(const dialog of document.querySelectorAll('dialog')){dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});dialog.addEventListener('close',scheduleRender)}
 // FD Prohlidka bindings: W/S forward/back, A/D strafe, left/right arrows turn.
 const keyMap={w:'forward',arrowup:'forward',s:'back',arrowdown:'back',a:'left',d:'right',arrowleft:'turnLeft',arrowright:'turnRight'};
-document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!document.querySelector('dialog[open]')&&shell.classList.contains('expanded-gallery')){toggleExpanded();return}if(event.metaKey||event.ctrlKey||event.altKey||!entered||!shell.contains(document.activeElement)||document.querySelector('dialog[open]')||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;if(seatMode){const angles={ArrowLeft:[.12,0],ArrowRight:[-.12,0],ArrowUp:[0,.08],ArrowDown:[0,-.08]},delta=angles[event.key];if(delta){event.preventDefault();yaw+=delta[0];pitch=THREE.MathUtils.clamp(pitch+delta[1],-.8,.7);lookFromWalk();scheduleRender()}return}if(!walking){if(selected<0||mapMode)return;const action=event.key==='ArrowLeft'?'left':event.key==='ArrowRight'?'right':event.key==='+'||event.key==='='?'near':event.key==='-'||event.key==='_'?'far':null;if(action){event.preventDefault();orbitAction(action)}return}const key=keyMap[event.key.toLowerCase()];if(!key)return;event.preventDefault();startStep(key)});
-document.addEventListener('keyup',event=>{const key=keyMap[event.key.toLowerCase()];if(key)keys.delete(key)});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!document.querySelector('dialog[open]')&&shell.classList.contains('expanded-gallery')){toggleExpanded();return}if(event.metaKey||event.ctrlKey||event.altKey||!entered||!shell.contains(document.activeElement)||document.querySelector('dialog[open]')||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;if(seatMode){const angles={ArrowLeft:[.12,0],ArrowRight:[-.12,0],ArrowUp:[0,.08],ArrowDown:[0,-.08]},delta=angles[event.key];if(delta){event.preventDefault();yaw+=delta[0];pitch=THREE.MathUtils.clamp(pitch+delta[1],-.8,.7);lookFromWalk();scheduleRender()}return}if(!walking){if(selected<0||mapMode)return;const action=event.key==='ArrowLeft'?'left':event.key==='ArrowRight'?'right':event.key==='+'||event.key==='='?'near':event.key==='-'||event.key==='_'?'far':null;if(action){event.preventDefault();orbitAction(action)}return}
+ shiftHeld=event.shiftKey;
+ const key=keyMap[event.key.toLowerCase()];
+ if(!key)return;
+ event.preventDefault();startStep(key);
+});
+document.addEventListener('keyup',event=>{
+ if(event.key==='Shift')shiftHeld=event.shiftKey;
+ const key=keyMap[event.key.toLowerCase()];
+ if(key)keys.delete(key);
+});
+shell.addEventListener('focusout',event=>{
+ if(!shell.contains(event.relatedTarget))clearMovementKeys();
+});
 padController=bindMovePad({pad:$('walkPad'),onStart:()=>{if(!walking)setWalking(true,true);route=null;host.focus({preventScroll:true})},onChange:(side,forward)=>{navSide=side;navForward=forward;if(side||forward)ensureMovement()},onNudge:(side,forward)=>{const x=camera.position.x+(-Math.sin(yaw)*forward+Math.cos(yaw)*side)*.65,z=camera.position.z+(-Math.cos(yaw)*forward-Math.sin(yaw)*side)*.65;const pos=walkPosition(x,z);if(pos)walkTo(...pos)}});
 function applyTouchOrbit(angle){
  orbitDirection.copy(camera.position).sub(cameraTarget).normalize();
