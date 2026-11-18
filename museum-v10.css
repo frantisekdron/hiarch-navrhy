@@ -65,3 +65,23 @@ body.gallery-at-entry .museum-canvas:focus-visible{outline:2px solid #e4d0a6;out
 .entrance-poster picture,.entrance-poster img{display:block;width:100%;height:100%}
 .entrance-poster img{object-fit:cover}
 .entrance-poster:focus-visible{outline:2px solid #e4d0a6;outline-offset:-5px}
+
+/* The first stop is a free walk, with instructions instead of model controls. */
+.museum-shell[data-mode=walk][data-selected-project=""] .walk-help{
+ display:block;left:50%;right:auto;top:auto;bottom:32px;transform:translateX(-50%);
+ width:540px;max-width:calc(100% - 400px);padding:14px 20px;margin:0;
+ border:1px solid #b5c4ad80;border-radius:12px;background:#14251df2;
+ color:#f4f4e9;font-size:14px;line-height:1.65;text-align:center;text-shadow:none;
+ box-sizing:border-box;box-shadow:0 8px 24px #0003;pointer-events:none;
+}
+@media(max-width:650px){
+ .museum-shell[data-mode=walk][data-selected-project=""] .walk-help{
+  left:12px;right:12px;top:104px;bottom:auto;transform:none;width:auto;max-width:none;
+  padding:10px 12px;font-size:12px;line-height:1.5;
+ }
+}
+@media(max-height:520px) and (min-width:651px){
+ .museum-shell[data-mode=walk][data-selected-project=""] .walk-help{
+  top:72px;bottom:auto;max-width:calc(100% - 280px);padding:8px 14px;font-size:12px;
+ }
+}
